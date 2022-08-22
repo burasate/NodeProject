@@ -13,6 +13,7 @@ def update(*_):
         update_list = update_list_r.text.split('\n')
 
     for url in update_list:
+        os.system('cls||clear')
         if not 'https://' in url:
             continue
 

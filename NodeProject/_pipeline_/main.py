@@ -25,6 +25,7 @@ if not os.name == 'nt':
     sys.path.remove(sitePackagePath)
 
 for p in sys.path:
+    os.system('cls||clear')
     print(p)
 
 
