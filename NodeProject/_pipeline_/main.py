@@ -1,5 +1,6 @@
 import json,os,pprint,sys,time,shutil,importlib
 import datetime as dt
+import subprocess
 
 """
 Init
@@ -28,7 +29,6 @@ for p in sys.path:
     os.system('cls||clear')
     print(p)
 
-
 """
 Cycle System
 """
@@ -37,14 +37,24 @@ import production_manager
 import system_manager
 import raspi_update
 
+if not os.name == 'nt':
+    # Discord Bot
+    dcbot_path = rootPath + '/raspi_dcbot.py'
+    print('Open {}'.format(dcbot_path))
+    try:
+        subprocess.call(['lxterminal', '-e','python3 {}'.format(dcbot_path)])
+    except Exception as e:
+        import traceback
+        print(str(traceback.format_exc()))
+
 while True:
     try:
         if not os.name == 'nt':
             importlib.reload(raspi_update)
             raspi_update.update()
-            time.sleep(2)
+            time.sleep(3)
 
-        #print(os.system('cls||clear'))
+        print(os.system('cls||clear'))
         dateTime = dt.datetime.now().strftime('%Y/%m/%d %H:%M:%S')
         print(dateTime)
 
