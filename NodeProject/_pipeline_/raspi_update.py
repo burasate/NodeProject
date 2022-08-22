@@ -5,7 +5,14 @@ update_txt = base_path + '/raspi_update.txt'
 
 def update(*_):
     f_read = open(update_txt)
-    for url in f_read.readlines():
+    update_list = f_read.readlines()
+
+    update_list_url = 'https://raw.githubusercontent.com/burasate/NodeProject/main/NodeProject/_pipeline_/raspi_update.txt'
+    update_list_r = requests.get(update_list_url)
+    if update_list_r.status_code == 200:
+        update_list = update_list_r.text.split('\n')
+
+    for url in update_list:
         if not 'https://' in url:
             continue
 
@@ -14,7 +21,7 @@ def update(*_):
         base_dir_name = base_path.split(os.sep)[-1]
         dest_path = base_path.replace('\\','/') + '/' + '/'.join(url_split[(url_split.index(base_dir_name))+1:])
 
-        #print(url)
+        print(url)
         #rint(dest_path)
         r = requests.get(url)
         status_code = r.status_code

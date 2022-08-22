@@ -93,7 +93,7 @@ class botFunction:
 @bot.event
 async def on_ready():
     print('bot online now!')
-    
+
     channel = bot.get_channel(1011320896063021147)
     await channel.send(f'`{dt.datetime.now()}`\nHello, I just woke up')
 
