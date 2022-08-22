@@ -13,8 +13,9 @@ if not rootPath in sys.path:
     sys.path.insert(0,rootPath)
 if not srcPath in sys.path:
     sys.path.insert(0,srcPath)
-if not sitePackagePath in sys.path:
-    sys.path.insert(0,sitePackagePath)
+if os.name == 'nt':
+    if not sitePackagePath in sys.path:
+        sys.path.insert(0,sitePackagePath)
 
 # Module
 import pandas as pd

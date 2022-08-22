@@ -131,7 +131,7 @@ async def role_update():
 # Discord Command
 #-------------------------------------
 @bot.command()
-async def data(ctx):
+async def dev_data(ctx):
     ctx_data = botFunction.getContextData(ctx)
     data_str = json.dumps(ctx_data, indent=4)
     await ctx.send('`{}`'.format(data_str), delete_after=15)
@@ -139,7 +139,7 @@ async def data(ctx):
     print(data_str)
 
 @bot.command()
-async def test(ctx):
+async def dev_test(ctx):
     await ctx.send('got your command !', mention_author=True, tts=True, delete_after=5)
     await ctx.message.delete(delay=2.5)
     ctx_data = botFunction.getContextData(ctx)
