@@ -96,7 +96,7 @@ async def on_ready():
     print('bot online now!')
 
     channel = bot.get_channel(1011320896063021147)
-    await channel.send(f'`{dt.datetime.now()}`\nHello, I just woke up')
+    await channel.send(f'`{dt.datetime.now()}`\nHello, I just woke up', delete_after=15)
 
     role_update.start()
 
