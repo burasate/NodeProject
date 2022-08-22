@@ -13,6 +13,7 @@ srcPath = rootPath+'/src'
 sitePackagePath = rootPath+'/src'+'/site-packages'
 projectPath = os.sep.join(rootPath.split(os.sep)[:-1])
 
+#Environment
 if not rootPath in sys.path:
     sys.path.insert(0,rootPath)
 if not srcPath in sys.path:
