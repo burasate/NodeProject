@@ -1,6 +1,6 @@
 from discord.ext import commands, tasks
 import discord
-import requests, os, csv, os, json
+import requests, os, csv, os, json, time
 import datetime as dt
 
 """
@@ -139,6 +139,13 @@ async def dev_data(ctx):
     print(data_str)
 
 @bot.command()
+async def dev_reload(ctx):
+    delay = 5
+    await ctx.send(f'Bot will be offline for {delay} second', delete_after=2)
+    time.sleep(delay)
+    await bot.close()
+
+@bot.command()
 async def dev_test(ctx):
     await ctx.send('got your command !', mention_author=True, tts=True, delete_after=5)
     await ctx.message.delete(delay=2.5)
@@ -184,4 +191,8 @@ async def my_status(ctx):
 #-------------------------------------
 # Run
 #-------------------------------------
-bot.run(token)
+def run(*_):
+    bot.run(token)
+
+if __name__ == '__main__':
+    run()
