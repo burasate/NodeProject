@@ -157,6 +157,7 @@ cython_debug/
 *.csv
 *.bat
 *.sh
+*.zip
 src/
 __pycache__/
 _archive/
