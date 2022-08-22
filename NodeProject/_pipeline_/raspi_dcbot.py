@@ -119,6 +119,7 @@ async def role_update():
             await member.add_roles(member_role)
         else:
             await member.remove_roles(member_role)
+    os.system('cls||clear')
     print(dt.datetime.now(), 'member role updated')
 
 #-------------------------------------
