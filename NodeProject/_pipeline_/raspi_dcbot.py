@@ -71,6 +71,7 @@ class botFunction:
             'author': {
                 'id': ctx.author.id,
                 'name': ctx.author.name,
+                'mention' : ctx.author.mention,
                 'bot': ctx.author.bot,
                 'nick': ctx.author.nick,
                 'roles': []
@@ -144,7 +145,8 @@ async def test(ctx):
     ctx_data = botFunction.getContextData(ctx)
     task_name = 'do_nothing'
     task_data = {
-        'member': ctx_data['author']['nick']
+        'member_id': ctx_data['author']['id'],
+        'member_name': ctx_data['author']['name']
     }
     botFunction.addQueueTask(task_name, task_data)
 
@@ -155,8 +157,8 @@ async def test(ctx):
 async def my_id(ctx):
     ctx_data = botFunction.getContextData(ctx)
     id = ctx_data['author']['id']
-    nick = ctx_data['author']['nick']
-    await ctx.send(f'{nick}\nyour discord id is\n`{id}`'.format(nick, id), mention_author=True, delete_after=10)
+    mention = ctx_data['author']['mention']
+    await ctx.send(f'{mention}\nyour discord id is\n`{id}`', mention_author=True, delete_after=10)
     await ctx.message.delete(delay=0)
 
 @bot.command()

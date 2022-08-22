@@ -16,7 +16,6 @@ if not srcPath in sys.path:
 if not sitePackagePath in sys.path:
     sys.path.insert(0,sitePackagePath)
 
-
 # Module
 import pandas as pd
 pd.set_option('display.max_rows', None)
@@ -91,32 +90,53 @@ class register:
                     if prop_dict[prop_name] != find_row[prop_name]:
                         notionDatabase.updatePageProperty(find_row['page_id'], prop_name, prop_dict[prop_name])
 
-# Task Sytem
-class task:
-    def task_pucnch():
-        print('do punch task')
+# Task System
+class taskQueue:
+    data = {}
+    def task_pucnch(*_):
+        print('do punch task {}'.format(taskQueue.data['who']))
         print('oraa \n'*10)
 
-    def test():
+    def run(*_):
         request_sheet = 'Request'
         request_path = '{}/{}.json'.format(rec_dir,request_sheet)
         loadWorksheet(request_sheet, rec_dir)
 
         request_json = json.load(open(request_path))
         request_df = pd.DataFrame().from_records(request_json)
+        request_df.sort_values(by=['date_time'], ascending=[True], inplace=True)
         for i in request_df.index.tolist():
             row = request_df.loc[i]
+            print('Get Task  ', row.to_dict())
+            taskQueue.data = json.loads(str(row['data']).replace('\'','\"'))
+            #print(taskQueue.data)
 
-            if row['name'] == 'punch':
-                task.task_pucnch()
-                continue
+            clear = True
+            try:
+                if row['name'] == 'punch':
+                    taskQueue.task_pucnch()
 
-            if row['name'] == 'punch':
-                task.task_pucnch()
-                continue
+                elif row['name'] == 'punch2':
+                    pass
 
-            #Clear Task
-            #gSheet.deleteRow(request_sheet, 'date_time', row['date_time'])
+                else:
+                    clear = False
+
+                # Clear Task
+                if clear:
+                    gSheet.deleteRow(request_sheet, 'date_time', row['date_time'])
+            except Exception as e:
+                import traceback
+                print(str(traceback.format_exc()))
+                gSheet.setValue(
+                    request_sheet, findKey='date_time', findValue=row['date_time'],
+                    key='error', value=str(traceback.format_exc())
+                )
+                now = str(dt.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+                gSheet.setValue(
+                    request_sheet, findKey='date_time', findValue=row['date_time'],
+                    key='date_time', value=now
+                )
 
 
 if __name__ == '__main__':
@@ -124,6 +144,5 @@ if __name__ == '__main__':
     #loadWorksheet('AnimationTracking', mainPath + '/production_rec')
     #loadNotionDatabase(mainPath + '/production_rec/notionDatabase')
     #register.updateMember()
-    task.test()
-
+    taskQueue.run()
     pass
