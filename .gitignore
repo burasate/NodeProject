@@ -161,5 +161,6 @@ cython_debug/
 src/
 __pycache__/
 _archive/
+_version/
 production_rec/
 production_rpt/
