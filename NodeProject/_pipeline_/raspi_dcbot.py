@@ -52,10 +52,7 @@ class botFunction:
                 'content': ctx.message.content,
                 'id': ctx.message.id
             },
-            'category': {
-                'name': ctx.channel.category.name,
-                'id': ctx.channel.category_id,
-            },
+            'category': None,
             'channel': {
                 'id': ctx.channel.id,
                 'name': ctx.channel.name
@@ -77,6 +74,10 @@ class botFunction:
             data['author']['roles'].append({
                 'id': i.id,
                 'name': i.name})
+        if ctx.channel.category != None:
+            data['category']['name'] = ctx.channel.category.name
+            data['category']['id'] = ctx.channel.category.id
+
         return data
 
     def getRegisteredMember():
@@ -102,7 +103,7 @@ async def on_ready():
 #-------------------------------------
 # Discord Sync
 #-------------------------------------
-@tasks.loop(seconds=15.0)
+@tasks.loop(seconds=60.0)
 async def role_update():
     regis_rec = botFunction.getRegisteredMember()
     regis_id_list = [int(i['discord_id']) for i in regis_rec]
@@ -130,7 +131,7 @@ async def dev_data(ctx):
     ctx_data = botFunction.getContextData(ctx)
     data_str = json.dumps(ctx_data, indent=4)
     await ctx.send('`{}`'.format(data_str), delete_after=15)
-    await ctx.message.delete(delay=2.5)
+    await ctx.message.delete(delay=0)
     print(data_str)
 
 @bot.command()
@@ -152,7 +153,7 @@ async def sys_reboot(ctx):
 @bot.command()
 async def dev_test(ctx):
     await ctx.send('got your command !', mention_author=True, tts=True, delete_after=5)
-    await ctx.message.delete(delay=2.5)
+    await ctx.message.delete(delay=0)
     ctx_data = botFunction.getContextData(ctx)
     task_name = 'do_nothing'
     task_data = {
@@ -187,7 +188,7 @@ async def my_status(ctx):
           #f'\n' \
     if not 'Node Freelance' in role_list:
         await ctx.send(msg, mention_author=True, delete_after=15)
-        await ctx.send('Now you are in \"Node Freelance\" Role', mention_author=True, delete_after=15)
+        await ctx.send('You are already in the \"Node Freelance\" Role', mention_author=True, delete_after=15)
     else:
         await ctx.send(msg, mention_author=True, embed=embed, delete_after=15)
     await ctx.message.delete(delay=0)
