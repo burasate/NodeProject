@@ -23,14 +23,6 @@ intents.all()
 bot = commands.Bot(command_prefix='!', intents=intents)
 client = discord.Client()
 
-#import botFunction
-#botFunction.addQueueTask( task_name, data_dict )
-
-#-------------------------------------
-# Context Data
-#-------------------------------------
-#botFunction.getContextData(ctx)
-
 class botFunction:
     def addQueueTask(task_name, data_dict):
         if type(data_dict) != type(dict()):
@@ -90,7 +82,6 @@ class botFunction:
     def getRegisteredMember():
         member_path = os.sep.join(base_path.split(os.sep)[:-1]) + '/production_rec/notionDatabase/csv/member.csv'
         #print(member_path)
-
         with open(member_path, mode='r') as csv_file:
             csv_reader = csv.DictReader(csv_file)
             rec = [dict(i) for i in csv_reader if dict(i)['discord_id'] != '']
@@ -102,13 +93,16 @@ class botFunction:
 @bot.event
 async def on_ready():
     print('bot online now!')
-    role_update.start()
+    
+    channel = bot.get_channel(1011320896063021147)
+    await channel.send(f'`{dt.datetime.now()}`\nHello, I just woke up')
 
+    role_update.start()
 
 #-------------------------------------
 # Discord Sync
 #-------------------------------------
-@tasks.loop(seconds=5.0)
+@tasks.loop(seconds=15.0)
 async def role_update():
     regis_rec = botFunction.getRegisteredMember()
     regis_id_list = [int(i['discord_id']) for i in regis_rec]
@@ -139,11 +133,12 @@ async def dev_data(ctx):
     print(data_str)
 
 @bot.command()
-async def dev_reload(ctx):
-    delay = 5
-    await ctx.send(f'Bot will be offline for {delay} second', delete_after=2)
-    time.sleep(delay)
-    await bot.close()
+async def sys_update(ctx):
+    import raspi_update
+    importlib.reload(raspi_update)
+    raspi_update.update()
+    await ctx.send('system update'.format(data_str), delete_after=2)
+    await ctx.message.delete(delay=2)
 
 @bot.command()
 async def dev_test(ctx):
@@ -191,8 +186,4 @@ async def my_status(ctx):
 #-------------------------------------
 # Run
 #-------------------------------------
-def run(*_):
-    bot.run(token)
-
-if __name__ == '__main__':
-    run()
+bot.run(token)
