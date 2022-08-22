@@ -13,9 +13,11 @@ if not rootPath in sys.path:
     sys.path.insert(0,rootPath)
 if not srcPath in sys.path:
     sys.path.insert(0,srcPath)
-if os.name == 'nt':
-    if not sitePackagePath in sys.path:
-        sys.path.insert(0,sitePackagePath)
+if not sitePackagePath in sys.path:
+    sys.path.insert(0,sitePackagePath)
+#Environment Linux
+if not os.name == 'nt':
+    sys.path.remove(sitePackagePath)
 
 # Module
 import pandas as pd

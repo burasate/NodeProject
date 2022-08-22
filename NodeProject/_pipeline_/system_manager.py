@@ -14,6 +14,9 @@ if not srcPath in sys.path:
     sys.path.insert(0,srcPath)
 if not sitePackagePath in sys.path:
     sys.path.insert(0,sitePackagePath)
+#Environment Linux
+if not os.name == 'nt':
+    sys.path.remove(sitePackagePath)
 
 """
 Func
