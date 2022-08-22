@@ -1,2 +1,2 @@
-# NodePi
+# Node
  Animation Pipeline Automation
