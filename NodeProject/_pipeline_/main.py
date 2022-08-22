@@ -30,11 +30,15 @@ Cycle System
 #time.sleep(15)
 import production_manager
 import system_manager
-
-
+import raspi_update
 
 while True:
     try:
+        if not os.name == 'nt':
+            importlib.reload(raspi_update)
+            raspi_update.update()
+            time.sleep(2)
+
         #print(os.system('cls||clear'))
         dateTime = dt.datetime.now().strftime('%Y/%m/%d %H:%M:%S')
         print(dateTime)
@@ -45,8 +49,8 @@ while True:
         print('========\nSystem Manager\n========')
         importlib.reload(system_manager)
         system_manager.workspaceSetup()
-        system_manager.versionBackup('.ma', projectPath + '/animation_wrk', dateFormat='%Y%m%d_%H%M')
-        system_manager.versionBackup('.mov', projectPath + '/animation_xpt', dateFormat='%Y%m%d_%H%M')
+        #system_manager.versionBackup('.ma', projectPath + '/animation_wrk', dateFormat='%Y%m%d_%H%M')
+        #system_manager.versionBackup('.mov', projectPath + '/animation_xpt', dateFormat='%Y%m%d_%H%M')
 
         """
         Production Manager (update, record and cleanup data of production)
