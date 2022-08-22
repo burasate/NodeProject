@@ -164,12 +164,21 @@ async def my_id(ctx):
 @bot.command()
 async def my_status(ctx):
     ctx_data = botFunction.getContextData(ctx)
-    role = ', '.join([i['name'] for i in ctx_data['author']['roles'] if not 'everyone'in i['name']])
-    nick = ctx_data['author']['nick']
-    msg = f'{nick}\n' \
-          f'role : {role}\n'
+    role_list = [i['name'] for i in ctx_data['author']['roles'] if not 'everyone'in i['name']]
+    role_str = ', '.join(role_list)
+    mention = ctx_data['author']['mention']
+    embed = embed=discord.Embed(
+        title='Member Register/Update', url='https://forms.gle/QrqycQV75o4xRJ4ZA',
+        description='You are not in \"Node Freelance\" Role, Please submit this form',
+        color=0xFF5733)
+    msg = f'{mention}\n' \
+          f'role : {role_str}\n'
           #f'\n' \
-    await ctx.send(msg, mention_author=True, delete_after=10)
+    if not 'Node Freelance' in role_list:
+        await ctx.send(msg, mention_author=True, delete_after=15)
+        await ctx.send('Now you are in \"Node Freelance\" Role', mention_author=True, delete_after=15)
+    else:
+        await ctx.send(msg, mention_author=True, embed=embed, delete_after=15)
     await ctx.message.delete(delay=0)
 
 #-------------------------------------
