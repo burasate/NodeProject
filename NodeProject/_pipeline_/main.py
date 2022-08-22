@@ -37,8 +37,9 @@ import production_manager
 import system_manager
 import raspi_update
 
+# Discord Bot
 if not os.name == 'nt':
-    # Discord Bot
+    os.system('cls||clear')
     dcbot_path = rootPath + '/raspi_dcbot.py'
     print('Open {}'.format(dcbot_path))
     try:
