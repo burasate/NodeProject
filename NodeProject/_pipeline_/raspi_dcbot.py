@@ -134,11 +134,19 @@ async def dev_data(ctx):
 
 @bot.command()
 async def sys_update(ctx):
-    import raspi_update
-    importlib.reload(raspi_update)
-    raspi_update.update()
     await ctx.send('system update'.format(data_str), delete_after=2)
-    await ctx.message.delete(delay=2)
+    await ctx.message.delete()
+    if not os.name == 'nt':
+        import raspi_update
+        importlib.reload(raspi_update)
+        raspi_update.update()
+
+@bot.command()
+async def sys_reboot(ctx):
+    await ctx.send(''.format(data_str), delete_after=2)
+    await ctx.message.delete()
+    if not os.name == 'nt':
+        os.system('sudo reboot')
 
 @bot.command()
 async def dev_test(ctx):
