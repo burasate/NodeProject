@@ -192,6 +192,17 @@ async def my_status(ctx):
         await ctx.send(msg, mention_author=True, embed=embed, delete_after=15)
     await ctx.message.delete(delay=0)
 
+@bot.command()
+async def register(ctx):
+    ctx_data = botFunction.getContextData(ctx)
+    mention = ctx_data['author']['mention']
+    embed = embed = discord.Embed(
+        title='Member Register/Update', url='https://forms.gle/QrqycQV75o4xRJ4ZA',
+        description='',
+        color=0xFF5733)
+    await ctx.send(f'{mention}', mention_author=True, embed=embed, delete_after=15)
+    await ctx.message.delete(delay=0)
+
 #-------------------------------------
 # Run
 #-------------------------------------
