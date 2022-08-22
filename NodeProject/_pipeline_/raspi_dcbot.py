@@ -170,14 +170,14 @@ async def my_id(ctx):
     ctx_data = botFunction.getContextData(ctx)
     id = ctx_data['author']['id']
     mention = ctx_data['author']['mention']
-    await ctx.send(f'{mention}\nyour discord id is\n`{id}`', mention_author=True, delete_after=10)
+    await ctx.send(f'{mention}\nyour discord id is\n`{id}`', mention_author=True, delete_after=20)
     await ctx.message.delete(delay=0)
 
 @bot.command()
 async def my_status(ctx):
     ctx_data = botFunction.getContextData(ctx)
     role_list = [i['name'] for i in ctx_data['author']['roles'] if not 'everyone'in i['name']]
-    role_str = ', '.join(role_list)
+    role_str = ',   '.join(role_list)
     mention = ctx_data['author']['mention']
     embed = embed=discord.Embed(
         title='Member Register/Update', url='https://forms.gle/QrqycQV75o4xRJ4ZA',
@@ -187,10 +187,10 @@ async def my_status(ctx):
           f'role : {role_str}\n'
           #f'\n' \
     if not 'Node Freelance' in role_list:
-        await ctx.send(msg, mention_author=True, delete_after=15)
+        await ctx.send(msg, mention_author=True, delete_after=20)
         await ctx.send('You are already in the \"Node Freelance\" Role', mention_author=True, delete_after=15)
     else:
-        await ctx.send(msg, mention_author=True, embed=embed, delete_after=15)
+        await ctx.send(msg, mention_author=True, embed=embed, delete_after=20)
     await ctx.message.delete(delay=0)
 
 @bot.command()
