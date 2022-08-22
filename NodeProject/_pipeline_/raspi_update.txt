@@ -1,0 +1,5 @@
+https://raw.githubusercontent.com/burasate/NodeProject/main/NodeProject/_pipeline_/system_manager.py
+https://raw.githubusercontent.com/burasate/NodeProject/main/NodeProject/_pipeline_/main.py
+https://raw.githubusercontent.com/burasate/NodeProject/main/NodeProject/_pipeline_/production_manager.py
+https://raw.githubusercontent.com/burasate/NodeProject/main/NodeProject/_pipeline_/raspi_update.py
+https://raw.githubusercontent.com/burasate/NodeProject/main/NodeProject/_pipeline_/raspi_dcbot.py
