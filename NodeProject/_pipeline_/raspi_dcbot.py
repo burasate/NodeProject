@@ -20,8 +20,10 @@ sever_id = config_j['sever_id']
 intents = discord.Intents.default()
 intents.members = True
 intents.all()
-bot = commands.Bot(command_prefix='!', intents=intents)
 client = discord.Client()
+bot = commands.Bot(command_prefix='!', intents=intents)
+if os.name == 'nt':
+    bot = commands.Bot(command_prefix='/', intents=intents)
 
 class botFunction:
     def addQueueTask(task_name, data_dict):
@@ -96,7 +98,7 @@ async def on_ready():
     print('bot online now!')
 
     channel = bot.get_channel(1011320896063021147)
-    await channel.send(f'`{dt.datetime.now()}`\nHello, I just woke up', delete_after=15)
+    await channel.send(f'`{dt.datetime.now()}`\nHello, I just woke up\n(Runnig on os {os.name})', delete_after=15)
 
     role_update.start()
 
