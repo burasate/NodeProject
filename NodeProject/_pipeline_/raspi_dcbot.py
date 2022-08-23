@@ -106,7 +106,6 @@ class botFunction:
         return guild
 
 
-
 #-------------------------------------
 # Discord Start
 #-------------------------------------
@@ -119,7 +118,6 @@ async def on_ready():
 
     role_update.start()
     project_invite.start()
-
 
 #-------------------------------------
 # Discord Sync
