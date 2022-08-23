@@ -47,7 +47,7 @@ def loadNotionDatabase(dirPath):
 
 # Member System
 class register:
-    def updateMember(*_):
+    def update_member(*_):
         regis_sheet = 'Registration'
         regis_path = '{}/{}.json'.format(rec_dir,regis_sheet)
         nt_member_path = notiondb_dir + '/csv' + '/member.csv'
@@ -93,6 +93,28 @@ class register:
                     if prop_dict[prop_name] != find_row[prop_name]:
                         notionDatabase.updatePageProperty(find_row['page_id'], prop_name, prop_dict[prop_name])
 
+# Project System
+class project:
+    def update_invite(*_):
+        nt_project_path = notiondb_dir + '/csv' + '/project.csv'
+        nt_member_path = notiondb_dir + '/csv' + '/member.csv'
+
+        project_df = pd.read_csv(nt_project_path)
+        member_df = pd.read_csv(nt_member_path)
+
+        print(project_df)
+        for i in project_df.index.tolist():
+            row = project_df.loc[i]
+            if not row['title'] in ['Ingma','Project Test']:
+                continue
+            #print(row)
+
+            ready_to_invite = row['ready_to_invite']
+            sent_invite = row['sent_invite']
+
+            if ready_to_invite and not sent_invite:
+                notionDatabase.updatePageProperty(row['page_id'], 'sent_invite', True)
+
 # Task System
 class taskQueue:
     data = {}
@@ -119,8 +141,8 @@ class taskQueue:
                 if row['name'] == 'punch':
                     taskQueue.task_pucnch()
 
-                elif row['name'] == 'punch2':
-                    pass
+                elif row['name'] == 'sent_invite_to_project':
+                    project.update_invite()
 
                 else:
                     clear = False
@@ -141,11 +163,11 @@ class taskQueue:
                     key='date_time', value=now
                 )
 
-
 if __name__ == '__main__':
-    #mainPath = os.sep.join(rootPath.split(os.sep)[:-1])
-    #loadWorksheet('AnimationTracking', mainPath + '/production_rec')
-    #loadNotionDatabase(mainPath + '/production_rec/notionDatabase')
-    #register.updateMember()
-    taskQueue.run()
+    base_path = os.sep.join(rootPath.split(os.sep)[:-1])
+    #loadWorksheet('AnimationTracking', base_path + '/production_rec')
+    loadNotionDatabase(base_path + '/production_rec/notionDatabase')
+    #register.update_member()
+    #taskQueue.run()
+    #project.update_invite()
     pass
