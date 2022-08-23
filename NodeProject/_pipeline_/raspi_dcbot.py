@@ -238,7 +238,7 @@ async def my_status(ctx):
           f'Discord ID : `{id}`\n' \
           f'Roles : {role_str}\n'
           #f'\n' \
-    if not 'Node Freelance' in role_list:
+    if 'Node Freelance' in role_list:
         await ctx.send(msg + '\nYou are already in the \"Node Freelance\" Role', mention_author=True, delete_after=20)
     else:
         await ctx.send(msg, mention_author=True, embed=embed, delete_after=20)
