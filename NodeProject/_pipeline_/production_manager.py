@@ -90,8 +90,11 @@ class register:
                 find_index = member_df[member_df['member_name'] == member_name].index.tolist()[0]
                 find_row = member_df.loc[find_index]
                 for prop_name in prop_dict:
+                    v = prop_dict[prop_name]
+                    if str(v) == '' and prop_name in ['demo_reel','linkedin']: #url format
+                        v = '-'
                     if prop_dict[prop_name] != find_row[prop_name]:
-                        notionDatabase.updatePageProperty(find_row['page_id'], prop_name, prop_dict[prop_name])
+                        notionDatabase.updatePageProperty(find_row['page_id'], prop_name, v)
 
 # Project System
 class project:
@@ -167,7 +170,7 @@ if __name__ == '__main__':
     base_path = os.sep.join(rootPath.split(os.sep)[:-1])
     #loadWorksheet('AnimationTracking', base_path + '/production_rec')
     loadNotionDatabase(base_path + '/production_rec/notionDatabase')
-    #register.update_member()
+    register.update_member()
     #taskQueue.run()
-    project.update_invite()
+    #project.update_invite()
     pass

@@ -146,9 +146,9 @@ async def project_invite():
     projects = botFunction.getProjects()
     projects = [ i for i in projects if i['ready_to_invite'] ]
     guild = botFunction.getGuild()
-    target_role = [i for i in guild.roles if i.name == 'Node Freelance'][0]
+    target_role = [ i for i in guild.roles if 'Node Freelancer' in i.name ][0]
+    channel = bot.get_channel(1011594327132209193)
     for project in projects:
-        channel = bot.get_channel(1011594327132209193)
         msg = f'''
 Hi {target_role.mention}
 We have a project you might be interested in.
