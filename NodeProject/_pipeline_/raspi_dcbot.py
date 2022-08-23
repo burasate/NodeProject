@@ -52,7 +52,7 @@ class botFunction:
                 'content': ctx.message.content,
                 'id': ctx.message.id
             },
-            'category': None,
+            'category': {},
             'channel': {
                 'id': ctx.channel.id,
                 'name': ctx.channel.name
@@ -179,16 +179,17 @@ async def my_status(ctx):
     role_list = [i['name'] for i in ctx_data['author']['roles'] if not 'everyone'in i['name']]
     role_str = ',   '.join(role_list)
     mention = ctx_data['author']['mention']
+    id = ctx_data['author']['id']
     embed = embed=discord.Embed(
         title='Member Register/Update', url='https://forms.gle/QrqycQV75o4xRJ4ZA',
         description='You are not in \"Node Freelance\" Role, Please submit this form',
         color=0xFF5733)
     msg = f'{mention}\n' \
-          f'role : {role_str}\n'
+          f'Discord ID : `{id}`\n' \
+          f'Roles : {role_str}\n'
           #f'\n' \
     if not 'Node Freelance' in role_list:
-        await ctx.send(msg, mention_author=True, delete_after=20)
-        await ctx.send('You are already in the \"Node Freelance\" Role', mention_author=True, delete_after=15)
+        await ctx.send(msg + '\nYou are already in the \"Node Freelance\" Role', mention_author=True, delete_after=20)
     else:
         await ctx.send(msg, mention_author=True, embed=embed, delete_after=20)
     await ctx.message.delete(delay=0)
