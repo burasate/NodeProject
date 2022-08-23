@@ -4,3 +4,5 @@ https://raw.githubusercontent.com/burasate/NodeProject/main/NodeProject/_pipelin
 https://raw.githubusercontent.com/burasate/NodeProject/main/NodeProject/_pipeline_/raspi_update.py
 https://raw.githubusercontent.com/burasate/NodeProject/main/NodeProject/_pipeline_/raspi_dcbot.py
 https://raw.githubusercontent.com/burasate/NodeProject/main/NodeProject/_pipeline_/__Init__.py
+https://raw.githubusercontent.com/burasate/NodeProject/main/NodeProject/_pipeline_/src/notionDatabase/notionDatabase.py
+https://raw.githubusercontent.com/burasate/NodeProject/main/NodeProject/_pipeline_/src/gSheet/gSheet.py
