@@ -158,9 +158,15 @@ cython_debug/
 *.bat
 *.sh
 *.zip
-src/
+python-3.7.0-embed-amd64/
+python-3.7.0-embed-win32/
+site-packages/
 __pycache__/
 _archive/
 _version/
 production_rec/
 production_rpt/
+brsNn/
+*workTime.py
+*__Init__.py
+maReader/

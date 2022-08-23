@@ -102,7 +102,7 @@ class project:
         project_df = pd.read_csv(nt_project_path)
         member_df = pd.read_csv(nt_member_path)
 
-        print(project_df)
+        #print(project_df)
         for i in project_df.index.tolist():
             row = project_df.loc[i]
             if not row['title'] in ['Ingma','Project Test']:
@@ -169,5 +169,5 @@ if __name__ == '__main__':
     loadNotionDatabase(base_path + '/production_rec/notionDatabase')
     #register.update_member()
     #taskQueue.run()
-    #project.update_invite()
+    project.update_invite()
     pass
