@@ -39,11 +39,12 @@ def loadWorksheet(sheet, dirPath):
     savePath = dirPath + os.sep + sheet + '.json'
     json.dump(data, open(savePath, 'w'), indent=4)
     print('Load worksheet {} - {}'.format(gSheet.sheetName,sheet))
-
+"""
 def loadNotionDatabase(dirPath):
     if not os.path.exists(dirPath):
         os.makedirs(dirPath)
     notionDatabase.loadNotionDatabase(dirPath)
+"""
 
 # Member System
 class register:
@@ -54,7 +55,6 @@ class register:
         db_member_id = [i['id'] for i in notionDatabase.database if i['name'] == 'member'][0]
 
         #load online database
-        #loadNotionDatabase(notiondb_dir)
         loadWorksheet(regis_sheet, rec_dir)
 
         # Compare 2 Dataframes
@@ -169,8 +169,10 @@ class taskQueue:
 if __name__ == '__main__':
     base_path = os.sep.join(rootPath.split(os.sep)[:-1])
     #loadWorksheet('AnimationTracking', base_path + '/production_rec')
-    loadNotionDatabase(base_path + '/production_rec/notionDatabase')
+
     register.update_member()
-    #taskQueue.run()
+    taskQueue.run()
     #project.update_invite()
     pass
+
+    #loadNotionDatabase(base_path + '/production_rec/notionDatabase')

@@ -22,7 +22,7 @@ def updateFromCSV(csvPath, workSheet,newline=''):
 
     #load csv
     tableList = []
-    with open(csvPath, 'r', newline=newline) as readfile:
+    with open(csvPath, 'r', newline=newline, encoding='utf-8') as readfile:
         for row in csv.reader(readfile,delimiter=','):
             tableList.append(row)
         readfile.close()

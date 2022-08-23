@@ -66,6 +66,9 @@ while True:
         print('========\nSystem Manager\n========')
         importlib.reload(system_manager)
         system_manager.workspaceSetup()
+        system_manager.integration.load_notion_db()
+        #data cleanup
+        system_manager.integration.notion_sheet()
         #system_manager.versionBackup('.ma', projectPath + '/animation_wrk', dateFormat='%Y%m%d_%H%M')
         #system_manager.versionBackup('.mov', projectPath + '/animation_xpt', dateFormat='%Y%m%d_%H%M')
 
@@ -74,7 +77,7 @@ while True:
         """
         print('========\nProduction Manager\n========')
         importlib.reload(production_manager)
-        production_manager.loadNotionDatabase(projectPath + '/production_rec/notionDatabase')
+        #production_manager.loadNotionDatabase(projectPath + '/production_rec/notionDatabase')
         production_manager.register.update_member()
         production_manager.taskQueue.run()
 

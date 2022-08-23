@@ -403,7 +403,7 @@ def loadNotionDatabase(dir_part):
         df = df[['page_id', 'title', 'last_edited_time'] + sorted(list(properties), reverse=False)]
         df.reset_index(inplace=True, drop=True)
         df.to_csv(csv_path, index=False)
-        print(df)
+        #print(df)
         """
         with open(dir_part + '/{}.json'.format(i['name'])) as data_f:
             data_j = json.load(data_f)
