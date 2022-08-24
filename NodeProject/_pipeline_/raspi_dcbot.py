@@ -141,7 +141,7 @@ async def role_update():
             await member.remove_roles(member_role)
     print(dt.datetime.now(), 'member role updated')
 
-@tasks.loop(hours=24)
+@tasks.loop(hours=1)
 async def project_invite():
     projects = botFunction.getProjects()
     projects = [ i for i in projects if i['ready_to_invite'] and not i['sent_invite'] ]
@@ -161,7 +161,10 @@ Project Date : {str(project['project_date']).replace(',',' - ')}
 If are you are interested
 type `!join [Project Name] [Your availibility hour per week]`
 
-example `!join {project['title'].strip().replace(' ','_')} 20`
+for example
+`
+!join {project['title'].strip().replace(' ','_')} 20
+`
     '''
         await channel.send(f'{msg}')
 
