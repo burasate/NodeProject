@@ -67,6 +67,8 @@ while True:
         importlib.reload(system_manager)
         system_manager.workspaceSetup()
         system_manager.integration.load_notion_db()
+        system_manager.data.create_history()
+        system_manager.data.clear_past_history()
         #data cleanup
         system_manager.integration.notion_sheet()
         #system_manager.versionBackup('.ma', projectPath + '/animation_wrk', dateFormat='%Y%m%d_%H%M')

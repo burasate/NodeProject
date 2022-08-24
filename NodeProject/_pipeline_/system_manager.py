@@ -90,9 +90,71 @@ class integration:
             except:
                 print('can\'t upload dataframe to sheet {}'.format(sheet_dest_name))
 
+class data:
+    history_dir_name = '_history'
 
+    def create_history(*_):
+        for root, dirs, files in os.walk(rec_dir, topdown=False):
+            for name in files:
+                ext = '.csv'
+                if not ext in name:
+                    continue
+                if data.history_dir_name in root:
+                    continue
+                file_path = os.path.join(root, name)
 
+                hist_dir_path = os.path.join(root, data.history_dir_name)
+                if not os.path.exists(hist_dir_path):
+                    os.mkdir(hist_dir_path)
 
+                mtime = os.stat(file_path).st_mtime
+                mtime_hour = dt.datetime.fromtimestamp(mtime).hour
+                mtime_srtftime = dt.datetime.fromtimestamp(mtime).strftime('%Y%m%d_00')
+                if mtime_hour > 12:
+                    mtime_srtftime = dt.datetime.fromtimestamp(mtime).strftime('%Y%m%d_01')
+
+                hist_file_path = os.path.join(
+                    hist_dir_path, name.replace(ext, '_{}{}'.format(mtime_srtftime, ext)))
+
+                print('create history  ', hist_file_path.split(os.sep)[-1])
+                shutil.copyfile(file_path, hist_file_path)
+
+    def clear_past_history(*_):
+        for root, dirs, files in os.walk(rec_dir, topdown=False):
+            for name in files:
+                ext = '.csv'
+                if not ext in name:
+                    continue
+                if data.history_dir_name in root:
+                    continue
+                file_path = os.path.join(root, name)
+
+                hist_dir_path = os.path.join(root, data.history_dir_name)
+                name_no_ext = name.replace(ext,'')
+
+                hist_file_list = sorted([ i for i in os.listdir(hist_dir_path) if name_no_ext in i ])
+
+                file_limit = 5
+                if len(hist_file_list) > file_limit:
+                    del_file_list = hist_file_list[:-file_limit]
+                    keep_file_list = hist_file_list[-file_limit:]
+                    #print(del_file_list , keep_file_list)
+                    del_path_list = [ os.path.join(hist_dir_path, i) for i in del_file_list ]
+                    for i in del_path_list:
+                        del_file = del_file_list[del_path_list.index(i)]
+                        print('remove off-limit[{}] history files'.format(file_limit), del_file)
+                        os.remove(i)
+
+    def get_history_path_list(file_path):
+        ext = '.csv'
+        file_path = file_path.replace('/',os.sep)
+        name = os.path.basename(file_path)
+        name_no_ext = name.replace(ext,'')
+        file_dir = os.path.dirname(file_path)
+        hist_dir_path = file_dir + os.sep + data.history_dir_name
+        hist_file_list = sorted([ i for i in os.listdir(hist_dir_path) if name_no_ext in i ])
+        hist_path_list = [os.path.join(hist_dir_path, i) for i in hist_file_list]
+        return hist_path_list
 
 if __name__ == '__main__':
     base_path = os.sep.join(rootPath.split(os.sep)[:-1])
@@ -100,5 +162,7 @@ if __name__ == '__main__':
     #versionBackup('.ma', base_path)
     #integration.load_notion_db()
     #integration.notion_sheet()
-
+    #data.create_history()
+    #data.clear_past_history()
+    #print(data.get_history_path_list(r"D:\GDrive\Documents\2022\BRSAnimPipeline\work\NodeProject\NodeProject\production_rec\notionDatabase\csv\project.csv"))
     pass
