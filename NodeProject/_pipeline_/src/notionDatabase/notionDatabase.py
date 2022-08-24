@@ -400,40 +400,11 @@ def loadNotionDatabase(dir_part):
             for prop_name in properties:
                 data[prop_name] = properties[prop_name]
             df = df.append(pd.DataFrame.from_records([data]))
-        if df.empty:
-            continue
-        df = df[['page_id', 'title', 'last_edited_time'] + sorted(list(properties), reverse=False)]
-        df.reset_index(inplace=True, drop=True)
+        if not df.empty:
+            df = df[['page_id', 'title', 'last_edited_time'] + sorted(list(properties), reverse=False)]
+            df.reset_index(inplace=True, drop=True)
         df.to_csv(csv_path, index=False)
-        #print(df)
-        """
-        with open(dir_part + '/{}.json'.format(i['name'])) as data_f:
-            data_j = json.load(data_f)
-        csv_dir = dir_part + '/csv'
-        if not os.path.exists(csv_dir):
-            os.makedirs(csv_dir)
-        csv_path = csv_dir + '/{}.csv'.format(i['name'])
-        if os.path.exists(csv_path):
-            try: os.remove(csv_path)
-            except: pass
-        for row_id in data_j:
-            fix_col = ['page_id', 'title', 'last_edited_time']
-            prop_col = sorted(list(data_j[row_id]['properties']), reverse=False)
-            column = fix_col + prop_col
-            # Create File
-            if not os.path.exists(csv_path):
-                with open(csv_path, 'w', newline='', encoding='utf-8') as f:
-                    csv_writer = csv.writer(f, delimiter=',', quoting=csv.QUOTE_MINIMAL)
-                    csv_writer.writerow(column)
-                    f.close()
-            # Add Row
-            row = [ data_j[row_id][i] for i in fix_col ] + [ data_j[row_id]['properties'][i] for i in prop_col ]
-            with open(csv_path, 'a', newline='', encoding='utf-8') as f:
-                csv_writer = csv.writer(f, delimiter=',', quoting=csv.QUOTE_ALL)
-                csv_writer.writerow(row)
-                f.close()
-        """
-
+        
 if __name__ == '__main__':
     #pprint.pprint(getPage('4c4aa72787e6487ca8bd7e01be74219b'))
     #pprint.pprint(getPageProperty('4c4aa72787e6487ca8bd7e01be74219b','rx%3B%7D'))
