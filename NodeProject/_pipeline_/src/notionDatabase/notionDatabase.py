@@ -134,7 +134,7 @@ def updatePageProperty(page_id, property, value):
         raise Warning('property \'{}\' was not found in page'.format(property))
 
     prop_data = getPageProperty(page_id, page_data['properties'][property]['id'])
-    pprint.pprint(prop_data)
+    #pprint.pprint(prop_data)
     v_type = None
     if 'property_item' in prop_data:
         v_type = prop_data['property_item']['type']

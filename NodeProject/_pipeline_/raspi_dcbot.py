@@ -34,7 +34,7 @@ class botFunction:
             'name': task_name,
             'data': data_dict
         }
-        data['data'] = str(data['data'])
+        data['data'] = str(data['data']).replace('\'','\"')
         response = requests.post(
             'https://script.google.com/macros/s/'
             'AKfycbyyW4jhOl-KC-pyqF8qIrnx3x3GiohyJj'
@@ -273,7 +273,7 @@ async def join(ctx, project_name, hour_week):
     task_data = {
         'discord_id': ctx_data['author']['id'],
         'project_name': project_name,
-        'hour_week': hour_week
+        'hour_week': float(hour_week)
     }
     botFunction.addQueueTask(task_name, task_data)
 

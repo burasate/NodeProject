@@ -52,7 +52,7 @@ class register:
         regis_sheet = 'Registration'
         regis_path = '{}/{}.json'.format(rec_dir,regis_sheet)
         nt_member_path = notiondb_dir + '/csv' + '/member.csv'
-        db_member_id = [i['id'] for i in notionDatabase.database if i['name'] == 'member'][0]
+        dest_db_id = [i['id'] for i in notionDatabase.database if i['name'] == 'member'][0]
 
         #load online database
         loadWorksheet(regis_sheet, rec_dir)
@@ -81,7 +81,7 @@ class register:
 
             # Add New Member
             if not member_name in member_df['member_name'].tolist():
-                new_page = notionDatabase.createPage(db_member_id,'member_name', member_name)
+                new_page = notionDatabase.createPage(dest_db_id,'member_name', member_name)
                 """
                 for prop_name in prop_dict:
                     new_page_id = new_page['id'].replace('-','')
@@ -120,6 +120,57 @@ class project:
             if ready_to_invite and not sent_invite:
                 notionDatabase.updatePageProperty(row['page_id'], 'sent_invite', True)
 
+    def add_member(discord_id, project_name, hour_week):
+        nt_project_path = notiondb_dir + '/csv' + '/project.csv'
+        nt_project_member_path = notiondb_dir + '/csv' + '/project_member.csv'
+        nt_member_path = notiondb_dir + '/csv' + '/member.csv'
+        dest_db_id = [i['id'] for i in notionDatabase.database if i['name'] == 'project_member'][0]
+
+        project_df = pd.read_csv(nt_project_path)
+        project_member_df = pd.read_csv(nt_project_member_path)
+        member_df = pd.read_csv(nt_member_path)
+
+        member_df = member_df[member_df['discord_id'] == discord_id]
+        if member_df.empty:
+            raise Warning('cannot found discord id {} in member'.format(discord_id))
+        member_index = member_df.index.tolist()[0]
+        member_sl = member_df.iloc[member_index]
+        #print(member_sl)
+
+        project_name = project_name.strip().replace(' ','_').lower()
+        project_df['title'] = project_df['title'].str.strip()
+        project_df['title'] = project_df['title'].str.replace(' ','_')
+        project_df['title'] = project_df['title'].str.lower()
+        project_df = project_df[project_df['title'] == project_name]
+        if project_df.empty:
+            raise Warning('cannot found project name {} in project'.format(project_name))
+        project_index = project_df.index.tolist()[0]
+        project_sl = project_df.iloc[project_index]
+        #print(project_sl)
+
+        project_member_df['project'] = project_member_df['project'].str.strip()
+        project_member_df['project'] = project_member_df['project'].str.replace(' ', '_')
+        project_member_df['project'] = project_member_df['project'].str.lower()
+        project_member_df = project_member_df[project_member_df['project'] == project_name]
+        #print(project_member_df)
+
+        is_exists = False
+        for i in project_member_df.index.tolist():
+            row = project_member_df.loc[i]
+            is_exists = (
+                row['member_name'] == member_sl['title'] and
+                row['project'] == project_sl['title']
+            )
+            if is_exists:
+                break
+
+        if not is_exists:
+            new_page = notionDatabase.createPage(dest_db_id, 'member_name', member_sl['title'])
+            notionDatabase.updatePageProperty(new_page['id'], 'member', member_sl['page_id'])
+            notionDatabase.updatePageProperty(new_page['id'], 'project', project_sl['page_id'])
+            notionDatabase.updatePageProperty(new_page['id'], 'hour_week', hour_week)
+
+
 # Task System
 class taskQueue:
     data = {}
@@ -149,6 +200,13 @@ class taskQueue:
                 elif row['name'] == 'sent_invite_to_project':
                     project.update_invite()
 
+                elif row['name'] == 'join_project':
+                    project.add_member(
+                        taskQueue.data['discord_id'],
+                        taskQueue.data['project_name'],
+                        taskQueue.data['hour_week']
+                    )
+
                 else:
                     clear = False
 
@@ -172,9 +230,10 @@ if __name__ == '__main__':
     base_path = os.sep.join(rootPath.split(os.sep)[:-1])
     #loadWorksheet('AnimationTracking', base_path + '/production_rec')
 
-    register.update_member()
-    taskQueue.run()
+    #register.update_member()
+    #taskQueue.run()
     #project.update_invite()
+    project.add_member(346164580487004171, 'Project_Test', 20)
     pass
 
     #loadNotionDatabase(base_path + '/production_rec/notionDatabase')

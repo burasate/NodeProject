@@ -160,7 +160,7 @@ if __name__ == '__main__':
     base_path = os.sep.join(rootPath.split(os.sep)[:-1])
     #workspaceSetup()
     #versionBackup('.ma', base_path)
-    #integration.load_notion_db()
+    integration.load_notion_db()
     #integration.notion_sheet()
     #data.create_history()
     #data.clear_past_history()
