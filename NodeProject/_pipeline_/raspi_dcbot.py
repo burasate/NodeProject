@@ -144,7 +144,7 @@ async def role_update():
 @tasks.loop(hours=24)
 async def project_invite():
     projects = botFunction.getProjects()
-    projects = [ i for i in projects if i['ready_to_invite'] ]
+    projects = [ i for i in projects if i['ready_to_invite'] and not i['sent_invite'] ]
     guild = botFunction.getGuild()
     target_role = [ i for i in guild.roles if 'Node Freelancer' in i.name ][0]
     channel = bot.get_channel(1011594327132209193)
@@ -165,11 +165,11 @@ example `!join {project['title'].strip().replace(' ','_')} 20`
     '''
         await channel.send(f'{msg}')
 
-    task_name = 'sent_invite_to_project'
-    task_data = {
-        'project_name': project['title'],
-    }
-    botFunction.addQueueTask(task_name, task_data)
+        task_name = 'sent_invite_to_project'
+        task_data = {
+            'project_name': project['title'],
+        }
+        botFunction.addQueueTask(task_name, task_data)
 
 #-------------------------------------
 # Discord Command
