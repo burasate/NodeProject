@@ -134,7 +134,7 @@ class project:
         if member_df.empty:
             raise Warning('cannot found discord id {} in member'.format(discord_id))
         member_index = member_df.index.tolist()[0]
-        member_sl = member_df.iloc[member_index]
+        member_sl = member_df.loc[member_index]
         #print(member_sl)
 
         project_name = project_name.strip().replace(' ','_').lower()
@@ -145,7 +145,7 @@ class project:
         if project_df.empty:
             raise Warning('cannot found project name {} in project'.format(project_name))
         project_index = project_df.index.tolist()[0]
-        project_sl = project_df.iloc[project_index]
+        project_sl = project_df.loc[project_index]
         #print(project_sl)
 
         project_member_df['project'] = project_member_df['project'].str.strip()
@@ -230,9 +230,9 @@ if __name__ == '__main__':
     #loadWorksheet('AnimationTracking', base_path + '/production_rec')
 
     #register.update_member()
-    #taskQueue.run()
+    taskQueue.run()
     #project.update_invite()
-    project.add_member(346164580487004171, 'Project_Test', 20)
+    #project.add_member(346164580487004171, 'Project_Test', 20)
     pass
 
     #loadNotionDatabase(base_path + '/production_rec/notionDatabase')
