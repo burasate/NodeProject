@@ -161,7 +161,9 @@ class project:
                 row['project'] == project_sl['title']
             )
             if is_exists:
-                break
+                notionDatabase.updatePageProperty(row['id'], 'member', member_sl['page_id'])
+                notionDatabase.updatePageProperty(row['id'], 'project', project_sl['page_id'])
+                notionDatabase.updatePageProperty(row['id'], 'hour_week', hour_week)
 
         if not is_exists:
             new_page = notionDatabase.createPage(dest_db_id, 'member_name', member_sl['title'])
