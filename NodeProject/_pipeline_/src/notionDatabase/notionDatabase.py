@@ -401,7 +401,7 @@ def loadNotionDatabase(dir_part):
                 data[prop_name] = properties[prop_name]
             df = df.append(pd.DataFrame.from_records([data]))
 
-        if not df.empty:
+        if df.empty:
             raise Warning('the database need to add some page for works')
         df = df[['page_id', 'title', 'last_edited_time'] + sorted(list(properties), reverse=False)]
         df.reset_index(inplace=True, drop=True)
