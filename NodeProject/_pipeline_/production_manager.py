@@ -82,11 +82,13 @@ class register:
             # Add New Member
             if not member_name in member_df['member_name'].tolist():
                 new_page = notionDatabase.createPage(db_member_id,'member_name', member_name)
+                """
                 for prop_name in prop_dict:
                     new_page_id = new_page['id'].replace('-','')
                     notionDatabase.updatePageProperty(new_page_id, prop_name, prop_dict[prop_name])
+                """
             # Update Member
-            elif member_name in member_df['member_name'].tolist():
+            if member_name in member_df['member_name'].tolist():
                 find_index = member_df[member_df['member_name'] == member_name].index.tolist()[0]
                 find_row = member_df.loc[find_index]
                 for prop_name in prop_dict:
