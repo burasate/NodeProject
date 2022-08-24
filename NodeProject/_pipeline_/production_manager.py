@@ -151,7 +151,6 @@ class project:
         project_member_df['project'] = project_member_df['project'].str.strip()
         project_member_df['project'] = project_member_df['project'].str.replace(' ', '_')
         project_member_df['project'] = project_member_df['project'].str.lower()
-        project_member_df = project_member_df[project_member_df['project'] == project_name]
         #print(project_member_df)
 
         is_exists = False
