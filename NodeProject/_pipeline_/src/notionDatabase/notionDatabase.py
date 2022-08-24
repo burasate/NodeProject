@@ -404,7 +404,7 @@ def loadNotionDatabase(dir_part):
             df = df[['page_id', 'title', 'last_edited_time'] + sorted(list(properties), reverse=False)]
             df.reset_index(inplace=True, drop=True)
         df.to_csv(csv_path, index=False)
-        
+
 if __name__ == '__main__':
     #pprint.pprint(getPage('4c4aa72787e6487ca8bd7e01be74219b'))
     #pprint.pprint(getPageProperty('4c4aa72787e6487ca8bd7e01be74219b','rx%3B%7D'))
