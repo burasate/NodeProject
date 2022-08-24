@@ -400,9 +400,11 @@ def loadNotionDatabase(dir_part):
             for prop_name in properties:
                 data[prop_name] = properties[prop_name]
             df = df.append(pd.DataFrame.from_records([data]))
+
         if not df.empty:
-            df = df[['page_id', 'title', 'last_edited_time'] + sorted(list(properties), reverse=False)]
-            df.reset_index(inplace=True, drop=True)
+            raise Warning('the database need to add some page for works')
+        df = df[['page_id', 'title', 'last_edited_time'] + sorted(list(properties), reverse=False)]
+        df.reset_index(inplace=True, drop=True)
         df.to_csv(csv_path, index=False)
 
 if __name__ == '__main__':
