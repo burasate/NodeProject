@@ -6,7 +6,7 @@ import subprocess
 Init
 """
 if not os.name == 'nt':
-    time.sleep(15)
+    time.sleep(5)
 
 os.system('cls||clear')
 print('========\nInitialize\n========')
