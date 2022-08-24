@@ -5,10 +5,11 @@ import subprocess
 """
 Init
 """
+if not os.name == 'nt':
+    time.sleep(15)
 
 os.system('cls||clear')
 print('========\nInitialize\n========')
-time.sleep(3)
 
 rootPath = os.path.dirname(os.path.abspath(__file__))
 srcPath = rootPath+'/src'
