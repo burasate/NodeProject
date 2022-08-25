@@ -114,11 +114,11 @@ class botFunction:
 async def on_ready():
     print('bot online now!')
 
-    #channel = bot.get_channel(1011320896063021147)
-    #await channel.send(f'`{dt.datetime.now()}`\nHello, I just woke up\n(Runnig on os \"{os.name}\")')
+    channel = bot.get_channel(1011320896063021147)
+    await channel.send(f'`{dt.datetime.now()}`\nHello, I just woke up\n(Runnig on os \"{os.name}\")')
 
-    #role_update.start()
-    #project_invite.start()
+    role_update.start()
+    project_invite.start()
     project_channel_update.start()
 
 """---------------------------------"""
