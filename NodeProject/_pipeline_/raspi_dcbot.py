@@ -137,6 +137,9 @@ async def role_update():
         #print(member_id, member)
         if member_id in regis_id_list:
             await member.add_roles(member_role)
+            channel = bot.get_channel(1012248546050846720)
+            msg = f'added {member.mention} to {member_role.name}'
+            await channel.send(f'{msg}')
         else:
             await member.remove_roles(member_role)
     print(dt.datetime.now(), 'member role updated')
