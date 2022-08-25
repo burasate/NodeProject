@@ -192,7 +192,7 @@ for example
         }
         botFunction.addQueueTask(task_name, task_data)
 
-@tasks.loop(minutes=10)
+@tasks.loop(seconds=5)
 async def project_channel_update():
     guild = botFunction.getGuild()
     categories = guild.categories
@@ -224,7 +224,7 @@ async def project_channel_update():
         if channel_id != None:
             is_id_exists = channel_id in category_channel_id_list
 
-        print(channel_name, channel_id, is_name_exists, is_id_exists)
+        #print(channel_name, channel_id, is_name_exists, is_id_exists) #for check
         if not is_name_exists and not is_id_exists: #new
             channel = await guild.create_text_channel(channel_name)
             await channel.edit(category=project_category, sync_permissions=True)
