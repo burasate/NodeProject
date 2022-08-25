@@ -70,7 +70,10 @@ class register:
             member_name = '.'.join([ row['Nick Name'].capitalize(), row['First Name'][0].upper() + discord_id[-2:], ])
             #print(member_name, row['Discord ID'])
 
-            hour_per_week = ''.join([i for i in str(row['Availability']) if not i.isalpha()])
+            hour_per_week = ''.join([i for i in str(row['Availability']) if not i.isalpha() or i == '=' or i == '.'])
+            hour_per_week_split = [float(i) for i in hour_per_week.split('-')]
+            if len(hour_per_week_split) == 2:
+                hour_per_week = (hour_per_week_split[0]+hour_per_week_split[0])*0.5
             if str(hour_per_week) != str(row['Availability']):
                 gSheet.setValue(
                     regis_sheet, findKey='Discord ID', findValue=discord_id,
