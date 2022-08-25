@@ -114,11 +114,11 @@ class botFunction:
 async def on_ready():
     print('bot online now!')
 
-    channel = bot.get_channel(1011320896063021147)
-    await channel.send(f'`{dt.datetime.now()}`\nHello, I just woke up\n(Runnig on os \"{os.name}\")')
+    #channel = bot.get_channel(1011320896063021147)
+    #await channel.send(f'`{dt.datetime.now()}`\nHello, I just woke up\n(Runnig on os \"{os.name}\")')
 
-    role_update.start()
-    project_invite.start()
+    #role_update.start()
+    #project_invite.start()
     project_channel_update.start()
 
 """---------------------------------"""
@@ -203,14 +203,15 @@ async def project_channel_update():
     channel_id_list = [str(i['discord_channel_id']) for i in projects]
     category_channel_list = [i.name for i in project_category.channels]
     category_channel_id_list = [int(i.id) for i in project_category.channels]
+    prefix_ready, prefix_archive = ['🟢proj-', '🔴proj-']
 
-    # New
+    # Exist
     for name in project_name_list :
         index = project_name_list.index(name)
         channel_name = ''.join([i for i in name if i.isalpha() or i.isspace() or i.isnumeric()])
         channel_name = channel_name.lower().strip()
         channel_name = channel_name.replace(' ','_')
-        channel_name = '🟢proj-' + channel_name
+        channel_name = prefix_ready + channel_name
 
         channel_id = str(channel_id_list[index])
         if not channel_id.isnumeric():
@@ -243,6 +244,17 @@ async def project_channel_update():
             channel = bot.get_channel(channel_id)
             await channel.edit(name=channel_name, sync_permissions=True)
             print('Rename project channel {}'.format(channel_name))
+
+    # Archive
+    for category_channel_id in category_channel_id_list:
+        if len(project_name_list) == len(channel_id_list):
+            print(int(category_channel_id), [int(i) for i in channel_id_list])
+            if not int(category_channel_id) in [int(i) for i in channel_id_list]:
+                channel = bot.get_channel(category_channel_id)
+                await channel.edit(name=channel_name.replace(prefix_ready, prefix_archive))
+                print('Re-status project channel {}'.format(channel_name))
+        else:
+            pass
 
 """---------------------------------"""
 # Discord Command
