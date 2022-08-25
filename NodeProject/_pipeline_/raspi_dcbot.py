@@ -127,37 +127,33 @@ async def role_update():
     regis_rec = botFunction.getRegisteredMember()
     regis_id_list = [ i['discord_id'] for i in regis_rec if str(i['discord_id']).split('.')[0].isdigit() ]
     regis_id_list = [ int(i) for i in regis_id_list ]
+    find_role_name = 'Node Freelancer'
 
     # print(regis_id_list)
     guild = botFunction.getGuild()
     member_id_list = [i.id for i in guild.members]
     # print(member_id_list)
-    member_role = [i for i in guild.roles if 'Freelancer' in i.name][0]
+    apply_role = [i for i in guild.roles if find_role_name in i.name][0]
     id_sent_welcome_list = []
 
     for member in guild.members:
         member_id = member.id
-        #print(member_id, member)
+        member_roles = [i.name for i in member.roles]
+        #print(member_id, member, member_roles)
+        is_found_role = True in [ find_role_name in i for i in member_roles ]
+        #print(is_found_role)
         if member_id in regis_id_list:
-            await member.add_roles(member_role)
+            if not is_found_role:
+                await member.add_roles(apply_role)
 
-            member_sl = [i for i in regis_rec if int(i['discord_id']) == member_id][0]
-            sent_role_welcome = member_sl['sent_role_welcome']
-            user_name = member_sl['title']
-            if not sent_role_welcome:
+                member_sl = [i for i in regis_rec if int(i['discord_id']) == member_id][0]
+                user_name = member_sl['title']
                 channel = bot.get_channel(1012248546050846720)
-                msg = f'added {user_name} ({member.display_name}) to \"{member_role.name}\" role'
+                msg = f'added {user_name} ({member.display_name}) to \"{apply_role.name}\" role'
                 await channel.send(f'{msg}')
-                id_sent_welcome_list.append(member_id)
-        else:
-            await member.remove_roles(member_role)
 
-    if id_sent_welcome_list != []:
-        task_name = 'sent_role_welcome'
-        task_data = {
-            'id_list': id_sent_welcome_list,
-        }
-        botFunction.addQueueTask(task_name, task_data)
+        else:
+            await member.remove_roles(apply_role)
 
     print(dt.datetime.now(), 'member role updated')
 

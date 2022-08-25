@@ -194,6 +194,7 @@ class taskQueue:
         print('do punch task {}'.format(taskQueue.data['who']))
         print('oraa \n'*10)
 
+    '''
     def sent_role_welcome_update(data):
         #taskQueue.data['id_list']
         nt_member_path = notiondb_dir + '/csv' + '/member.csv'
@@ -204,6 +205,7 @@ class taskQueue:
             row = member_df.loc[i]
             if row['discord_id'] in data['id_list']:
                 notionDatabase.updatePageProperty(row['page_id'], 'sent_role_welcome', True)
+    '''
 
     def run(*_):
         request_sheet = 'Request'
@@ -229,9 +231,6 @@ class taskQueue:
 
                 elif row['name'] == 'sent_invite_to_project':
                     project.update_invite()
-
-                elif row['name'] == 'sent_role_welcome':
-                    taskQueue.sent_role_welcome_update(taskQueue.data)
 
                 elif row['name'] == 'join_project':
                     project.add_member(
