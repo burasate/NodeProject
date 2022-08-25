@@ -179,9 +179,13 @@ class project:
             notionDatabase.updatePageProperty(new_page['id'], 'project', project_sl['page_id'])
             notionDatabase.updatePageProperty(new_page['id'], 'hour_week', hour_week)
 
-            project_member_df.append(pd.DataFrame.from_records([{
-                'page_id' : new_page['id'],
+            project_member_df = project_member_df.append(pd.DataFrame.from_records([{
+                'page_id' : new_page['id'], 'member': member_sl['page_id'],
+                'project' : project_sl['page_id'], 'hour_week' : hour_week
             }]))
+
+        project_member_df.reset_index(drop=True, inplace=True)
+        project_member_df.to_csv(nt_project_member_path, index=False)
 
 # Task System
 class taskQueue:
@@ -242,7 +246,7 @@ class taskQueue:
                 # Clear Task
                 if clear:
                     gSheet.deleteRow(request_sheet, 'date_time', row['date_time'])
-                    break #Loop per Task
+                    #break #Loop per Task
 
             except Exception as e:
                 import traceback
