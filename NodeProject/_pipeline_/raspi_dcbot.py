@@ -143,9 +143,10 @@ async def role_update():
 
             member_sl = [i for i in regis_rec if int(i['discord_id']) == member_id][0]
             sent_role_welcome = member_sl['sent_role_welcome']
+            user_name = member_sl['title']
             if not sent_role_welcome:
                 channel = bot.get_channel(1012248546050846720)
-                msg = f'added {member.mention} to \"{member_role.name}\" role'
+                msg = f'added {user_name} ({member.display_name}) to \"{member_role.name}\" role'
                 await channel.send(f'{msg}')
                 id_sent_welcome_list.append(member_id)
         else:
