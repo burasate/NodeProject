@@ -82,7 +82,7 @@ while True:
         importlib.reload(production_manager)
         #production_manager.loadNotionDatabase(projectPath + '/production_rec/notionDatabase')
         production_manager.register.update_member()
-        production_manager.taskQueue.run()
+        production_manager.task_queue.run()
 
         """
         Data Analytic (data analysis and report)
