@@ -122,12 +122,11 @@ async def on_ready():
 #-------------------------------------
 # Discord Sync
 #-------------------------------------
-@tasks.loop(seconds=180.0)
+@tasks.loop(minutes=10)
 async def role_update():
     regis_rec = botFunction.getRegisteredMember()
     regis_id_list = [ i['discord_id'] for i in regis_rec if str(i['discord_id']).split('.')[0].isdigit() ]
     regis_id_list = [ int(i) for i in regis_id_list ]
-
 
     # print(regis_id_list)
     guild = botFunction.getGuild()
