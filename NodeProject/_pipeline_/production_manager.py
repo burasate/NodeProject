@@ -69,13 +69,21 @@ class register:
             discord_id = str(row['Discord ID'])
             member_name = '.'.join([ row['Nick Name'].capitalize(), row['First Name'][0].upper() + discord_id[-2:], ])
             #print(member_name, row['Discord ID'])
+
+            hour_per_week = ''.join([i for i in row['Availability'] if not i.isalpha()])
+            if str(hour_per_week) != str(row['Availability']):
+                gSheet.setValue(
+                    regis_sheet, findKey='Discord ID', findValue=discord_id,
+                    key='Availability', value=hour_per_week
+                )
+
             prop_dict = {
                 'discord_id': int(discord_id),
                 'demo_reel': row['Demo Reel'],
                 'email': row['Email Address'],
                 'first_name': row['First Name'].capitalize(),
                 'last_name': row['Last Name'].capitalize(),
-                'hour_per_week': float(row['Availability']),
+                'hour_per_week': float(hour_per_week),
                 'linkedin': row['Linkedin Profile']
             }
 
