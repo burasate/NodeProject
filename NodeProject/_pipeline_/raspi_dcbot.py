@@ -3,6 +3,7 @@ import discord
 import requests, os, csv, os, json, time, pprint
 import datetime as dt
 import pandas as pd
+import numpy as np
 
 """
 https://discordpy.readthedocs.io/en/stable/api.html
@@ -118,6 +119,7 @@ async def on_ready():
 
     role_update.start()
     project_invite.start()
+    project_channel_update.start()
 
 #-------------------------------------
 # Discord Sync
@@ -189,6 +191,45 @@ for example
             'project_name': project['title'],
         }
         botFunction.addQueueTask(task_name, task_data)
+
+@tasks.loop(hours=24)
+async def project_channel_update():
+    guild = botFunction.getGuild()
+    categories = guild.categories
+    project_category = [i for i in categories if 'node' in (i.name).lower() and 'project' in (i.name).lower()][0]
+    projects = botFunction.getProjects()
+    project_name_list = [i['title'] for i in projects]
+    channel_id_list = [i['discord_channel_id'] for i in projects]
+    #print(project_name_list)
+    #print(project_category.channels)
+    category_channel_list = [i.name for i in project_category.channels]
+    #print(category_channel_list)
+    #print(channel_id_list)
+
+    for name in project_name_list :
+        index = project_name_list.index(name)
+        channel_name = ''.join([i for i in name if i.isalpha() or i.isspace()])
+        channel_name = channel_name.lower().strip()
+        channel_name = channel_name.replace(' ','_')
+        channel_name = 'proj-' + channel_name
+        channel_id = str(channel_id_list[index])
+        #print(channel_name)
+
+        if not channel_name in category_channel_list:
+            if not channel_id.isnumeric() or channel_id == '':
+                channel = await guild.create_text_channel(channel_name)
+                await channel.edit(category=project_category, sync_permissions=True)
+
+                task_name = 'set_project_channel_id'
+                task_data = {
+                    'id' : channel.id,
+                    'name' : name
+                }
+                botFunction.addQueueTask(task_name, task_data)
+            else:
+                channel = bot.get_channel(int(channel_id))
+                if not channel.name == channel_name:
+                    await channel.edit(name=channel_name)
 
 #-------------------------------------
 # Discord Command
@@ -279,7 +320,6 @@ async def join(ctx, project_name, hour_week):
     id = ctx_data['author']['id']
     mention = ctx_data['author']['mention']
 
-
     msg = f'{mention} sent your task to queue\n' \
           f'Project : {project_name}\n' \
           f'Hours per week : {hour_week}\n'\
@@ -292,7 +332,6 @@ async def join(ctx, project_name, hour_week):
         'hour_week': float(hour_week)
     }
     botFunction.addQueueTask(task_name, task_data)
-
 
 #-------------------------------------
 # Run
