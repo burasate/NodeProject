@@ -250,6 +250,7 @@ async def project_channel_update():
         if len(project_name_list) == len([i for i in channel_id_list if i.isnumeric()]):
             if not category_channel_id in [int(i) for i in channel_id_list]:
                 channel = bot.get_channel(category_channel_id)
+                channel_name = channel.name
                 await channel.edit(name=channel_name.replace(prefix_ready, prefix_archive))
                 print('Re-status project channel {}'.format(channel_name))
         else:
