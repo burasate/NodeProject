@@ -149,11 +149,12 @@ async def role_update():
         else:
             await member.remove_roles(member_role)
 
-    task_name = 'sent_role_welcome'
-    task_data = {
-        'id_list': id_sent_welcome_list,
-    }
-    botFunction.addQueueTask(task_name, task_data)
+    if id_sent_welcome_list != []:
+        task_name = 'sent_role_welcome'
+        task_data = {
+            'id_list': id_sent_welcome_list,
+        }
+        botFunction.addQueueTask(task_name, task_data)
 
     print(dt.datetime.now(), 'member role updated')
 

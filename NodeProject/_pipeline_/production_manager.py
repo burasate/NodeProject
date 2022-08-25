@@ -179,13 +179,23 @@ class project:
             notionDatabase.updatePageProperty(new_page['id'], 'project', project_sl['page_id'])
             notionDatabase.updatePageProperty(new_page['id'], 'hour_week', hour_week)
 
-
 # Task System
 class taskQueue:
     data = {}
     def task_pucnch(*_):
         print('do punch task {}'.format(taskQueue.data['who']))
         print('oraa \n'*10)
+
+    def sent_role_welcome_update(data):
+        #taskQueue.data['id_list']
+        nt_member_path = notiondb_dir + '/csv' + '/member.csv'
+        member_df = pd.read_csv(nt_member_path)
+        #print(member_df)
+
+        for i in member_df.index.tolist():
+            row = member_df.loc[i]
+            if row['discord_id'] in data['id_list']:
+                notionDatabase.updatePageProperty(row['page_id'], 'sent_role_welcome', True)
 
     def run(*_):
         request_sheet = 'Request'
@@ -212,6 +222,9 @@ class taskQueue:
                 elif row['name'] == 'sent_invite_to_project':
                     project.update_invite()
 
+                elif row['name'] == 'sent_role_welcome':
+                    project.sent_role_welcome_update()
+
                 elif row['name'] == 'join_project':
                     project.add_member(
                         taskQueue.data['discord_id'],
@@ -225,7 +238,8 @@ class taskQueue:
                 # Clear Task
                 if clear:
                     gSheet.deleteRow(request_sheet, 'date_time', row['date_time'])
-                    #break #Loop per Task
+                    break #Loop per Task
+
             except Exception as e:
                 import traceback
                 print(str(traceback.format_exc()))
@@ -244,7 +258,8 @@ if __name__ == '__main__':
     #loadWorksheet('AnimationTracking', base_path + '/production_rec')
 
     #register.update_member()
-    taskQueue.run()
+    taskQueue.sent_role_welcome_update({'id_list' : [346164580487004171]})
+    #taskQueue.run()
     #project.update_invite()
     #project.add_member(346164580487004171, 'Project_Test', 20)
     pass
