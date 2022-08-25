@@ -66,14 +66,18 @@ class register:
         for i in regis_df.index.tolist():
             row = regis_df.loc[i]
             #print(row)
-            discord_id = str(row['Discord ID'])
-            member_name = '.'.join([ row['Nick Name'].capitalize(), row['First Name'][0].upper() + discord_id[-2:], ])
+            discord_id = row['Discord ID']
+            member_name = '.'.join([ row['Nick Name'].capitalize(), row['First Name'][0].upper() + str(discord_id)[-2:], ])
             #print(member_name, row['Discord ID'])
 
             hour_per_week = ''.join([i for i in str(row['Availability']) if not i.isalpha() or i == '=' or i == '.'])
             hour_per_week_split = [float(i) for i in hour_per_week.split('-')]
+            #print(hour_per_week_split)
             if len(hour_per_week_split) == 2:
-                hour_per_week = (hour_per_week_split[0]+hour_per_week_split[0])*0.5
+                hour_per_week = (hour_per_week_split[0]+hour_per_week_split[-1])*0.5
+                hour_per_week = round(hour_per_week)
+            #print(str(hour_per_week), str(row['Availability']))
+            #print(str(hour_per_week) != str(row['Availability']))
             if str(hour_per_week) != str(row['Availability']):
                 gSheet.setValue(
                     regis_sheet, findKey='Discord ID', findValue=discord_id,
@@ -278,8 +282,8 @@ if __name__ == '__main__':
     base_path = os.sep.join(rootPath.split(os.sep)[:-1])
     #loadWorksheet('AnimationTracking', base_path + '/production_rec')
 
-    #register.update_member()
-    task_queue.run()
+    register.update_member()
+    #task_queue.run()
     #project.update_invite()
     #project.add_member(346164580487004171, 'Project_Test', 20)
     pass

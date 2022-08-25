@@ -9,9 +9,9 @@ import numpy as np
 https://discordpy.readthedocs.io/en/stable/api.html
 https://autocode.com/tools/discord/embed-builder/
 """
-#-------------------------------------
+"""---------------------------------"""
 # Init
-#-------------------------------------
+"""---------------------------------"""
 base_path = os.path.dirname(os.path.abspath(__file__))
 
 config_file_name = os.path.basename(os.path.abspath(__file__)).replace('.py','.json')
@@ -107,9 +107,9 @@ class botFunction:
         return guild
 
 
-#-------------------------------------
+"""---------------------------------"""
 # Discord Start
-#-------------------------------------
+"""---------------------------------"""
 @bot.event
 async def on_ready():
     print('bot online now!')
@@ -121,9 +121,9 @@ async def on_ready():
     project_invite.start()
     project_channel_update.start()
 
-#-------------------------------------
+"""---------------------------------"""
 # Discord Sync
-#-------------------------------------
+"""---------------------------------"""
 @tasks.loop(minutes=10)
 async def role_update():
     regis_rec = botFunction.getRegisteredMember()
@@ -202,6 +202,7 @@ async def project_channel_update():
     project_id_list = [i['page_id'] for i in projects]
     channel_id_list = [str(i['discord_channel_id']) for i in projects]
     category_channel_list = [i.name for i in project_category.channels]
+    category_channel_id_list = [i.id for i in project_category.channels]
 
     # New
     for name in project_name_list :
@@ -230,12 +231,12 @@ async def project_channel_update():
             print('Create project channel {}'.format(channel_name))
 
     # Check rename
-    for channel in category_channel_list:
-        print(channel)
+    for ch_id in category_channel_id_list:
+        print(ch_id)
 
-#-------------------------------------
+"""---------------------------------"""
 # Discord Command
-#-------------------------------------
+"""---------------------------------"""
 @bot.command()
 async def dev_data(ctx):
     ctx_data = botFunction.getContextData(ctx)
@@ -272,9 +273,9 @@ async def dev_test(ctx):
     }
     botFunction.addQueueTask(task_name, task_data)
 
-#-------------------------------------
+"""---------------------------------"""
 # Discord Command Member
-#-------------------------------------
+"""---------------------------------"""
 @bot.command()
 async def my_id(ctx):
     ctx_data = botFunction.getContextData(ctx)
@@ -335,7 +336,14 @@ async def join(ctx, project_name, hour_week):
     }
     botFunction.addQueueTask(task_name, task_data)
 
-#-------------------------------------
+"""---------------------------------"""
+# Discord Command
+"""---------------------------------"""
+#@bot.command()
+#async def new_project(ctx, project_name, hour_week):
+
+
+"""---------------------------------"""
 # Run
-#-------------------------------------
+"""---------------------------------"""
 bot.run(token)
