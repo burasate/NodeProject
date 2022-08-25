@@ -225,7 +225,7 @@ class taskQueue:
                 # Clear Task
                 if clear:
                     gSheet.deleteRow(request_sheet, 'date_time', row['date_time'])
-                    break #Loop per Task
+                    #break #Loop per Task
             except Exception as e:
                 import traceback
                 print(str(traceback.format_exc()))

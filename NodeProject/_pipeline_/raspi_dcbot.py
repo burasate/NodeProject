@@ -122,7 +122,7 @@ async def on_ready():
 #-------------------------------------
 # Discord Sync
 #-------------------------------------
-@tasks.loop(seconds=60.0)
+@tasks.loop(seconds=180.0)
 async def role_update():
     regis_rec = botFunction.getRegisteredMember()
     regis_id_list = [int(i['discord_id']) for i in regis_rec]
@@ -131,17 +131,30 @@ async def role_update():
     member_id_list = [i.id for i in guild.members]
     # print(member_id_list)
     member_role = [i for i in guild.roles if 'Freelancer' in i.name][0]
-    # print(member_role)
+    id_sent_welcome_list = []
+
     for member in guild.members:
         member_id = member.id
         #print(member_id, member)
         if member_id in regis_id_list:
             await member.add_roles(member_role)
-            channel = bot.get_channel(1012248546050846720)
-            msg = f'added {member.mention} to {member_role.name}'
-            await channel.send(f'{msg}')
+
+            member_sl = [i for i in regis_rec if int(i['discord_id']) == member_id][0]
+            sent_role_welcome = member_sl['sent_role_welcome']
+            if not sent_role_welcome:
+                channel = bot.get_channel(1012248546050846720)
+                msg = f'added {member.mention} to \"{member_role.name}\" role'
+                await channel.send(f'{msg}')
+                id_sent_welcome_list.append(member_id)
         else:
             await member.remove_roles(member_role)
+
+    task_name = 'sent_role_welcome'
+    task_data = {
+        'id_list': id_sent_welcome_list,
+    }
+    botFunction.addQueueTask(task_name, task_data)
+
     print(dt.datetime.now(), 'member role updated')
 
 @tasks.loop(hours=1)
