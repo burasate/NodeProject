@@ -199,6 +199,9 @@ class taskQueue:
             row = request_df.loc[i]
             print('Get Task  ', row.to_dict())
             taskQueue.data = json.loads(str(row['data']).replace('\'','\"'))
+
+            if 'error' in taskQueue.data:
+                taskQueue.data['error'] == ''
             #print(taskQueue.data)
 
             clear = True
