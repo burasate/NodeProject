@@ -114,11 +114,11 @@ class botFunction:
 async def on_ready():
     print('bot online now!')
 
-    channel = bot.get_channel(1011320896063021147)
-    await channel.send(f'`{dt.datetime.now()}`\nHello, I just woke up\n(Runnig on os \"{os.name}\")')
+    #channel = bot.get_channel(1011320896063021147)
+    #await channel.send(f'`{dt.datetime.now()}`\nHello, I just woke up\n(Runnig on os \"{os.name}\")')
 
-    role_update.start()
-    project_invite.start()
+    #role_update.start()
+    #project_invite.start()
     project_channel_update.start()
 
 """---------------------------------"""
@@ -202,22 +202,29 @@ async def project_channel_update():
     project_id_list = [i['page_id'] for i in projects]
     channel_id_list = [str(i['discord_channel_id']) for i in projects]
     category_channel_list = [i.name for i in project_category.channels]
-    category_channel_id_list = [i.id for i in project_category.channels]
+    category_channel_id_list = [int(i.id) for i in project_category.channels]
 
     # New
     for name in project_name_list :
         index = project_name_list.index(name)
-        channel_name = ''.join([i for i in name if i.isalpha() or i.isspace()])
+        channel_name = ''.join([i for i in name if i.isalpha() or i.isspace() or i.isnumeric()])
         channel_name = channel_name.lower().strip()
         channel_name = channel_name.replace(' ','_')
         channel_name = 'proj-' + channel_name
-        channel_id = str(channel_id_list[index])
 
-        is_exists = not (
-            not channel_name in category_channel_list and
-            (not channel_id.isnumeric() or channel_id == '') #is empty
-        )
-        if not is_exists:
+        channel_id = str(channel_id_list[index])
+        if not channel_id.isnumeric():
+            channel_id = None
+        else :
+            channel_id = int(channel_id)
+
+        is_name_exists = channel_name in category_channel_list
+        is_id_exists =  False
+        if channel_id != None:
+            is_id_exists = channel_id in category_channel_id_list
+
+        print(channel_name, channel_id, is_name_exists, is_id_exists)
+        if not is_name_exists and not is_id_exists: #new
             channel = await guild.create_text_channel(channel_name)
             await channel.edit(category=project_category, sync_permissions=True)
 
@@ -230,9 +237,12 @@ async def project_channel_update():
             botFunction.addQueueTask(task_name, task_data)
             print('Create project channel {}'.format(channel_name))
 
-    # Check rename
-    for ch_id in category_channel_id_list:
-        print(ch_id)
+        elif is_id_exists and not is_name_exists: #rename
+            find_index = category_channel_id_list.index(channel_id)
+            find_name = category_channel_list[find_index]
+            channel = bot.get_channel(channel_id)
+            await channel.edit(name=channel_name, sync_permissions=True)
+            print('Rename project channel {}'.format(channel_name))
 
 """---------------------------------"""
 # Discord Command
