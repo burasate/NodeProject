@@ -210,7 +210,7 @@ async def project_channel_update():
         channel_name = ''.join([i for i in name if i.isalpha() or i.isspace() or i.isnumeric()])
         channel_name = channel_name.lower().strip()
         channel_name = channel_name.replace(' ','_')
-        channel_name = 'proj-' + channel_name
+        channel_name = '🟢proj-' + channel_name
 
         channel_id = str(channel_id_list[index])
         if not channel_id.isnumeric():
