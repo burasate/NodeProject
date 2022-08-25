@@ -223,7 +223,7 @@ class taskQueue:
                     project.update_invite()
 
                 elif row['name'] == 'sent_role_welcome':
-                    project.sent_role_welcome_update(taskQueue.data)
+                    taskQueue.sent_role_welcome_update(taskQueue.data)
 
                 elif row['name'] == 'join_project':
                     project.add_member(
