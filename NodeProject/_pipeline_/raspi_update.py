@@ -7,10 +7,14 @@ def update(*_):
     f_read = open(update_txt)
     update_list = f_read.readlines()
 
+
     update_list_url = 'https://raw.githubusercontent.com/burasate/NodeProject/main/NodeProject/_pipeline_/raspi_update.txt'
     update_list_r = requests.get(update_list_url)
     if update_list_r.status_code == 200:
         update_list = update_list_r.text.split('\n')
+
+    print('Loading Update List')
+    print(update_list)
 
     for url in update_list:
         os.system('cls||clear')
