@@ -199,12 +199,12 @@ async def project_channel_update():
     project_category = [i for i in categories if 'node' in (i.name).lower() and 'project' in (i.name).lower()][0]
     projects = botFunction.getProjects()
     project_name_list = [i['title'] for i in projects]
-    channel_id_list = [i['discord_channel_id'] for i in projects]
+    channel_id_list = [str(i['discord_channel_id']) for i in projects]
     #print(project_name_list)
     #print(project_category.channels)
     category_channel_list = [i.name for i in project_category.channels]
     #print(category_channel_list)
-    #print(channel_id_list)
+    print(channel_id_list)
 
     for name in project_name_list :
         index = project_name_list.index(name)
@@ -215,21 +215,20 @@ async def project_channel_update():
         channel_id = str(channel_id_list[index])
         #print(channel_name)
 
-        if not channel_name in category_channel_list:
-            if not channel_id.isnumeric() or channel_id == '':
-                channel = await guild.create_text_channel(channel_name)
-                await channel.edit(category=project_category, sync_permissions=True)
+        is_exists = (
+            not channel_name in category_channel_list and
+            (not channel_id.isnumeric() or channel_id == '') #is empty
+        )
+        if  is_exists:
+            channel = await guild.create_text_channel(channel_name)
+            await channel.edit(category=project_category, sync_permissions=True)
 
-                task_name = 'set_project_channel_id'
-                task_data = {
-                    'id' : channel.id,
-                    'name' : name
-                }
-                botFunction.addQueueTask(task_name, task_data)
-            else:
-                channel = bot.get_channel(int(channel_id))
-                if not channel.name == channel_name:
-                    await channel.edit(name=channel_name)
+            task_name = 'set_project_channel_id'
+            task_data = {
+                'id' : channel.id,
+                'name' : name
+            }
+            botFunction.addQueueTask(task_name, task_data)
 
 #-------------------------------------
 # Discord Command
