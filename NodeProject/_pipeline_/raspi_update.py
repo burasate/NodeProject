@@ -30,6 +30,9 @@ def update(timeout=10):
         status_code = r.status_code
         # print(r.text)
         #print(status_code, status_code == 200)
+        if status_code != 200:
+            print('Cannot update file via githubusercontent {}'.format(status_code))
+            continue
 
         print('updating ' + dest_path.split('/')[-1])
         #NT Danger Zone
