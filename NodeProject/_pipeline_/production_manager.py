@@ -179,6 +179,10 @@ class project:
             notionDatabase.updatePageProperty(new_page['id'], 'project', project_sl['page_id'])
             notionDatabase.updatePageProperty(new_page['id'], 'hour_week', hour_week)
 
+            project_member_df.append(pd.DataFrame.from_records([{
+                'page_id' : new_page['id'],
+            }]))
+
 # Task System
 class taskQueue:
     data = {}
