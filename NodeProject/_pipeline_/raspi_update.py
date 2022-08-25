@@ -3,12 +3,12 @@ import requests, os
 base_path = os.path.dirname(os.path.abspath(__file__))
 update_txt = base_path + '/raspi_update.txt'
 
-def update(*_):
+def update(timeout=10):
     f_read = open(update_txt)
     update_list = f_read.readlines()
 
     update_list_url = 'https://raw.githubusercontent.com/burasate/NodeProject/main/NodeProject/_pipeline_/raspi_update.txt'
-    update_list_r = requests.get(update_list_url)
+    update_list_r = requests.get(update_list_url, timeout=timeout)
     if update_list_r.status_code == 200:
         update_list = update_list_r.text.split('\n')
     print('Loading Update List')
@@ -26,7 +26,7 @@ def update(*_):
 
         print(url)
         #rint(dest_path)
-        r = requests.get(url)
+        r = requests.get(url, timeout=timeout)
         status_code = r.status_code
         # print(r.text)
         #print(status_code, status_code == 200)
