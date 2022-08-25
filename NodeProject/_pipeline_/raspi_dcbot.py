@@ -114,11 +114,11 @@ class botFunction:
 async def on_ready():
     print('bot online now!')
 
-    #channel = bot.get_channel(1011320896063021147)
-    #await channel.send(f'`{dt.datetime.now()}`\nHello, I just woke up\n(Runnig on os \"{os.name}\")')
+    channel = bot.get_channel(1011320896063021147)
+    await channel.send(f'`{dt.datetime.now()}`\nHello, I just woke up\n(Runnig on os \"{os.name}\")')
 
-    #role_update.start()
-    #project_invite.start()
+    role_update.start()
+    project_invite.start()
     project_channel_update.start()
 
 """---------------------------------"""
@@ -247,9 +247,8 @@ async def project_channel_update():
 
     # Archive
     for category_channel_id in category_channel_id_list:
-        if len(project_name_list) == len(channel_id_list):
-            print(int(category_channel_id), [int(i) for i in channel_id_list])
-            if not int(category_channel_id) in [int(i) for i in channel_id_list]:
+        if len(project_name_list) == len([i for i in channel_id_list if i.isnumeric()]):
+            if not category_channel_id in [int(i) for i in channel_id_list]:
                 channel = bot.get_channel(category_channel_id)
                 await channel.edit(name=channel_name.replace(prefix_ready, prefix_archive))
                 print('Re-status project channel {}'.format(channel_name))
