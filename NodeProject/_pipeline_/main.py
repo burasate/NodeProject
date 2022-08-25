@@ -41,10 +41,10 @@ import raspi_update
 # Discord Bot
 if not os.name == 'nt':
     os.system('cls||clear')
+    raspi_update.update()
     dcbot_path = rootPath + '/raspi_dcbot.py'
-    print('Open {}'.format(dcbot_path))
     try:
-        raspi_update.update()
+        print('Open {}'.format(dcbot_path))
         subprocess.call(['lxterminal', '-e','python3 {}'.format(dcbot_path)])
     except Exception as e:
         import traceback
