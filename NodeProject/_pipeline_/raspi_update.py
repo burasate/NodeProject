@@ -48,3 +48,6 @@ def update(*_):
 
 if __name__ == '__main__':
     update()
+
+if __name__ == 'raspi_update' and not os.name == 'nt':
+    update()
