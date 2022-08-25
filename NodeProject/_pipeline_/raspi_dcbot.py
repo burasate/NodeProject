@@ -192,7 +192,7 @@ for example
         }
         botFunction.addQueueTask(task_name, task_data)
 
-@tasks.loop(seconds=5)
+@tasks.loop(minutes=10)
 async def project_channel_update():
     guild = botFunction.getGuild()
     categories = guild.categories
