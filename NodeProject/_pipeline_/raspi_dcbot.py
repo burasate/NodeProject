@@ -199,13 +199,11 @@ async def project_channel_update():
     project_category = [i for i in categories if 'node' in (i.name).lower() and 'project' in (i.name).lower()][0]
     projects = botFunction.getProjects()
     project_name_list = [i['title'] for i in projects]
+    project_id_list = [i['page_id'] for i in projects]
     channel_id_list = [str(i['discord_channel_id']) for i in projects]
-    #print(project_name_list)
-    #print(project_category.channels)
     category_channel_list = [i.name for i in project_category.channels]
-    #print(category_channel_list)
-    print(channel_id_list)
 
+    # New
     for name in project_name_list :
         index = project_name_list.index(name)
         channel_name = ''.join([i for i in name if i.isalpha() or i.isspace()])
@@ -213,22 +211,27 @@ async def project_channel_update():
         channel_name = channel_name.replace(' ','_')
         channel_name = 'proj-' + channel_name
         channel_id = str(channel_id_list[index])
-        #print(channel_name)
 
-        is_exists = (
+        is_exists = not (
             not channel_name in category_channel_list and
             (not channel_id.isnumeric() or channel_id == '') #is empty
         )
-        if  is_exists:
+        if not is_exists:
             channel = await guild.create_text_channel(channel_name)
             await channel.edit(category=project_category, sync_permissions=True)
 
             task_name = 'set_project_channel_id'
             task_data = {
-                'id' : channel.id,
-                'name' : name
+                'channel_id' : channel.id,
+                'project_name' : name,
+                'project_id' : project_id_list[index]
             }
             botFunction.addQueueTask(task_name, task_data)
+            print('Create project channel {}'.format(channel_name))
+
+    # Check rename
+    for channel in category_channel_list:
+        print(channel)
 
 #-------------------------------------
 # Discord Command

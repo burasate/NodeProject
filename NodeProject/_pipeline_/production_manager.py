@@ -191,15 +191,23 @@ class project:
         project_member_df.to_csv(nt_project_member_path, index=False)
 
 # Task System
-class taskQueue:
+class task_queue:
     data = {}
     def task_pucnch(*_):
-        print('do punch task {}'.format(taskQueue.data['who']))
+        print('do punch task {}'.format(task_queue.data['who']))
         print('oraa \n'*10)
+
+    def set_project_channel_id():
+        task_queue.data
+        notionDatabase.updatePageProperty(
+            task_queue.data['project_id'],
+            'discord_channel_id',
+            task_queue.data['channel_id']
+        )
 
     '''
     def sent_role_welcome_update(data):
-        #taskQueue.data['id_list']
+        #task_queue.data['id_list']
         nt_member_path = notiondb_dir + '/csv' + '/member.csv'
         member_df = pd.read_csv(nt_member_path)
         #print(member_df)
@@ -221,25 +229,28 @@ class taskQueue:
         for i in request_df.index.tolist():
             row = request_df.loc[i]
             print('Get Task  ', row.to_dict())
-            taskQueue.data = json.loads(str(row['data']).replace('\'','\"'))
+            task_queue.data = json.loads(str(row['data']).replace('\'','\"'))
 
-            if 'error' in taskQueue.data:
-                taskQueue.data['error'] == ''
-            #print(taskQueue.data)
+            if 'error' in task_queue.data:
+                task_queue.data['error'] == ''
+            #print(task_queue.data)
 
             clear = True
             try:
                 if row['name'] == 'punch':
-                    taskQueue.task_pucnch()
+                    task_queue.task_pucnch()
 
                 elif row['name'] == 'sent_invite_to_project':
                     project.update_invite()
 
+                elif row['name'] == 'set_project_channel_id':
+                    task_queue.set_project_channel_id()
+
                 elif row['name'] == 'join_project':
                     project.add_member(
-                        taskQueue.data['discord_id'],
-                        taskQueue.data['project_name'],
-                        taskQueue.data['hour_week']
+                        task_queue.data['discord_id'],
+                        task_queue.data['project_name'],
+                        task_queue.data['hour_week']
                     )
 
                 else:
@@ -268,8 +279,7 @@ if __name__ == '__main__':
     #loadWorksheet('AnimationTracking', base_path + '/production_rec')
 
     #register.update_member()
-    taskQueue.sent_role_welcome_update({'id_list' : [346164580487004171]})
-    #taskQueue.run()
+    task_queue.run()
     #project.update_invite()
     #project.add_member(346164580487004171, 'Project_Test', 20)
     pass
