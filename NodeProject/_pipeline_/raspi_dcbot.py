@@ -27,8 +27,8 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 if os.name == 'nt':
     bot = commands.Bot(command_prefix='/', intents=intents)
 
-class botFunction:
-    def addQueueTask(task_name, data_dict):
+class bot_func:
+    def add_queue_task(task_name, data_dict):
         if type(data_dict) != type(dict()):
             return None
         data = {
@@ -44,7 +44,7 @@ class botFunction:
         print(response.text)
         print(data)
 
-    def getContextData(ctx):
+    def get_ctx_data(ctx):
         data = {
             'guild': {
                 'id': ctx.guild.id,
@@ -84,7 +84,8 @@ class botFunction:
 
         return data
 
-    def getRegisteredMember():
+    """
+    def get_register_member():
         member_path = os.sep.join(base_path.split(os.sep)[:-1]) + '/production_rec/notionDatabase/csv/member.csv'
         df = pd.read_csv(member_path)
         rec = []
@@ -92,8 +93,10 @@ class botFunction:
             row = df.loc[i]
             rec.append(row.to_dict())
         return rec
+    """
 
-    def getProjects():
+    """
+    def get_projects():
         project_path = os.sep.join(base_path.split(os.sep)[:-1]) + '/production_rec/notionDatabase/csv/project.csv'
         df = pd.read_csv(project_path)
         rec = []
@@ -101,11 +104,22 @@ class botFunction:
             row = df.loc[i]
             rec.append(row.to_dict())
         return rec
+    """
 
-    def getGuild():
+    def get_guild():
         guild = [bot.guilds[i] for i in range(len(bot.guilds)) if str(bot.guilds[i].id) == sever_id][0]
         return guild
 
+    def get_notino_db(csv_name):
+        prev_dir = os.sep.join(base_path.split(os.sep)[:-1])
+        file_path = prev_dir + '/production_rec/notionDatabase/csv/{}.csv'.format(csv_name)
+
+        df = pd.read_csv(file_path)
+        rec = []
+        for i in df.index.tolist():
+            row = df.loc[i]
+            rec.append(row.to_dict())
+        return rec
 
 """---------------------------------"""
 # Discord Start
@@ -117,22 +131,23 @@ async def on_ready():
     channel = bot.get_channel(1011320896063021147)
     await channel.send(f'`{dt.datetime.now()}`\nHello, I just woke up\n(Runnig on os \"{os.name}\")')
 
-    role_update.start()
-    project_invite.start()
-    project_channel_update.start()
+    if not os.name == 'nt':
+        role_update.start()
+        project_invite.start()
+        project_channel_update.start()
 
 """---------------------------------"""
 # Discord Sync
 """---------------------------------"""
 @tasks.loop(minutes=10)
 async def role_update():
-    regis_rec = botFunction.getRegisteredMember()
+    regis_rec = bot_func.get_notino_db('member')
     regis_id_list = [ i['discord_id'] for i in regis_rec if str(i['discord_id']).split('.')[0].isdigit() ]
     regis_id_list = [ int(i) for i in regis_id_list ]
     find_role_name = 'Node Freelancer'
 
     # print(regis_id_list)
-    guild = botFunction.getGuild()
+    guild = bot_func.get_guild()
     member_id_list = [i.id for i in guild.members]
     # print(member_id_list)
     apply_role = [i for i in guild.roles if find_role_name in i.name][0]
@@ -161,11 +176,11 @@ async def role_update():
 
 @tasks.loop(hours=1)
 async def project_invite():
-    projects = botFunction.getProjects()
+    projects = bot_func.get_notino_db('project')
     projects = [ i for i in projects if i['ready_to_invite'] and not i['sent_invite'] ]
-    guild = botFunction.getGuild()
+    guild = bot_func.get_guild()
     target_role = [ i for i in guild.roles if 'Node Freelancer' in i.name ][0]
-    channel = bot.get_channel(1011594327132209193)
+    channel = bot.get_channel(1010175157119225978)
     for project in projects:
         msg = f'''
 Hi {target_role.mention}
@@ -183,6 +198,7 @@ for example
 `
 !join {project['title'].strip().replace(' ','_')} 20
 `
+*then your availibility will re-calculated to register/update form*
     '''
         await channel.send(f'{msg}')
 
@@ -190,14 +206,14 @@ for example
         task_data = {
             'project_name': project['title'],
         }
-        botFunction.addQueueTask(task_name, task_data)
+        bot_func.add_queue_task(task_name, task_data)
 
 @tasks.loop(minutes=10)
 async def project_channel_update():
-    guild = botFunction.getGuild()
+    guild = bot_func.get_guild()
     categories = guild.categories
     project_category = [i for i in categories if 'node' in (i.name).lower() and 'project' in (i.name).lower()][0]
-    projects = botFunction.getProjects()
+    projects = bot_func.get_notino_db('project')
     project_name_list = [i['title'] for i in projects]
     project_id_list = [i['page_id'] for i in projects]
     channel_id_list = [str(i['discord_channel_id']) for i in projects]
@@ -235,7 +251,7 @@ async def project_channel_update():
                 'project_name' : name,
                 'project_id' : project_id_list[index]
             }
-            botFunction.addQueueTask(task_name, task_data)
+            bot_func.add_queue_task(task_name, task_data)
             print('Create project channel {}'.format(channel_name))
 
         elif is_id_exists and not is_name_exists: #rename
@@ -261,7 +277,7 @@ async def project_channel_update():
 """---------------------------------"""
 @bot.command()
 async def dev_data(ctx):
-    ctx_data = botFunction.getContextData(ctx)
+    ctx_data = bot_func.get_ctx_data(ctx)
     data_str = json.dumps(ctx_data, indent=4)
     await ctx.send('`{}`'.format(data_str), delete_after=15)
     await ctx.message.delete(delay=0)
@@ -287,20 +303,20 @@ async def sys_reboot(ctx):
 async def dev_test(ctx):
     await ctx.send('got your command !', mention_author=True, tts=True, delete_after=5)
     await ctx.message.delete(delay=0)
-    ctx_data = botFunction.getContextData(ctx)
+    ctx_data = bot_func.get_ctx_data(ctx)
     task_name = 'do_nothing'
     task_data = {
         'member_id': ctx_data['author']['id'],
         'member_name': ctx_data['author']['name']
     }
-    botFunction.addQueueTask(task_name, task_data)
+    bot_func.add_queue_task(task_name, task_data)
 
 """---------------------------------"""
 # Discord Command Member
 """---------------------------------"""
 @bot.command()
 async def my_id(ctx):
-    ctx_data = botFunction.getContextData(ctx)
+    ctx_data = bot_func.get_ctx_data(ctx)
     id = ctx_data['author']['id']
     mention = ctx_data['author']['mention']
     await ctx.send(f'{mention}\nyour discord id is\n`{id}`', mention_author=True, delete_after=20)
@@ -308,7 +324,7 @@ async def my_id(ctx):
 
 @bot.command()
 async def my_status(ctx):
-    ctx_data = botFunction.getContextData(ctx)
+    ctx_data = bot_func.get_ctx_data(ctx)
     role_list = [i['name'] for i in ctx_data['author']['roles'] if not 'everyone'in i['name']]
     role_str = ',   '.join(role_list)
     mention = ctx_data['author']['mention']
@@ -329,7 +345,7 @@ async def my_status(ctx):
 
 @bot.command()
 async def register(ctx):
-    ctx_data = botFunction.getContextData(ctx)
+    ctx_data = bot_func.get_ctx_data(ctx)
     mention = ctx_data['author']['mention']
     embed = embed = discord.Embed(
         title='Member Register/Update', url='https://forms.gle/QrqycQV75o4xRJ4ZA',
@@ -340,8 +356,8 @@ async def register(ctx):
 
 @bot.command()
 async def join(ctx, project_name, hour_week):
-    await ctx.message.delete(delay=0)
-    ctx_data = botFunction.getContextData(ctx)
+    #await ctx.message.delete(delay=0)
+    ctx_data = bot_func.get_ctx_data(ctx)
     id = ctx_data['author']['id']
     mention = ctx_data['author']['mention']
 
@@ -356,14 +372,121 @@ async def join(ctx, project_name, hour_week):
         'project_name': project_name,
         'hour_week': float(hour_week)
     }
-    botFunction.addQueueTask(task_name, task_data)
+    bot_func.add_queue_task(task_name, task_data)
 
 """---------------------------------"""
-# Discord Command
+# Discord Command Recruiter
 """---------------------------------"""
 #@bot.command()
 #async def new_project(ctx, project_name, hour_week):
 
+@bot.command()
+@commands.has_role('Node Recruiter')
+async def all_member(ctx):
+    await ctx.message.delete()
+    ctx_data = bot_func.get_ctx_data(ctx)
+    members = bot_func.get_notino_db('member')
+    mention = ctx_data['author']['mention']
+    regis_rec = bot_func.get_notino_db('member')
+
+    member_text_list = [ ',  {}  '.format(i['title']) for i in members ]
+    for i in member_text_list:
+        index = member_text_list.index(i)
+        if index % 3 == 0:
+            member_text_list[index] = member_text_list[index] + '\n'
+    msg = \
+f'''
+**All member list**
+{''.join(member_text_list)}
+'''
+    await ctx.send(f'{mention}{msg}', mention_author=True)
+
+@bot.command()
+@commands.has_role('Node Recruiter')
+async def project_member(ctx):
+    await ctx.message.delete()
+    ctx_data = bot_func.get_ctx_data(ctx)
+    projects = bot_func.get_notino_db('project')
+    proj_ch_id_list = [i['discord_channel_id'] for i in projects]
+    proj_list = [i['title'] for i in projects]
+    channel_id = ctx_data['channel']['id']
+    mention = ctx_data['author']['mention']
+
+    if channel_id in proj_ch_id_list:
+        project_member = bot_func.get_notino_db('project_member')
+        project_sl = proj_list[proj_ch_id_list.index(channel_id)]
+
+        project_member = [ i for i in project_member if i['project'].lower() == project_sl.lower() ]
+        member_text_list = [
+            '{}  -  available {} week'.format(i['member'], i['hour_week']) + '\n`!add {}`\n'.format(i['member'])
+            for i in project_member
+        ]
+        msg = \
+f'''
+**Members who has interested this project**
+
+{''.join(member_text_list)}
+
+for remove member 
+typ `!remove [Name]`
+'''
+        await ctx.send(f'{mention}{msg}', mention_author=True)
+
+@bot.command()
+@commands.has_role('Node Recruiter')
+async def add(ctx, member_name):
+    await ctx.message.delete()
+    ctx_data = bot_func.get_ctx_data(ctx)
+    channel_id = ctx_data['channel']['id']
+    channel = bot.get_channel(channel_id)
+
+    regis_rec = bot_func.get_notino_db('member')
+    find_member = [i for i in regis_rec if i['title'] == member_name]
+    if len(find_member) == 0:
+        await ctx.send(f'member name \"{member_name}\" are not found', delete_after=2)
+    else:
+        find_member = find_member[0]
+        member_id = find_member['discord_id']
+
+        guild = bot_func.get_guild()
+        member = [i for i in guild.members if i.id == member_id][0]
+        await channel.set_permissions(member, read_messages=True, send_messages=True)
+        await ctx.send(f'**{member_name}**   joined channel')
+
+@bot.command()
+@commands.has_role('Node Recruiter')
+async def remove(ctx, member_name):
+    await ctx.message.delete()
+    ctx_data = bot_func.get_ctx_data(ctx)
+    channel_id = ctx_data['channel']['id']
+    channel = bot.get_channel(channel_id)
+
+    regis_rec = bot_func.get_notino_db('member')
+    find_member = [i for i in regis_rec if i['title'] == member_name]
+    if len(find_member) == 0:
+        await ctx.send(f'member name \"{member_name}\" are not found', delete_after=2)
+    else:
+        find_member = find_member[0]
+        member_id = find_member['discord_id']
+
+        guild = bot_func.get_guild()
+        member = [i for i in guild.members if i.id == member_id][0]
+        await channel.set_permissions(member, read_messages=False, send_messages=False)
+        await ctx.send(f'**{member_name}**   leave channel')
+
+"""
+@bot.event
+async def on_message(message):
+    alphabet_list = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+                     'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+    alphabet_list = alphabet_list + [i.upper() for i in alphabet_list]
+
+    #print(message)
+    print(message.content)
+
+    eng_alpha = ''.join([i for i in str(message.content) if i in alphabet_list])
+    #print('eng alpha', len(eng_alpha), eng_alpha)
+"""
 
 """---------------------------------"""
 # Run

@@ -161,7 +161,7 @@ if __name__ == '__main__':
     #workspaceSetup()
     #versionBackup('.ma', base_path)
     integration.load_notion_db()
-    #integration.notion_sheet()
+    integration.notion_sheet()
     #data.create_history()
     #data.clear_past_history()
     #print(data.get_history_path_list(r"D:\GDrive\Documents\2022\BRSAnimPipeline\work\NodeProject\NodeProject\production_rec\notionDatabase\csv\project.csv"))

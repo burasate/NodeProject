@@ -136,14 +136,24 @@ class project:
                 notionDatabase.updatePageProperty(row['page_id'], 'sent_invite', True)
 
     def add_member(discord_id, project_name, hour_week):
+        regis_sheet = 'Registration'
+        regis_path = '{}/{}.json'.format(rec_dir, regis_sheet)
+        regis_json = json.load(open(regis_path))
         nt_project_path = notiondb_dir + '/csv' + '/project.csv'
         nt_project_member_path = notiondb_dir + '/csv' + '/project_member.csv'
         nt_member_path = notiondb_dir + '/csv' + '/member.csv'
         dest_db_id = [i['id'] for i in notionDatabase.database if i['name'] == 'project_member'][0]
 
+        regis_df = pd.DataFrame().from_records(regis_json)
         project_df = pd.read_csv(nt_project_path)
         project_member_df = pd.read_csv(nt_project_member_path)
         member_df = pd.read_csv(nt_member_path)
+
+        regis_df = regis_df[regis_df['Discord ID'] == discord_id]
+        if regis_df.empty:
+            raise Warning('cannot found discord id {} in register'.format(discord_id))
+        regis_index = regis_df.index.tolist()[0]
+        regis_sl = regis_df.loc[regis_index]
 
         member_df = member_df[member_df['discord_id'] == discord_id]
         if member_df.empty:
@@ -185,6 +195,11 @@ class project:
             notionDatabase.updatePageProperty(new_page['id'], 'member', member_sl['page_id'])
             notionDatabase.updatePageProperty(new_page['id'], 'project', project_sl['page_id'])
             notionDatabase.updatePageProperty(new_page['id'], 'hour_week', hour_week)
+
+            gSheet.setValue(
+                regis_sheet, findKey='Discord ID', findValue=discord_id,
+                key='Availability', value= round((regis_sl['Availability'] + hour_week) * 0.5)
+            )
 
             project_member_df = project_member_df.append(pd.DataFrame.from_records([{
                 'page_id' : new_page['id'], 'member': member_sl['page_id'],
@@ -283,7 +298,7 @@ if __name__ == '__main__':
     #loadWorksheet('AnimationTracking', base_path + '/production_rec')
 
     register.update_member()
-    #task_queue.run()
+    task_queue.run()
     #project.update_invite()
     #project.add_member(346164580487004171, 'Project_Test', 20)
     pass
