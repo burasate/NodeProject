@@ -174,7 +174,7 @@ async def role_update():
 
     print(dt.datetime.now(), 'member role updated')
 
-@tasks.loop(hours=1)
+@tasks.loop(minutes=10)
 async def project_invite():
     projects = bot_func.get_notino_db('project')
     projects = [ i for i in projects if i['ready_to_invite'] and not i['sent_invite'] ]
