@@ -180,7 +180,7 @@ async def project_invite():
     projects = [ i for i in projects if i['ready_to_invite'] and not i['sent_invite'] ]
     guild = bot_func.get_guild()
     target_role = [ i for i in guild.roles if 'Node Freelancer' in i.name ][0]
-    channel = bot.get_channel(1010175157119225978)
+    channel = bot.get_channel(1011594327132209193)
     for project in projects:
         msg = f'''
 Hi {target_role.mention}
@@ -430,7 +430,7 @@ f'''
 for remove member 
 typ `!remove [Name]`
 '''
-        await ctx.send(f'{mention}{msg}', mention_author=True)
+        await ctx.send(f'{mention}{msg}', mention_author=True, delete_after=180)
 
 @bot.command()
 @commands.has_role('Node Recruiter')

@@ -52,10 +52,12 @@ if not os.name == 'nt':
 
 while True:
     try:
+        """
         if not os.name == 'nt':
             importlib.reload(raspi_update)
             raspi_update.update()
             time.sleep(3)
+        """
 
         print(os.system('cls||clear'))
         dateTime = dt.datetime.now().strftime('%Y/%m/%d %H:%M:%S')
