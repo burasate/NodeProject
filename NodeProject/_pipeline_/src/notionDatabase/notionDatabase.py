@@ -8,7 +8,8 @@ pd.set_option('display.width', None)
 #-------------------------------------
 # Init
 #-------------------------------------
-with open(os.path.dirname(os.path.abspath(__file__)) + '/config.json') as config_f:
+config_path = os.path.dirname(os.path.abspath(__file__)) + '/config.json'
+with open(config_path) as config_f:
     config_j = json.load(config_f)
 token = config_j['token']
 database = config_j['database']
@@ -302,7 +303,12 @@ def notionJsonParser(database_id, dir_path, replace_name = ''):
 
             elif obj == 'property_item' and typ == 'date':
                 if item[typ] != None:
-                    value = ','.join([ item[typ]['start'], item[typ]['end'] ])
+                    if item[typ]['start'] != None and item[typ]['end'] != None:
+                        value = ','.join([ item[typ]['start'], item[typ]['end'] ])
+                    elif item[typ]['start'] != None and item[typ]['end'] == None:
+                        value = ','.join([item[typ]['start']])
+                    else:
+                        value = ''
                 else:
                     value = None
 

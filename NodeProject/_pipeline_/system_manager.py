@@ -4,19 +4,19 @@ import datetime as dt
 """
 Init
 """
-rootPath = os.path.dirname(os.path.abspath(__file__))
-srcPath = rootPath+'/src'
-sitePackagePath = rootPath+'/src'+'/site-packages'
+root_path = os.path.dirname(os.path.abspath(__file__))
+src_path = root_path+'/src'
+site_package_path = root_path+'/src'+'/site-packages'
 
-if not rootPath in sys.path:
-    sys.path.insert(0,rootPath)
-if not srcPath in sys.path:
-    sys.path.insert(0,srcPath)
-if not sitePackagePath in sys.path:
-    sys.path.insert(0,sitePackagePath)
+if not root_path in sys.path:
+    sys.path.insert(0,root_path)
+if not src_path in sys.path:
+    sys.path.insert(0,src_path)
+if not site_package_path in sys.path:
+    sys.path.insert(0,site_package_path)
 #Environment Linux
 if not os.name == 'nt':
-    sys.path.remove(sitePackagePath)
+    sys.path.remove(site_package_path)
 
 # Module
 import pandas as pd
@@ -25,10 +25,10 @@ pd.set_option('display.max_columns', None)
 pd.set_option('display.width', None)
 from gSheet import gSheet
 gSheet.sheetName = 'Node Project Integration'
-from notionDatabase import notionDatabase
+from notionDatabase import notionDatabase as ntdb
 
 # Path
-prev_dir = os.sep.join(rootPath.split(os.sep)[:-1])
+prev_dir = os.sep.join(root_path.split(os.sep)[:-1])
 rec_dir = prev_dir + '/production_rec'
 notiondb_dir = rec_dir + '/notionDatabase'
 
@@ -37,8 +37,8 @@ Func
 """
 
 def workspaceSetup(*_):
-    path = os.sep.join(rootPath.split(os.sep)[:-1]) #\project name
-    workspaceJ = json.load(open(rootPath + '/workspace.json', 'r'))
+    path = os.sep.join(root_path.split(os.sep)[:-1]) #\project name
+    workspaceJ = json.load(open(root_path + '/workspace.json', 'r'))
     for data in workspaceJ:
         name = data['name']
         makePath = path+'/{}'.format(name)
@@ -71,16 +71,36 @@ def versionBackup(extension, dirPath, dateFormat='%Y%m%d_%H%M%S'):
                     print('Backup {}'.format(new_filePath))
                     shutil.copyfile(filePath, new_filePath)
 
+def load_worksheet(sheet, dir_path):
+    data = gSheet.getAllDataS(sheet)
+    save_path = dir_path + os.sep + sheet + '.json'
+    json.dump(data, open(save_path, 'w'), indent=4)
+    print('Load worksheet {} - {}'.format(gSheet.sheetName,sheet))
+
 class integration:
+    def init_notion_db(*_):
+        load_worksheet('nt_database', rec_dir)
+        db_path = rec_dir + '/nt_database.json'
+        with open(db_path) as db_f:
+            db_j = json.load(db_f)
+
+        with open(ntdb.config_path) as r_config_f:
+            r_config_j = json.load(r_config_f)
+            r_config_j['database'] = db_j
+        with open(ntdb.config_path, 'w') as w_config_f:
+            json.dump(r_config_j, w_config_f,indent=4)
+
+        ntdb.database = r_config_j['database']
+
     def load_notion_db(*_):
         if not os.path.exists(notiondb_dir):
             os.makedirs(notiondb_dir)
-        notionDatabase.loadNotionDatabase(notiondb_dir)
+        ntdb.loadNotionDatabase(notiondb_dir)
 
     def notion_sheet(*_):
-        base_path = os.sep.join(rootPath.split(os.sep)[:-1]).replace('\\','/')
+        base_path = os.sep.join(root_path.split(os.sep)[:-1]).replace('\\','/')
         nt_csv_dir = base_path + '/production_rec/notionDatabase/csv'
-        csv_path_list = [nt_csv_dir + '/' + i for i in os.listdir(nt_csv_dir)]
+        csv_path_list = [nt_csv_dir + '/' + i for i in os.listdir(nt_csv_dir) if '.csv' in i]
         #print(csv_path_list)
         for csv_path in csv_path_list:
             sheet_dest_name = 'nt_{}'.format(csv_path.split('/')[-1].split('.')[0])
@@ -156,13 +176,49 @@ class data:
         hist_path_list = [os.path.join(hist_dir_path, i) for i in hist_file_list]
         return hist_path_list
 
+class error:
+    file_path = rec_dir + '/main_traceback.csv'
+    def record(text):
+        try:
+            data = {
+                'date_time': dt.datetime.now().strftime('%m-%d-%Y %H:%M:%S'),
+                'traceback' : str(text)
+            }
+            error.file_path = rec_dir + '/main_traceback.csv'
+
+            df = pd.DataFrame()
+            if os.path.exists(error.file_path):
+                df = pd.read_csv(error.file_path)
+            df = df.append(pd.DataFrame.from_records([data]))
+            df.reset_index(inplace=True, drop=True)
+            df.to_csv(error.file_path, index=False)
+        except:
+            pass
+
+    def get_nortify(clear_after = True):
+        if os.path.exists(error.file_path):
+            df = pd.read_csv(error.file_path)
+            df.drop_duplicates(['traceback'], inplace=True)
+            rec = []
+            for i in df.index.tolist():
+                row = df.loc[i]
+                rec.append(row.to_dict())
+            if clear_after:
+                os.remove(error.file_path)
+            return rec
+        else:
+            return []
+
+
 if __name__ == '__main__':
-    base_path = os.sep.join(rootPath.split(os.sep)[:-1])
+    base_path = os.sep.join(root_path.split(os.sep)[:-1])
     #workspaceSetup()
     #versionBackup('.ma', base_path)
-    integration.load_notion_db()
-    integration.notion_sheet()
+    #integration.init_notion_db()
+    #integration.load_notion_db()
+    #integration.notion_sheet()
     #data.create_history()
     #data.clear_past_history()
     #print(data.get_history_path_list(r"D:\GDrive\Documents\2022\BRSAnimPipeline\work\NodeProject\NodeProject\production_rec\notionDatabase\csv\project.csv"))
+    error.record('tttsad')
     pass

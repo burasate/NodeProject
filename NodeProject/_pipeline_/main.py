@@ -97,6 +97,7 @@ while True:
         print('!!!! ==========================')
         print(str(traceback.format_exc()))
         print('!!!! ==========================')
+        system_manager.error.record( str(traceback.format_exc()) )
     finally:
         print('Ending of Process')
-        time.sleep(600*0.1)
+        time.sleep(120)

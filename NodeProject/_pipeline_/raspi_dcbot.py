@@ -1,6 +1,6 @@
 from discord.ext import commands, tasks
 import discord
-import requests, os, csv, os, json, time, pprint
+import requests, os, csv, os, json, time, pprint, sys
 import datetime as dt
 import pandas as pd
 import numpy as np
@@ -13,6 +13,12 @@ https://autocode.com/tools/discord/embed-builder/
 # Init
 """---------------------------------"""
 base_path = os.path.dirname(os.path.abspath(__file__))
+src_path = base_path+'/src'
+
+if not src_path in sys.path:
+    sys.path.insert(0,src_path)
+
+from notionDatabase import notionDatabase as ntdb
 
 config_file_name = os.path.basename(os.path.abspath(__file__)).replace('.py','.json')
 with open(base_path + '/' + config_file_name) as config_f:
@@ -26,6 +32,12 @@ client = discord.Client()
 bot = commands.Bot(command_prefix='!', intents=intents)
 if os.name == 'nt':
     bot = commands.Bot(command_prefix='/', intents=intents)
+
+channel_dict = {
+    'log' : 1011320896063021147,
+    'member_welcome' : 1012248546050846720,
+    'welcome' : 920741438516523051
+}
 
 class bot_func:
     def add_queue_task(task_name, data_dict):
@@ -127,13 +139,14 @@ class bot_func:
 @bot.event
 async def on_ready():
     print('bot online now!')
-
-    channel = bot.get_channel(1011320896063021147)
-    await channel.send(f'`{dt.datetime.now()}`\nHello, I just woke up\n(Runnig on os \"{os.name}\")')
+    traceback_nortify.start()
 
     if not os.name == 'nt':
+        channel = bot.get_channel(channel_dict['log'])
+        await channel.send(f'`{dt.datetime.now()}`\nHello, I just woke up\n(Runnig on os \"{os.name}\")')
+
         role_update.start()
-        project_invite.start()
+        #project_invite.start()
         project_channel_update.start()
 
 """---------------------------------"""
@@ -165,7 +178,7 @@ async def role_update():
 
                 member_sl = [i for i in regis_rec if int(i['discord_id']) == member_id][0]
                 user_name = member_sl['title']
-                channel = bot.get_channel(1012248546050846720)
+                channel = bot.get_channel(channel_dict['member_welcome'])
                 msg = f'added {user_name} ({member.display_name}) to \"{apply_role.name}\" role'
                 await channel.send(f'{msg}')
 
@@ -174,13 +187,16 @@ async def role_update():
 
     print(dt.datetime.now(), 'member role updated')
 
+"""
 @tasks.loop(minutes=10)
 async def project_invite():
     projects = bot_func.get_notino_db('project')
     projects = [ i for i in projects if i['ready_to_invite'] and not i['sent_invite'] ]
     guild = bot_func.get_guild()
     target_role = [ i for i in guild.roles if 'Node Freelancer' in i.name ][0]
-    channel = bot.get_channel(1011594327132209193)
+    #channel = bot.get_channel(1011594327132209193) #invite_channel
+    channel = bot.get_channel(1010175157119225978) #test_channel
+
     for project in projects:
         msg = f'''
 Hi {target_role.mention}
@@ -195,9 +211,8 @@ If are you are interested
 type `!join [Project Name] [Your availibility hour per week]`
 
 for example
-`
-!join {project['title'].strip().replace(' ','_')} 20
-`
+`!join {project['title'].strip().replace(' ','_')} 20`
+
 *then your availibility will re-calculated to register/update form*
     '''
         await channel.send(f'{msg}')
@@ -207,6 +222,7 @@ for example
             'project_name': project['title'],
         }
         bot_func.add_queue_task(task_name, task_data)
+"""
 
 @tasks.loop(minutes=10)
 async def project_channel_update():
@@ -271,6 +287,19 @@ async def project_channel_update():
                 print('Re-status project channel {}'.format(channel_name))
         else:
             pass
+
+@tasks.loop(hours=6)
+async def traceback_nortify():
+    import system_manager
+    rec = system_manager.error.get_nortify()
+    for i in rec:
+        msg = \
+f'''
+🚨 {i['date_time']}
+`{i['traceback']}`
+'''
+        channel = bot.get_channel(channel_dict['log'])
+        await channel.send(f'{msg}')
 
 """---------------------------------"""
 # Discord Command
@@ -340,7 +369,7 @@ async def my_status(ctx):
     if 'Node Freelance' in role_list:
         await ctx.send(msg + '\nYou are already in the \"Node Freelance\" Role', mention_author=True, delete_after=20)
     else:
-        await ctx.send(msg, mention_author=True, embed=embed, delete_after=20)
+        await ctx.send(msg, mention_author=True, embed=embed, delete_after=180)
     await ctx.message.delete(delay=0)
 
 @bot.command()
@@ -435,12 +464,13 @@ typ `!remove [Name]`
 @bot.command()
 @commands.has_role('Node Recruiter')
 async def add(ctx, member_name):
-    await ctx.message.delete()
+    #await ctx.message.delete()
     ctx_data = bot_func.get_ctx_data(ctx)
     channel_id = ctx_data['channel']['id']
     channel = bot.get_channel(channel_id)
 
     regis_rec = bot_func.get_notino_db('member')
+    project_rec = bot_func.get_notino_db('project')
     find_member = [i for i in regis_rec if i['title'] == member_name]
     if len(find_member) == 0:
         await ctx.send(f'member name \"{member_name}\" are not found', delete_after=2)
