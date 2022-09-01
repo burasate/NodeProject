@@ -19,6 +19,8 @@ if not src_path in sys.path:
     sys.path.insert(0,src_path)
 
 from notionDatabase import notionDatabase as ntdb
+from gSheet import gSheet
+gSheet.sheetName = 'Node Project Integration'
 
 config_file_name = os.path.basename(os.path.abspath(__file__)).replace('.py','.json')
 with open(base_path + '/' + config_file_name) as config_f:
@@ -26,8 +28,9 @@ with open(base_path + '/' + config_file_name) as config_f:
 token = config_j['token']
 sever_id = config_j['sever_id']
 
-intents = discord.Intents.default()
+intents = discord.Intents.all()
 intents.members = True
+intents.messages = True
 client = discord.Client()
 bot = commands.Bot(command_prefix='!', intents=intents)
 if os.name == 'nt':
@@ -339,6 +342,55 @@ async def dev_test(ctx):
         'member_name': ctx_data['author']['name']
     }
     bot_func.add_queue_task(task_name, task_data)
+
+@bot.command()
+async def translate(ctx, copy_id, target_lang):
+    target_list = ['th', 'en']
+    target_lang = target_lang.lower()
+    if not target_lang in target_list:
+        await ctx.send(f'Target language me be in {target_list}', delete_after=2)
+        return None
+
+    copy_id = copy_id.strip()
+    copy_id = copy_id.split('-')
+    channel_id = int(copy_id[0])
+    message_id = int(copy_id[-1])
+
+    channel = bot.get_channel(channel_id)
+    partial_message = channel.get_partial_message(message_id)
+    message = await partial_message.fetch()
+    jump_url = message.jump_url
+    #print(message.author.name)
+
+    msg_content = message.content
+
+    bot_msg = await ctx.send('translator\'s processing....')
+    #print(bot_msg)
+
+    data = gSheet.getAllDataS('dc_translate')
+    row_name_list = [i['row_name'] for i in data]
+    if data[row_name_list.index('target_source')]['target_language'] != target_lang:
+        gSheet.setValue('dc_translate',findKey='row_name',findValue='target_source',key='target_language',value=target_lang)
+    if data[row_name_list.index('input_output')]['source_language'] != msg_content:
+        gSheet.setValue('dc_translate',findKey='row_name',findValue='input_output',key='source_language',value=msg_content)
+
+    time.sleep(1)
+    data_new = gSheet.getAllDataS('dc_translate')
+    result = data_new[row_name_list.index('input_output')]['target_language']
+    #print(result)
+
+    embed = discord.Embed(title='see original message',url=jump_url)
+    new_msg = f'''
+message from **{message.author.name}** at *{message.created_at}*
+in {target_lang.upper()} language
+
+\"{result}\"
+
+:bulb: anyone can use translator command
+type `!translate [Copy id] [en / th]` to English
+'''
+    await bot_msg.edit(content = new_msg, embed=embed, tts=True)
+    #gSheet.setValue('dc_translate', findKey='index', findValue=1, key='source_language', value=msg_content)
 
 """---------------------------------"""
 # Discord Command Member
