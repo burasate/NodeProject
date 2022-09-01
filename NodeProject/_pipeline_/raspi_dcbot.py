@@ -351,8 +351,12 @@ async def translate(ctx, copy_id, target_lang):
         await ctx.send(f'Target language me be in {target_list}', delete_after=2)
         return None
 
-    copy_id = copy_id.strip()
-    copy_id = copy_id.split('-')
+    if 'http' in copy_id:
+        copy_id = copy_id.split('/')[-2:]
+    else:
+        copy_id = copy_id.strip()
+        copy_id = copy_id.split('-')
+
     channel_id = int(copy_id[0])
     message_id = int(copy_id[-1])
 
@@ -381,16 +385,14 @@ async def translate(ctx, copy_id, target_lang):
 
     embed = discord.Embed(title='see original message',url=jump_url)
     new_msg = f'''
-message from **{message.author.name}** at *{message.created_at}*
-in {target_lang.upper()} language
+message from **{message.author.name}** at `{message.created_at}` in {target_lang.upper()} language
 
 \"{result}\"
 
-:bulb: anyone can use translator command
-type `!translate [Copy id] [en / th]`
+type `!translate [copy id / copy message link] [en / th]`
 '''
+    await ctx.message.delete()
     await bot_msg.edit(content = new_msg, embed=embed, tts=True)
-    #gSheet.setValue('dc_translate', findKey='index', findValue=1, key='source_language', value=msg_content)
 
 """---------------------------------"""
 # Discord Command Member
