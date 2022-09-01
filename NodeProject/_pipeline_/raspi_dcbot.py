@@ -387,7 +387,7 @@ in {target_lang.upper()} language
 \"{result}\"
 
 :bulb: anyone can use translator command
-type `!translate [Copy id] [en / th]` to English
+type `!translate [Copy id] [en / th]`
 '''
     await bot_msg.edit(content = new_msg, embed=embed, tts=True)
     #gSheet.setValue('dc_translate', findKey='index', findValue=1, key='source_language', value=msg_content)
