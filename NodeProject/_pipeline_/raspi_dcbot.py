@@ -389,7 +389,7 @@ message from **{message.author.name}** at `{message.created_at}` in {target_lang
 
 \"{result}\"
 
-type `!translate [copy id / copy message link] [en / th]`
+command `!translate [copy id / copy message link] [en / th]`
 '''
     await ctx.message.delete()
     await bot_msg.edit(content = new_msg, embed=embed, tts=True)
