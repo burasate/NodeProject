@@ -171,6 +171,7 @@ async def on_ready():
         traceback_nortify.start()
         eng_auto_translate.start()
 
+
 """---------------------------------"""
 # Discord Sync
 """---------------------------------"""
