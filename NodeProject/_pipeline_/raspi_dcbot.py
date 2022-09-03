@@ -382,7 +382,6 @@ f'''
 
 @tasks.loop(minutes=2)
 async def eng_auto_translate(alphabet_count=120, target_lang='th'):
-    print('scanning english message..')
     alphabet_list = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
                      'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
     alphabet_list = alphabet_list + [i.upper() for i in alphabet_list]
