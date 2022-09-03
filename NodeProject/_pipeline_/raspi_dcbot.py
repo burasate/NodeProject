@@ -203,7 +203,7 @@ async def role_update():
         is_role_found = True in [ find_role_name in i for i in member_roles ]
         is_id_found = member_id in regis_id_list
         #print(is_found_role)
-        print(member.display_name , member_id, is_id_found, regis_id_list)
+        print(member.display_name , member_id, is_id_found)
         if is_id_found:
             if not is_role_found:
                 await member.add_roles(apply_role)
