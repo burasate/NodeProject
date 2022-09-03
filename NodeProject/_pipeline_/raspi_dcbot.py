@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from discord.ext import commands, tasks
 import discord
 import requests, os, csv, os, json, time, pprint, sys
@@ -159,6 +160,7 @@ class bot_func:
 @bot.event
 async def on_ready():
     print('bot online now!')
+    project_channel_update.start()
 
     if not os.name == 'nt':
         channel = bot.get_channel(channel_dict['log'])
@@ -256,7 +258,7 @@ async def project_channel_update():
     channel_id_list = [str(i['discord_channel_id']) for i in projects]
     category_channel_list = [i.name for i in project_category.channels]
     category_channel_id_list = [int(i.id) for i in project_category.channels]
-    prefix_ready, prefix_archive = ['🟢proj-', '🔴proj-']
+    prefix_ready, prefix_archive, prefix_voice = ['🟢proj-', '🔴proj-', '🎧proj-']
 
     # Exist
     for name in project_name_list :
@@ -295,8 +297,9 @@ async def project_channel_update():
             find_index = category_channel_id_list.index(channel_id)
             find_name = category_channel_list[find_index]
             channel = bot.get_channel(channel_id)
-            await channel.edit(name=channel_name, sync_permissions=True)
-            print('Rename project channel {}'.format(channel_name))
+            if str(channel.name) != channel_name:
+                await channel.edit(name=channel_name, sync_permissions=True)
+                print('Rename project channel {}'.format(channel_name))
 
     # Archive
     for category_channel_id in category_channel_id_list:
@@ -304,10 +307,66 @@ async def project_channel_update():
             if not category_channel_id in [int(i) for i in channel_id_list]:
                 channel = bot.get_channel(category_channel_id)
                 channel_name = channel.name
-                await channel.edit(name=channel_name.replace(prefix_ready, prefix_archive))
-                print('Re-status project channel {}'.format(channel_name))
+                new_channel_name = channel_name.replace(prefix_ready, prefix_archive)
+                if channel_name != new_channel_name:
+                    await channel.edit(name=new_channel_name)
+                    print('Re-status project channel {}'.format(channel_name))
         else:
             pass
+
+    #Sync Node Meeting (Voice Channel)
+    meeting_category = [i for i in categories if 'node' in (i.name).lower() and 'meeting' in (i.name).lower()][0]
+    project_category = [i for i in categories if 'node' in (i.name).lower() and 'project' in (i.name).lower()][0]
+    meeting_channels = meeting_category.channels
+    project_channels = project_category.channels
+    v_channel_timeout_days = 1
+
+    for proj_channel in project_channels:
+        if not prefix_ready in str(proj_channel):
+            continue
+
+        v_channel_name = proj_channel.name + '-voice'
+        v_channel_name = v_channel_name.replace(prefix_ready, prefix_voice)
+
+        last_meesage_list = [message async for message in proj_channel.history(limit=1)]
+
+        is_active = True
+        if last_meesage_list == []:
+            is_active = False
+            continue
+        last_meesage = last_meesage_list[0]
+        inactive_days = (dt.datetime.now() - last_meesage.created_at).days
+        if inactive_days > v_channel_timeout_days:
+            is_active = False
+
+        is_exists = v_channel_name in [i.name for i in meeting_channels]
+        if not is_exists and is_active:
+            meeting_channels.append(
+                await guild.create_voice_channel(v_channel_name, category=meeting_category, sync_permissions=True)
+            )
+
+        v_channel_find = [i for i in meeting_channels if i.name == v_channel_name]
+        if v_channel_find == []:
+            continue
+        v_channel = v_channel_find[0]
+
+        if not is_active:
+            await v_channel.delete()
+            continue
+
+        if not is_exists and is_active:
+            for member in proj_channel.members:
+                await v_channel.set_permissions(
+                    member,
+                    view_channel=True,
+                    connect=True,
+                    speak=True
+                )
+
+    # Delete Meeting Channel
+    del_v_channels = [i for i in meeting_channels if not prefix_voice in i.name]
+    for v_channel in del_v_channels:
+        await v_channel.delete()
 
 @tasks.loop(hours=6)
 async def traceback_nortify():
