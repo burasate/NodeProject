@@ -126,11 +126,13 @@ class bot_func:
         guild = [bot.guilds[i] for i in range(len(bot.guilds)) if str(bot.guilds[i].id) == sever_id][0]
         return guild
 
-    def get_notino_db(csv_name):
+    def get_notino_db(csv_name, dropna=False):
         prev_dir = os.sep.join(base_path.split(os.sep)[:-1])
         file_path = prev_dir + '/production_rec/notionDatabase/csv/{}.csv'.format(csv_name)
 
         df = pd.read_csv(file_path)
+        if dropna:
+            df.dropna(subset=['title'],inplace=True)
         rec = []
         for i in df.index.tolist():
             row = df.loc[i]
@@ -160,13 +162,14 @@ class bot_func:
 @bot.event
 async def on_ready():
     print('bot online now!')
+    role_update.start()
 
     if not os.name == 'nt':
         channel = bot.get_channel(channel_dict['log'])
         await channel.send(f'`{dt.datetime.now()}`\nHello, I just woke up\n(Runnig on os \"{os.name}\")')
 
         #project_invite.start()
-        role_update.start()
+
         project_channel_update.start()
         traceback_nortify.start()
         eng_auto_translate.start()
@@ -177,8 +180,8 @@ async def on_ready():
 """---------------------------------"""
 @tasks.loop(minutes=10)
 async def role_update():
-    regis_rec = bot_func.get_notino_db('member')
-    regis_id_list = [ i['discord_id'] for i in regis_rec if str(i['discord_id']).split('.')[0].isdigit() ]
+    regis_rec = bot_func.get_notino_db('member', dropna=True)
+    regis_id_list = [ i['discord_id'] for i in regis_rec if str(i['discord_id']).isdigit()]
     regis_id_list = [ int(i) for i in regis_id_list ]
     find_role_name = 'Node Freelancer'
 
@@ -187,19 +190,22 @@ async def role_update():
     member_id_list = [i.id for i in guild.members]
     # print(member_id_list)
     apply_role = [i for i in guild.roles if find_role_name in i.name][0]
+    #print(apply_role)
 
     channel = bot.get_channel(channel_dict['member_welcome'])
     messages = [message async for message in channel.history(limit=100) if bot.user.name == message.author.name]
     content_list = [i.clean_content for i in messages]
 
     for member in guild.members:
-        member_id = member.id
+        member_id = int(member.id)
         member_roles = [i.name for i in member.roles]
-        #print(member_id, member, member_roles)
-        is_found_role = True in [ find_role_name in i for i in member_roles ]
+        #print([member_id], member, member_roles)
+        is_role_found = True in [ find_role_name in i for i in member_roles ]
+        is_id_found = member_id in regis_id_list
         #print(is_found_role)
-        if member_id in regis_id_list:
-            if not is_found_role:
+        print(member.display_name , member_id, is_id_found, regis_id_list)
+        if is_id_found:
+            if not is_role_found:
                 await member.add_roles(apply_role)
 
                 member_sl = [i for i in regis_rec if int(i['discord_id']) == member_id][0]
