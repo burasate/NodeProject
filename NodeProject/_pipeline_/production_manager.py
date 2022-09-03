@@ -67,10 +67,10 @@ class register:
             row = regis_df.loc[i]
             #print(row)
             discord_id = row['Discord ID']
-            member_name = '.'.join([ row['Nick Name'].capitalize(), row['First Name'][0].upper() + str(discord_id)[-2:], ])
+            member_name = '.'.join([ row['Nick Name'].capitalize(), row['First Name'][0].upper() + str(discord_id)[-2:]])
             #print(member_name, row['Discord ID'])
 
-            hour_per_week = ''.join([i for i in str(row['Availability']) if not i.isalpha() or i == '=' or i == '.'])
+            hour_per_week = ''.join([i for i in str(row['Availability']) if i.isdigit() or i == '-' or i == '.'])
             hour_per_week_split = [float(i) for i in hour_per_week.split('-')]
             #print(hour_per_week_split)
             if len(hour_per_week_split) == 2:
