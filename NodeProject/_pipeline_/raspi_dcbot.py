@@ -165,8 +165,8 @@ async def on_ready():
         channel = bot.get_channel(channel_dict['log'])
         await channel.send(f'`{dt.datetime.now()}`\nHello, I just woke up\n(Runnig on os \"{os.name}\")')
 
-        role_update.start()
         #project_invite.start()
+        role_update.start()
         project_channel_update.start()
         traceback_nortify.start()
         eng_auto_translate.start()
@@ -186,7 +186,10 @@ async def role_update():
     member_id_list = [i.id for i in guild.members]
     # print(member_id_list)
     apply_role = [i for i in guild.roles if find_role_name in i.name][0]
-    id_sent_welcome_list = []
+
+    channel = bot.get_channel(channel_dict['member_welcome'])
+    messages = [message async for message in channel.history(limit=100) if bot.user.name == message.author.name]
+    content_list = [i.clean_content for i in messages]
 
     for member in guild.members:
         member_id = member.id
@@ -200,9 +203,9 @@ async def role_update():
 
                 member_sl = [i for i in regis_rec if int(i['discord_id']) == member_id][0]
                 user_name = member_sl['title']
-                channel = bot.get_channel(channel_dict['member_welcome'])
                 msg = f'added {user_name} ({member.display_name}) to \"{apply_role.name}\" role'
-                await channel.send(f'{msg}')
+                if not msg in content_list:
+                    await channel.send(f'{msg}')
 
         else:
             await member.remove_roles(apply_role)
