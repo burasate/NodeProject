@@ -411,6 +411,7 @@ def loadNotionDatabase(dir_part):
             raise Warning('the database need to add some page for works')
         df = df[['page_id', 'title', 'last_edited_time'] + sorted(list(properties), reverse=False)]
         df.reset_index(inplace=True, drop=True)
+        df = df.astype(int)
         df.to_csv(csv_path, index=False)
 
 if __name__ == '__main__':
