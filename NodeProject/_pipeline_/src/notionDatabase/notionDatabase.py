@@ -412,6 +412,7 @@ def loadNotionDatabase(dir_part):
         df = df[['page_id', 'title', 'last_edited_time'] + sorted(list(properties), reverse=False)]
         df.reset_index(inplace=True, drop=True)
         df = df.convert_dtypes('str')
+        df.dropna(subset=['title'], inplace=True)
         df.to_csv(csv_path, index=False)
 
 if __name__ == '__main__':
