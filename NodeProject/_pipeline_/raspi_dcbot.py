@@ -162,7 +162,7 @@ class bot_func:
 @bot.event
 async def on_ready():
     print('bot online now!')
-    
+
     if not os.name == 'nt':
         channel = bot.get_channel(channel_dict['log'])
         await channel.send(f'`{dt.datetime.now()}`\nHello, I just woke up\n(Runnig on os \"{os.name}\")')
