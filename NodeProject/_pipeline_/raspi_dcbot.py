@@ -136,13 +136,29 @@ class bot_func:
             rec.append(row.to_dict())
         return rec
 
+    def get_translate(msg_content, target_lang):
+        print(f'translate into {target_lang}...')
+        data = gSheet.getAllDataS('dc_translate')
+        row_name_list = [i['row_name'] for i in data]
+        if data[row_name_list.index('target_source')]['target_language'] != target_lang:
+            gSheet.setValue('dc_translate', findKey='row_name', findValue='target_source', key='target_language',
+                            value=target_lang)
+        if data[row_name_list.index('input_output')]['source_language'] != msg_content:
+            gSheet.setValue('dc_translate', findKey='row_name', findValue='input_output', key='source_language',
+                            value=msg_content)
+
+        time.sleep(1)
+        data_new = gSheet.getAllDataS('dc_translate')
+        result = data_new[row_name_list.index('input_output')]['target_language']
+        #print(result)
+        return result
+
 """---------------------------------"""
 # Discord Start
 """---------------------------------"""
 @bot.event
 async def on_ready():
     print('bot online now!')
-    traceback_nortify.start()
 
     if not os.name == 'nt':
         channel = bot.get_channel(channel_dict['log'])
@@ -151,6 +167,8 @@ async def on_ready():
         role_update.start()
         #project_invite.start()
         project_channel_update.start()
+        traceback_nortify.start()
+        eng_auto_translate.start()
 
 """---------------------------------"""
 # Discord Sync
@@ -304,6 +322,76 @@ f'''
         channel = bot.get_channel(channel_dict['log'])
         await channel.send(f'{msg}')
 
+@tasks.loop(minutes=2)
+async def eng_auto_translate(alphabet_count=120, target_lang='th'):
+    print('scanning english message..')
+    alphabet_list = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+                     'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+    alphabet_list = alphabet_list + [i.upper() for i in alphabet_list]
+
+    guild = bot_func.get_guild()
+    text_channels = [i for i in guild.channels if str(i.type) == 'text']
+    eng_message_list = []
+    for channel in text_channels:
+        channel_id = channel.id
+        messages = [message async for message in channel.history(limit=1)]
+        if messages == []:
+            continue
+        if str(messages[0].author) == str(bot.user):
+            continue
+
+        message_content = (messages[0].clean_content).strip()
+        message_created_at = str(messages[0].created_at)
+        message_id = messages[0].id
+        message_author = messages[0].author.nick
+        if message_author == None:
+            message_author = messages[0].author.name
+
+        eng_alpha = ''.join([i for i in str(message_content) if i in alphabet_list])
+        if alphabet_count > len(eng_alpha):
+            continue
+        #print(len(eng_alpha), eng_alpha)
+
+        eng_message_list.append([
+            message_created_at,
+            message_content,
+            message_author,
+            channel_id,
+            message_id
+        ])
+
+    sorted(eng_message_list, reverse=True)
+    if eng_message_list == []:
+        return None
+
+    last_eng_msg = eng_message_list[0]
+    last_msg_content = last_eng_msg[1]
+    last_msg_author = last_eng_msg[2]
+    last_msg_author = last_eng_msg[2]
+    channel_id = last_eng_msg[3]
+    #print(last_eng_msg)
+
+    translate_result = bot_func.get_translate(last_eng_msg[1], target_lang)
+    if translate_result == None:
+        return None
+    #print(translate_result)
+
+    msg = f'''
+{last_msg_author} auto translation to Thai:
+{translate_result}
+command `!translate [copy id / copy message link] [en / th]`
+'''
+
+    channel = bot.get_channel(channel_id)
+    await channel.send(msg)
+    """
+    # print(message)
+    print(message.content)
+
+    eng_alpha = ''.join([i for i in str(message.content) if i in alphabet_list])
+    # print('eng alpha', len(eng_alpha), eng_alpha)
+    """
+
 """---------------------------------"""
 # Discord Command
 """---------------------------------"""
@@ -345,10 +433,9 @@ async def dev_test(ctx):
 
 @bot.command()
 async def translate(ctx, copy_id, target_lang):
-    target_list = ['th', 'en']
+    target_dict = {'th': 'Thai', 'en': 'English'}
     target_lang = target_lang.lower()
-    if not target_lang in target_list:
-        await ctx.send(f'Target language me be in {target_list}', delete_after=2)
+    if not target_lang in list(target_dict):
         return None
 
     if 'http' in copy_id:
@@ -364,35 +451,27 @@ async def translate(ctx, copy_id, target_lang):
     partial_message = channel.get_partial_message(message_id)
     message = await partial_message.fetch()
     jump_url = message.jump_url
-    #print(message.author.name)
+    #msg_content = message.content
+    msg_content = message.clean_content
+    msg_content = msg_content.strip()
+    msg_author = message.author.nick
+    if msg_author == None:
+        msg_author = message.author.name
 
-    msg_content = message.content
-
-    bot_msg = await ctx.send('translator\'s processing....')
-    #print(bot_msg)
-
-    data = gSheet.getAllDataS('dc_translate')
-    row_name_list = [i['row_name'] for i in data]
-    if data[row_name_list.index('target_source')]['target_language'] != target_lang:
-        gSheet.setValue('dc_translate',findKey='row_name',findValue='target_source',key='target_language',value=target_lang)
-    if data[row_name_list.index('input_output')]['source_language'] != msg_content:
-        gSheet.setValue('dc_translate',findKey='row_name',findValue='input_output',key='source_language',value=msg_content)
-
-    time.sleep(1)
-    data_new = gSheet.getAllDataS('dc_translate')
-    result = data_new[row_name_list.index('input_output')]['target_language']
-    #print(result)
-
-    embed = discord.Embed(title='see original message',url=jump_url)
-    new_msg = f'''
-message from **{message.author.name}** at `{message.created_at}` in {target_lang.upper()} language
-
+    bot_msg = await ctx.send('let\'s me translate...')
+    result = bot_func.get_translate(msg_content, target_lang)
+    if result == None:
+        bot_msg.delete()
+        return None
+    else:
+        embed = discord.Embed(title='see original message', url=jump_url)
+        new_msg = f'''
+message from **{msg_author}** in {target_dict[target_lang]} language
 \"{result}\"
-
 command `!translate [copy id / copy message link] [en / th]`
-'''
-    await ctx.message.delete()
-    await bot_msg.edit(content = new_msg, embed=embed, tts=True)
+        '''
+        await ctx.message.delete()
+        await bot_msg.edit(content=new_msg, embed=embed, tts=True)
 
 """---------------------------------"""
 # Discord Command Member
