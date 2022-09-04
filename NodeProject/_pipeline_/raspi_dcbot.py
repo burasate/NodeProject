@@ -171,8 +171,7 @@ async def on_ready():
         role_update.start()
         project_channel_update.start()
         traceback_nortify.start()
-        eng_auto_translate.start()
-
+        auto_translate.start()
 
 """---------------------------------"""
 # Discord Sync
@@ -204,14 +203,17 @@ async def role_update():
         #print(is_found_role)
         print(member.display_name , member_id, is_id_found)
         if is_id_found:
+            member_sl = [i for i in regis_rec if int(i['discord_id']) == member_id][0]
+            user_name = member_sl['title']
             if not is_role_found:
                 await member.add_roles(apply_role)
+                await member.edit(nick=user_name)
 
-                member_sl = [i for i in regis_rec if int(i['discord_id']) == member_id][0]
-                user_name = member_sl['title']
                 msg = f'added {user_name} ({member.display_name}) to \"{apply_role.name}\" role'
                 if not msg in content_list:
                     await channel.send(f'{msg}')
+            if member.nick != user_name:
+                await member.edit(nick=user_name)
 
         else:
             await member.remove_roles(apply_role)
@@ -390,14 +392,16 @@ f'''
         await channel.send(f'{msg}')
 
 @tasks.loop(minutes=2)
-async def eng_auto_translate(alphabet_count=120, target_lang='th'):
-    alphabet_list = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
-                     'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
-    alphabet_list = alphabet_list + [i.upper() for i in alphabet_list]
+async def auto_translate(alphabet_count=170):
+    alphabet_dict = {
+        'en' : list('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'),
+        'th' : list('กขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮ')
+    }
+    #alphabet_list = list(alphabet_dict['en'])
 
     guild = bot_func.get_guild()
     text_channels = [i for i in guild.channels if str(i.type) == 'text']
-    eng_message_list = []
+    message_list = []
     for channel in text_channels:
         channel_id = channel.id
         messages = [message async for message in channel.history(limit=1)]
@@ -413,41 +417,55 @@ async def eng_auto_translate(alphabet_count=120, target_lang='th'):
         if message_author == None:
             message_author = messages[0].author.name
 
-        eng_alpha = ''.join([i for i in str(message_content) if i in alphabet_list])
-        if alphabet_count > len(eng_alpha):
-            continue
-        #print(len(eng_alpha), eng_alpha)
+        eng_alpha = ''.join([i for i in str(message_content) if i in alphabet_dict['en']])
+        th_alpha = ''.join([i for i in str(message_content) if i in alphabet_dict['th']])
 
-        eng_message_list.append([
+        target_lang = 'th'
+        if len(th_alpha) > len(eng_alpha):
+            target_lang = 'en'
+        elif len(th_alpha) == len(eng_alpha):
+            continue
+
+        if alphabet_count > max([len(th_alpha), len(eng_alpha)]):
+            continue
+
+        #print(channel.name, 'en', len(eng_alpha), 'th', len(th_alpha),'tsl_to',target_lang)
+
+        message_list.append([
             message_created_at,
             message_content,
             message_author,
             channel_id,
-            message_id
+            message_id,
+            target_lang
         ])
 
-    sorted(eng_message_list, reverse=True)
-    if eng_message_list == []:
+    message_list = sorted(message_list, reverse=True)
+    #print(message_list)
+
+    if message_list == []:
         return None
 
-    last_eng_msg = eng_message_list[0]
-    last_msg_content = last_eng_msg[1]
-    last_msg_author = last_eng_msg[2]
-    last_msg_author = last_eng_msg[2]
-    channel_id = last_eng_msg[3]
-    #print(last_eng_msg)
+    last_msg = message_list[0]
+    last_msg_content = last_msg[1]
+    last_msg_author = last_msg[2]
+    last_msg_author = last_msg[2]
+    channel_id = last_msg[3]
+    last_msg_target_lang = last_msg[5]
+    #print(last_msg)
 
-    translate_result = bot_func.get_translate(last_eng_msg[1], target_lang)
+    translate_result = bot_func.get_translate(last_msg_content, last_msg_target_lang)
     if translate_result == None:
         return None
     #print(translate_result)
 
     msg = f'''
-{last_msg_author} auto translation to Thai:
+{last_msg_author} auto translation:
 {translate_result}
 command `!translate [copy id / copy message link] [en / th]`
 '''
 
+    #print(msg)
     channel = bot.get_channel(channel_id)
     await channel.send(msg)
     """
