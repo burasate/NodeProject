@@ -391,8 +391,8 @@ f'''
         channel = bot.get_channel(channel_dict['log'])
         await channel.send(f'{msg}')
 
-@tasks.loop(minutes=2)
-async def auto_translate(alphabet_count=120):
+@tasks.loop(seconds=45)
+async def auto_translate(alphabet_count=100):
     alphabet_dict = {
         'en' : list('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'),
         'th' : list('กขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮ')
