@@ -467,7 +467,7 @@ command `!translate [copy id / copy message link] [en / th]`
 
     #print(msg)
     channel = bot.get_channel(channel_id)
-    await channel.send(msg, suppress_embeds=True)
+    await channel.send(msg)
     """
     # print(message)
     print(message.content)
