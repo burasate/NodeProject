@@ -30,13 +30,29 @@ if not os.name == 'nt':
 for p in sys.path:
     print(p)
 
+#Internet Connection
+import requests
+def has_internet():
+    try:
+        r = requests.get('https://google.com')
+    except:
+        return False
+    else:
+        return True
+
 """
 Cycle System
 """
-#time.sleep(15)
 import production_manager
 import system_manager
 import raspi_update
+
+#Internet Checking
+while not has_internet():
+    print(has_internet())
+    now = str(dt.datetime.now().strftime('%Y/%m/%d %H:%M:%S'))
+    print('{}   no internet connection!'.format(now))
+    time.sleep(1)
 
 # Discord Bot
 if not os.name == 'nt':
@@ -76,6 +92,13 @@ while True:
         system_manager.integration.notion_sheet()
         #system_manager.versionBackup('.ma', projectPath + '/animation_wrk', dateFormat='%Y%m%d_%H%M')
         #system_manager.versionBackup('.mov', projectPath + '/animation_xpt', dateFormat='%Y%m%d_%H%M')
+
+        #Fika Project
+        if os.name == 'nt':
+            system_manager.fika.cache_layout_file()
+            #system_manager.versionBackup('.ma', r'C:\Fika\Projects\Dug\Shots', dateFormat='%Y%m%d_%H%M')
+            system_manager.versionBackup('.ma', r"D:\GDrive\Temp\Fika\Works", dateFormat='%Y%m%d_%H%M')
+            system_manager.versionBackup('.mov', r"D:\GDrive\Temp\Fika\Works", dateFormat='%Y%m%d_%H%M')
 
         """
         Production Manager (update, record and cleanup data of production)

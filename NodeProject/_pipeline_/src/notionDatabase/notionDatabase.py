@@ -227,7 +227,12 @@ def notionJsonParser(database_id, dir_path, replace_name = ''):
     # Load Update
     db = getDatabase(database_id)
     if db['object'] == 'error':
-        raise Warning(db)
+        if db['code'] == 'object_not_found':
+            if os.path.exists(j_path):
+                os.remove(j_path)
+            return None
+        else:
+            raise Warning(db)
 
     page_id_list = [db['results'][i]['id'].replace('-','') for i in range(len(db['results']))]
     data_id_list = [i for i in data]
@@ -383,6 +388,11 @@ def loadNotionDatabase(dir_part):
         notionJsonParser(i['id'], dir_part, replace_name=i['name'])
 
         #json to csv
+        j_part = dir_part + '/{}.json'.format(i['name'])
+
+        if not os.path.exists(j_part):
+            continue
+
         with open(dir_part + '/{}.json'.format(i['name'])) as data_f:
             data_j = json.load(data_f)
         csv_dir = dir_part + '/csv'

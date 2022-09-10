@@ -209,15 +209,58 @@ class error:
         else:
             return []
 
+class fika: #teletubbies files
+    def cache_layout_file():
+        dir_path = r'C:\Fika\Projects\Dug\Shots\Publish'
+        dest_dir_path = r'D:\GDrive\Temp\Fika\Works\Layout'
+
+        for root, dirs, files in os.walk(dir_path, topdown=False):
+            for name in files:
+                file_path = os.path.join(root, name)
+                dest_file_path = os.path.join(dest_dir_path, name)
+
+                if not '_Layout.ma' in name:
+                    continue
+
+                is_exists = os.path.exists(dest_file_path)
+
+                if not is_exists:
+                    shutil.copyfile(file_path, dest_file_path)
+                    print(file_path)
+    """
+    def cache_audio_file():
+        dir_path = r'E:\Mocap'
+        dest_dir_path = r'D:\GDrive\Temp\Fika\Works\Layout'
+
+        for root, dirs, files in os.walk(dir_path, topdown=False):
+            for name in files:
+                file_path = os.path.join(root, name)
+                dest_file_path = os.path.join(dest_dir_path, name)
+
+                if not 'Combined.wav' in name:
+                    continue
+
+                print(dirs,file_path)
+
+                is_exists = os.path.exists(dest_file_path)
+
+                if not is_exists:pass
+                    #shutil.copyfile(file_path, dest_file_path)
+
+    """
+
 
 if __name__ == '__main__':
-    base_path = os.sep.join(root_path.split(os.sep)[:-1])
+    #base_path = os.sep.join(root_path.split(os.sep)[:-1])
     #workspaceSetup()
     #versionBackup('.ma', base_path)
-    integration.init_notion_db()
-    integration.load_notion_db()
-    integration.notion_sheet()
+    #integration.init_notion_db()
+    #integration.load_notion_db()
+    #integration.notion_sheet()
     #data.create_history()
     #data.clear_past_history()
     #print(data.get_history_path_list(r"D:\GDrive\Documents\2022\BRSAnimPipeline\work\NodeProject\NodeProject\production_rec\notionDatabase\csv\project.csv"))
+
+    #fika.cache_layout_file()
+    #fika.cache_audio_file()
     pass
