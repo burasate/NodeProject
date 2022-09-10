@@ -183,12 +183,9 @@ async def role_update():
     regis_id_list = [ int(i) for i in regis_id_list ]
     find_role_name = 'Node Freelancer'
 
-    # print(regis_id_list)
     guild = bot_func.get_guild()
     member_id_list = [i.id for i in guild.members]
-    # print(member_id_list)
     apply_role = [i for i in guild.roles if find_role_name in i.name][0]
-    #print(apply_role)
 
     channel = bot.get_channel(channel_dict['member_welcome'])
     messages = [message async for message in channel.history(limit=100) if bot.user.name == message.author.name]
@@ -197,11 +194,11 @@ async def role_update():
     for member in guild.members:
         member_id = int(member.id)
         member_roles = [i.name for i in member.roles]
-        #print([member_id], member, member_roles)
         is_role_found = True in [ find_role_name in i for i in member_roles ]
         is_id_found = member_id in regis_id_list
-        #print(is_found_role)
-        print(member.display_name , member_id, is_id_found)
+        '''
+        print(member.display_name , member_id, is_id_found) #show all member sync
+        '''
         if is_id_found:
             member_sl = [i for i in regis_rec if int(i['discord_id']) == member_id][0]
             user_name = member_sl['title']
@@ -391,7 +388,7 @@ f'''
         channel = bot.get_channel(channel_dict['log'])
         await channel.send(f'{msg}')
 
-@tasks.loop(seconds=45)
+@tasks.loop(minutes=1)
 async def auto_translate(alphabet_count=100):
     alphabet_dict = {
         'en' : list('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'),
@@ -441,7 +438,6 @@ async def auto_translate(alphabet_count=100):
         ])
 
     message_list = sorted(message_list, reverse=True)
-    #print(message_list)
 
     if message_list == []:
         return None
@@ -452,12 +448,12 @@ async def auto_translate(alphabet_count=100):
     last_msg_author = last_msg[2]
     channel_id = last_msg[3]
     last_msg_target_lang = last_msg[5]
-    #print(last_msg)
+    print('found last message', last_msg)
 
     translate_result = bot_func.get_translate(last_msg_content, last_msg_target_lang)
     if translate_result == None:
         return None
-    #print(translate_result)
+    print(translate_result)
 
     msg = f'''
 {last_msg_author} auto translation:

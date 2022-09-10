@@ -135,7 +135,10 @@ class project:
             if ready_to_invite and not sent_invite:
                 notionDatabase.updatePageProperty(row['page_id'], 'sent_invite', True)
 
-    def add_member(discord_id, project_name, hour_week):
+    def add_project_member(*_):
+        discord_id = task_queue.data['discord_id']
+        project_name = task_queue.data['project_name']
+
         regis_sheet = 'Registration'
         regis_path = '{}/{}.json'.format(rec_dir, regis_sheet)
         regis_json = json.load(open(regis_path))
@@ -188,13 +191,11 @@ class project:
             if is_exists:
                 notionDatabase.updatePageProperty(row['page_id'], 'member', member_sl['page_id'])
                 notionDatabase.updatePageProperty(row['page_id'], 'project', project_sl['page_id'])
-                notionDatabase.updatePageProperty(row['page_id'], 'hour_week', hour_week)
 
         if not is_exists:
             new_page = notionDatabase.createPage(dest_db_id, 'member_name', member_sl['title'])
             notionDatabase.updatePageProperty(new_page['id'], 'member', member_sl['page_id'])
             notionDatabase.updatePageProperty(new_page['id'], 'project', project_sl['page_id'])
-            notionDatabase.updatePageProperty(new_page['id'], 'hour_week', hour_week)
 
             gSheet.setValue(
                 regis_sheet, findKey='Discord ID', findValue=discord_id,
@@ -212,10 +213,6 @@ class project:
 # Task System
 class task_queue:
     data = {}
-    def task_pucnch(*_):
-        print('do punch task {}'.format(task_queue.data['who']))
-        print('oraa \n'*10)
-
     def set_project_channel_id():
         task_queue.data
         notionDatabase.updatePageProperty(
@@ -256,8 +253,8 @@ class task_queue:
 
             clear = True
             try:
-                if row['name'] == 'punch':
-                    task_queue.task_pucnch()
+                if row['name'] == '':
+                    pass
 
                 elif row['name'] == 'sent_invite_to_project':
                     project.update_invite()
@@ -266,11 +263,7 @@ class task_queue:
                     task_queue.set_project_channel_id()
 
                 elif row['name'] == 'join_project':
-                    project.add_member(
-                        task_queue.data['discord_id'],
-                        task_queue.data['project_name'],
-                        task_queue.data['hour_week']
-                    )
+                    project.add_project_member()
 
                 else:
                     clear = False
