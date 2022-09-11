@@ -13,7 +13,7 @@ SCOPES = ['https://www.googleapis.com/auth/drive']
 service = Create_Service(CLIENT_SECRET_FILE, API_NAME, API_VERSION, SCOPES)
 
 def get_files(folder_id):
-    data = get_metadata(folder_id)
+    data = get_metadata(folder_id, fields='mimeType')
     if data['mimeType'] != 'application/vnd.google-apps.folder':
         print('request folder id')
         return None
@@ -44,8 +44,8 @@ def create_folder(parent_id, folder_name):
     else:
         print('\"{}\" exists the skipped'.format(folder_name))
 
-def get_metadata(item_id):
-    data = service.files().get(fileId=item_id, fields='*').execute()
+def get_metadata(item_id, fields='*'):
+    data = service.files().get(fileId=item_id, fields=fields).execute()
     return data
 
 def move(item_id, target_folder_id):
