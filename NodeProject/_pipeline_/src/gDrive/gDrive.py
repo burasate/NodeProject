@@ -1,9 +1,10 @@
 from Google import Create_Service
-import pprint
+from googleapiclient.http import MediaFileUpload
+import pprint, os, mimetypes
 import pandas as pd
 
-#Reference
-#https://developers.google.com/drive/api/v3/reference/files
+# Reference
+# https://developers.google.com/drive/api/v3/reference/files
 
 CLIENT_SECRET_FILE = 'credentials.json'
 API_NAME = 'drive'
@@ -11,6 +12,11 @@ API_VERSION = 'v3'
 SCOPES = ['https://www.googleapis.com/auth/drive']
 
 service = Create_Service(CLIENT_SECRET_FILE, API_NAME, API_VERSION, SCOPES)
+
+def get_mimetype(file_path):
+    file_path = file_path.replace('/', os.sep)
+    mimetype = mimetypes.guess_type(file_path)[0]
+    return mimetype
 
 def get_files(folder_id):
     data = get_metadata(folder_id, fields='mimeType')
@@ -27,8 +33,9 @@ def get_files(folder_id):
         files.extend(r.get('files'))
         nextPageToken = r.get('nextPageToken')
 
-    #pprint.pprint(files)
+    # pprint.pprint(files)
     return files
+
 
 def create_folder(parent_id, folder_name):
     items = get_files(parent_id)
@@ -44,9 +51,11 @@ def create_folder(parent_id, folder_name):
     else:
         print('\"{}\" exists the skipped'.format(folder_name))
 
+
 def get_metadata(item_id, fields='*'):
     data = service.files().get(fileId=item_id, fields=fields).execute()
     return data
+
 
 def move(item_id, target_folder_id):
     data = get_metadata(item_id)
@@ -57,22 +66,25 @@ def move(item_id, target_folder_id):
         removeParents=source_folder_id
     ).execute()
 
+
 def delete(item_id):
     service.files().delete(fileId=item_id).execute()
 
+
 def create_share_anyone(item_id):
     request_body = {
-        'role' : 'reader',
-        'type' : 'anyone'
+        'role': 'reader',
+        'type': 'anyone'
     }
     r = service.permissions().create(
         fileId=item_id,
         body=request_body
     ).execute()
-    #pprint.pprint(r)
+    # pprint.pprint(r)
     data = get_metadata(item_id)
-    #print(data['webViewLink'])
+    # print(data['webViewLink'])
     return data['webViewLink']
+
 
 def romove_share_anyone(item_id):
     service.permissions().delete(
@@ -80,11 +92,12 @@ def romove_share_anyone(item_id):
         permissionId='anyoneWithLink'
     ).execute()
 
+
 def create_share_email(item_id, email):
     request_body = {
         'role': 'reader',
         'type': 'user',
-        'emailAddress' : email
+        'emailAddress': email
     }
     r = service.permissions().create(
         fileId=item_id,
@@ -92,12 +105,13 @@ def create_share_email(item_id, email):
     ).execute()
     pprint.pprint(r)
 
+
 def remove_share_email(item_id, email):
     permission_list = service.permissions().list(
         fileId=item_id,
         fields='*'
     ).execute()['permissions']
-    #pprint.pprint(permission_list)
+    # pprint.pprint(permission_list)
     email_list = [i for i in permission_list if i['emailAddress'] == email]
     if email_list == []:
         return None
@@ -107,24 +121,58 @@ def remove_share_email(item_id, email):
         permissionId=email_sl['id']
     ).execute()
 
+def upload(folder_id, file_path):
+    file_path = file_path.replace('/', os.sep)
+    file_name = file_path.split(os.sep)[-1]
+
+    itmes = get_files(folder_id)
+    item_id = None
+    for i in itmes:
+        if file_name == i['name']:
+            item_id = i['id']
+            break
+
+    file_metadata = {
+        'name': file_name,
+        'parents': [folder_id]
+    }
+    mimetype = get_mimetype(file_path)
+    media_content = MediaFileUpload(
+        file_path,
+        mimetype=mimetype
+    )
+    if item_id == None: #not exists
+        r = service.files().create(
+            body=file_metadata,
+            media_body=media_content
+        ).execute()
+    else: #exists
+        r = service.files().update(
+            fileId=item_id,
+            media_body=media_content
+        ).execute()
+    pprint.pprint(r)
+
 
 if __name__ == '__main__':
-    pprint.pprint(get_files('1ytUrK5iVPlBjtel08VA1RMaCW0N-b04_'))
+    #pprint.pprint(get_files('1ytUrK5iVPlBjtel08VA1RMaCW0N-b04_'))
 
-    #x = ['a', 'd']
-    #for i in x:
-        #create_folder('1ytUrK5iVPlBjtel08VA1RMaCW0N-b04_', i)
+    # x = ['a', 'd']
+    # for i in x:
+    # create_folder('1ytUrK5iVPlBjtel08VA1RMaCW0N-b04_', i)
 
-    #pprint.pprint(get_metadata('1QOLU2uLWc_b_RPsYyJfVxHMxbt-rrIgK'))
+    # pprint.pprint(get_metadata('1QOLU2uLWc_b_RPsYyJfVxHMxbt-rrIgK'))
 
-    #move(item_id = '1A3c16f2-fC25HBMffADs1bgBdAl4j_BC',
-         #target_folder_id = '1odseDCKkg78nTVA0ozM9RolPV0eMlmx1')
+    # move(item_id = '1A3c16f2-fC25HBMffADs1bgBdAl4j_BC',
+    # target_folder_id = '1odseDCKkg78nTVA0ozM9RolPV0eMlmx1')
 
-    #delete('1A3c16f2-fC25HBMffADs1bgBdAl4j_BC')
+    # delete('1A3c16f2-fC25HBMffADs1bgBdAl4j_BC')
 
-    #create_share_anyone('1A6z0QAJUPi6mHu_T9danfe7j7bnQVQsv')
-    #romove_share_anyone('1A6z0QAJUPi6mHu_T9danfe7j7bnQVQsv')
+    # create_share_anyone('1A6z0QAJUPi6mHu_T9danfe7j7bnQVQsv')
+    # romove_share_anyone('1A6z0QAJUPi6mHu_T9danfe7j7bnQVQsv')
 
-    #create_share_email('1A6z0QAJUPi6mHu_T9danfe7j7bnQVQsv', 'kanlayamart5437@gmail.com')
-    remove_share_email('1A6z0QAJUPi6mHu_T9danfe7j7bnQVQsv', 'kanlayamart5437@gmail.com')
+    # create_share_email('1A6z0QAJUPi6mHu_T9danfe7j7bnQVQsv', 'kanlayamart5437@gmail.com')
+    # remove_share_email('1A6z0QAJUPi6mHu_T9danfe7j7bnQVQsv', 'kanlayamart5437@gmail.com')
+
+    #upload('1ytUrK5iVPlBjtel08VA1RMaCW0N-b04_', r"C:\Users\DEX3D_I7\Desktop\loc.mov")
     pass
