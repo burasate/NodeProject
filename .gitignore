@@ -170,3 +170,5 @@ brsNn/
 *workTime.py
 *__Init__.py
 maReader/
+*.pickle
+*file_project/
