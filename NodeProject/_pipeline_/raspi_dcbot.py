@@ -143,14 +143,13 @@ class bot_func:
         print(f'translate into {target_lang}...')
         data = gSheet.getAllDataS('dc_translate')
         row_name_list = [i['row_name'] for i in data]
-        if data[row_name_list.index('target_source')]['target_language'] != target_lang:
-            gSheet.setValue('dc_translate', findKey='row_name', findValue='target_source', key='target_language',
-                            value=target_lang)
+        #if data[row_name_list.index('target_source')]['target_language'] != target_lang:
+        gSheet.setValue('dc_translate', findKey='row_name', findValue='target_source', key='target_language',value=target_lang)
         if data[row_name_list.index('input_output')]['source_language'] != msg_content:
             gSheet.setValue('dc_translate', findKey='row_name', findValue='input_output', key='source_language',
                             value=msg_content)
 
-        time.sleep(1)
+        time.sleep(5)
         data_new = gSheet.getAllDataS('dc_translate')
         result = data_new[row_name_list.index('input_output')]['target_language']
         #print(result)
@@ -162,6 +161,7 @@ class bot_func:
 @bot.event
 async def on_ready():
     print('bot online now!')
+    auto_translate.start()
 
     if not os.name == 'nt':
         channel = bot.get_channel(channel_dict['log'])
@@ -389,7 +389,7 @@ f'''
         await channel.send(f'{msg}')
 
 @tasks.loop(minutes=1)
-async def auto_translate(alphabet_count=100):
+async def auto_translate(alphabet_count=120):
     alphabet_dict = {
         'en' : list('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'),
         'th' : list('กขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮ')
@@ -453,10 +453,11 @@ async def auto_translate(alphabet_count=100):
     translate_result = bot_func.get_translate(last_msg_content, last_msg_target_lang)
     if translate_result == None:
         return None
+    translate_result = translate_result.strip()
     print(translate_result)
 
     msg = f'''
-{last_msg_author} auto translation:
+{last_msg_author} auto translation to {last_msg_target_lang}:
 {translate_result}
 command `!translate [copy id / copy message link] [en / th]`
 '''
@@ -464,6 +465,9 @@ command `!translate [copy id / copy message link] [en / th]`
     #print(msg)
     channel = bot.get_channel(channel_id)
     await channel.send(msg)
+
+    log_channel = bot.get_channel(channel_dict['log'])
+    await log_channel.send( '\n'.join(['found last message in [{}] translate'.format(str(channel.name)),'target lang : {}'.format(last_msg_target_lang)]) )
     """
     # print(message)
     print(message.content)
