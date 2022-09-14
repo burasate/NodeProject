@@ -143,13 +143,13 @@ class bot_func:
         print(f'translate into {target_lang}...')
         data = gSheet.getAllDataS('dc_translate')
         row_name_list = [i['row_name'] for i in data]
-        #if data[row_name_list.index('target_source')]['target_language'] != target_lang:
-        gSheet.setValue('dc_translate', findKey='row_name', findValue='target_source', key='target_language',value=target_lang)
+        if data[row_name_list.index('target_source')]['target_language'] != target_lang:
+            gSheet.setValue('dc_translate', findKey='row_name', findValue='target_source', key='target_language',value=target_lang)
         if data[row_name_list.index('input_output')]['source_language'] != msg_content:
             gSheet.setValue('dc_translate', findKey='row_name', findValue='input_output', key='source_language',
                             value=msg_content)
 
-        time.sleep(5)
+        time.sleep(3)
         data_new = gSheet.getAllDataS('dc_translate')
         result = data_new[row_name_list.index('input_output')]['target_language']
         #print(result)
@@ -161,7 +161,6 @@ class bot_func:
 @bot.event
 async def on_ready():
     print('bot online now!')
-    auto_translate.start()
 
     if not os.name == 'nt':
         channel = bot.get_channel(channel_dict['log'])
@@ -392,7 +391,7 @@ f'''
 async def auto_translate(alphabet_count=120):
     alphabet_dict = {
         'en' : list('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'),
-        'th' : list('กขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮ')
+        'th' : list('กขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮะาำเแโใไัี๊่๋้็ิื์')
     }
     #alphabet_list = list(alphabet_dict['en'])
 
@@ -417,6 +416,9 @@ async def auto_translate(alphabet_count=120):
         eng_alpha = ''.join([i for i in str(message_content) if i in alphabet_dict['en']])
         th_alpha = ''.join([i for i in str(message_content) if i in alphabet_dict['th']])
 
+        #print(eng_alpha)
+        #print(th_alpha)
+
         target_lang = 'th'
         if len(th_alpha) > len(eng_alpha):
             target_lang = 'en'
@@ -426,7 +428,7 @@ async def auto_translate(alphabet_count=120):
         if alphabet_count > max([len(th_alpha), len(eng_alpha)]):
             continue
 
-        #print(channel.name, 'en', len(eng_alpha), 'th', len(th_alpha),'tsl_to',target_lang)
+        print(channel.name, 'en', len(eng_alpha), 'th', len(th_alpha),'tsl_to',target_lang)
 
         message_list.append([
             message_created_at,
