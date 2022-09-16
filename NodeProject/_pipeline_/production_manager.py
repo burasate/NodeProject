@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import json,os,pprint,sys,time,shutil
 import datetime as dt
 
@@ -21,6 +22,7 @@ if not os.name == 'nt':
 
 # Module
 import pandas as pd
+import numpy as np
 pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None)
 pd.set_option('display.width', None)
@@ -34,7 +36,7 @@ rec_dir = prev_dir + '/production_rec'
 notiondb_dir = rec_dir + '/notionDatabase'
 
 # Any Func
-def loadWorksheet(sheet, dirPath):
+def load_worksheet(sheet, dirPath):
     data = gSheet.getAllDataS(sheet)
     savePath = dirPath + os.sep + sheet + '.json'
     json.dump(data, open(savePath, 'w'), indent=4)
@@ -46,6 +48,85 @@ def loadNotionDatabase(dirPath):
     notionDatabase.loadNotionDatabase(dirPath)
 """
 
+# Finance System
+class finance:
+    def get_finance_doc_link(project_id, member_name):
+        old_sheet_name = gSheet.sheetName
+        gSheet.sheetName = 'KF_Personal_FlowAccount'
+        config_sheet = 'config'
+
+        nt_project_path = notiondb_dir + '/csv' + '/project.csv'
+        project_df = pd.read_csv(nt_project_path)
+
+        #print(project_df)
+        project_df = project_df[project_df['page_id'] == project_id]
+        if project_df.empty:
+            return None
+        #print(project_df.loc[project_df.index.tolist()[0]])
+        project_sl = project_df.loc[project_df.index.tolist()[0]]
+        project_finance = project_sl['finance']
+        #print(project_finance, 'nan', project_finance is np.nan)
+        if project_finance is np.nan:
+            return None
+
+        nt_finance_path = notiondb_dir + '/csv' + '/project_finance.csv'
+        finance_df = pd.read_csv(nt_finance_path)
+        #print(finance_df)
+        finance_df = finance_df[finance_df['title'] == project_finance]
+        finance_sl = finance_df.loc[finance_df.index.tolist()[0]]
+        #print(finance_sl)
+
+        finance_config = gSheet.getAllDataS('config')
+
+        nt_member_path = notiondb_dir + '/csv' + '/member.csv'
+        member_df = pd.read_csv(nt_member_path)
+        member_df = member_df[member_df['member_name'] == member_name]
+        if member_df.empty:
+            return None
+        member_sl = member_df.loc[member_df.index.tolist()[0]]
+        #print(member_sl)
+
+        member_data = {
+            'company_name' : member_sl['bank_account_name'],
+            'company_address' : member_sl['address'],
+            'company_tax_id' : '{:0>13d}'.format(int(member_sl['tax_id'])),
+            'company_mobile' : '{:0>10d}'.format(int(member_sl['mobile'])),
+            'bank_account_name' : member_sl['bank_account_name'],
+            'bank_company_name' : member_sl['bank_company_name'],
+            'bank_account_number' : '{:0>10d}'.format(int(member_sl['bank_account_number']))
+        }
+
+        link_data = {}
+        for i in finance_config:
+            prop_name, prop_value = (i['property_name'], i['property_value'])
+            if prop_name in ['quotation_pdf_url','billing_pdf_url','invoice_pdf_url']:
+                link_data[prop_name] = prop_value
+
+            if i['is_formula'] == 'TRUE':
+                continue
+
+            print(prop_name, [prop_name in finance_df.columns])
+
+            if prop_name in member_data:
+                '''
+                gSheet.setValue(
+                    config_sheet, findKey='property_name', findValue=prop_name,
+                    key='property_value', value=member_data[prop_name]
+                )'''
+            elif prop_name in finance_df.columns:
+                print(finance_sl[prop_name])
+                '''
+                gSheet.setValue(
+                    config_sheet, findKey = 'property_name', findValue = prop_name,
+                    key = 'property_value', value = finance_sl[prop_name]
+                )'''
+
+        #Finish
+        gSheet.sheetName = old_sheet_name
+
+        pprint.pprint(link_data)
+        return link_data
+
 # Member System
 class register:
     def update_member(*_):
@@ -55,7 +136,7 @@ class register:
         dest_db_id = [i['id'] for i in notionDatabase.database if i['name'] == 'member'][0]
 
         #load online database
-        loadWorksheet(regis_sheet, rec_dir)
+        load_worksheet(regis_sheet, rec_dir)
 
         # Compare 2 Dataframes
         regis_json = json.load(open(regis_path))
@@ -84,6 +165,7 @@ class register:
                     key='Availability', value=hour_per_week
                 )
 
+            #Address	Bank Account Name	Mobile	Bank Account Number	Bank Company Name	Tax Id
             prop_dict = {
                 'discord_id': int(discord_id),
                 'demo_reel': row['Demo Reel'],
@@ -91,7 +173,13 @@ class register:
                 'first_name': row['First Name'].capitalize(),
                 'last_name': row['Last Name'].capitalize(),
                 'hour_per_week': float(hour_per_week),
-                'linkedin': row['Linkedin Profile']
+                'linkedin': row['Linkedin Profile'],
+                'address': str(row['Address']).replace('\n', ' '),
+                'bank_account_name': row['Bank Account Name'],
+                'mobile': row['Mobile'],
+                'bank_account_number': row['Bank Account Number'],
+                'bank_company_name': row['Bank Company Name'],
+                'tax_id': row['Tax Id']
             }
 
             # Add New Member
@@ -108,6 +196,8 @@ class register:
                 find_row = member_df.loc[find_index]
                 for prop_name in prop_dict:
                     v = prop_dict[prop_name]
+                    if v == '':
+                        continue
                     if str(v) == '' and prop_name in ['demo_reel','linkedin']: #url format
                         v = '-'
                     if prop_dict[prop_name] != find_row[prop_name]:
@@ -237,7 +327,7 @@ class task_queue:
     def run(*_):
         request_sheet = 'Request'
         request_path = '{}/{}.json'.format(rec_dir,request_sheet)
-        loadWorksheet(request_sheet, rec_dir)
+        load_worksheet(request_sheet, rec_dir)
 
         request_json = json.load(open(request_path))
         request_df = pd.DataFrame().from_records(request_json)
@@ -288,10 +378,11 @@ class task_queue:
 
 if __name__ == '__main__':
     base_path = os.sep.join(rootPath.split(os.sep)[:-1])
-    #loadWorksheet('AnimationTracking', base_path + '/production_rec')
+    #load_worksheet('AnimationTracking', base_path + '/production_rec')
+    finance.get_finance_doc_link('c3193d9b885043f89cc51c5a0508a1a6', 'Kaofang.B71')
 
-    register.update_member()
-    task_queue.run()
+    #register.update_member()
+    #task_queue.run()
     #project.update_invite()
     #project.add_member(346164580487004171, 'Project_Test', 20)
     pass

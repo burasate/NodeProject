@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import json,os,pprint,sys,time,shutil
 import datetime as dt
 
@@ -254,9 +255,9 @@ if __name__ == '__main__':
     #base_path = os.sep.join(root_path.split(os.sep)[:-1])
     #workspaceSetup()
     #versionBackup('.ma', base_path)
-    #integration.init_notion_db()
-    #integration.load_notion_db()
-    #integration.notion_sheet()
+    integration.init_notion_db()
+    integration.load_notion_db()
+    integration.notion_sheet()
     #data.create_history()
     #data.clear_past_history()
     #print(data.get_history_path_list(r"D:\GDrive\Documents\2022\BRSAnimPipeline\work\NodeProject\NodeProject\production_rec\notionDatabase\csv\project.csv"))

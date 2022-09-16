@@ -388,7 +388,7 @@ f'''
         await channel.send(f'{msg}')
 
 @tasks.loop(minutes=1)
-async def auto_translate(alphabet_count=120):
+async def auto_translate(alphabet_count=190):
     alphabet_dict = {
         'en' : list('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'),
         'th' : list('กขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรลวศษสหฬอฮะาำเแโใไัี๊่๋้็ิื์')
