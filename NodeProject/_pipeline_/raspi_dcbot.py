@@ -383,7 +383,7 @@ async def traceback_nortify():
         msg = \
 f'''
 🚨 {i['date_time']}
-`{i['traceback']}`
+`{i['traceback'][:-3000]}`
 '''
         channel = bot.get_channel(channel_dict['log'])
         await channel.send(f'{msg}')
@@ -712,15 +712,15 @@ async def finance(ctx, doc_type):
         await ctx.send(f'{mention}! request\'s not in project channel', mention_author=True, delete_after=10)
         return None
 
-    task_name = 'generate_finance_document'
+    task_name = 'generate_financial_document'
     task_data = {
         #'member_id': ctx_data['author']['id'],
         'member_name': ctx_data['author']['nick'],
-        'project_id': ctx_data['channel']['id'],
+        'channel_id': ctx_data['channel']['id'],
         'document_type' : doc_type
     }
     bot_func.add_queue_task(task_name, task_data)
-    await ctx.send(f'{mention} sent request for {doc_type.capitalize()} document', mention_author=True)
+    await ctx.send(f'{mention} sent request for {doc_type.capitalize()} document\nเอกสารจะถูกส่งเข้า dm ส่วนตัวเพื่อให้ตรวจสอบ..', mention_author=True)
 
 """---------------------------------"""
 # Discord Command Recruiter

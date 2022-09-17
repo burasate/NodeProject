@@ -36,7 +36,6 @@ def get_files(folder_id):
     # pprint.pprint(files)
     return files
 
-
 def create_folder(parent_id, folder_name):
     items = get_files(parent_id)
     folder_list = [i['name'] for i in items if 'google-apps.folder' in i['mimeType']]
@@ -51,11 +50,9 @@ def create_folder(parent_id, folder_name):
     else:
         print('\"{}\" exists the skipped'.format(folder_name))
 
-
 def get_metadata(item_id, fields='*'):
     data = service.files().get(fileId=item_id, fields=fields).execute()
     return data
-
 
 def move(item_id, target_folder_id):
     data = get_metadata(item_id)
@@ -66,10 +63,8 @@ def move(item_id, target_folder_id):
         removeParents=source_folder_id
     ).execute()
 
-
 def delete(item_id):
     service.files().delete(fileId=item_id).execute()
-
 
 def create_share_anyone(item_id):
     request_body = {
@@ -85,13 +80,11 @@ def create_share_anyone(item_id):
     # print(data['webViewLink'])
     return data['webViewLink']
 
-
 def romove_share_anyone(item_id):
     service.permissions().delete(
         fileId=item_id,
         permissionId='anyoneWithLink'
     ).execute()
-
 
 def create_share_email(item_id, email):
     request_body = {
@@ -104,7 +97,6 @@ def create_share_email(item_id, email):
         body=request_body
     ).execute()
     pprint.pprint(r)
-
 
 def remove_share_email(item_id, email):
     permission_list = service.permissions().list(

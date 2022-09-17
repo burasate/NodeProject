@@ -171,4 +171,5 @@ brsNn/
 *__Init__.py
 maReader/
 *.pickle
-*file_project/
+*file_storage/
+*.pdf

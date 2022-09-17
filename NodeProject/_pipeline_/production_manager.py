@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import json,os,pprint,sys,time,shutil
+import json,os,pprint,sys,time,shutil,requests
 import datetime as dt
 
 """
@@ -29,11 +29,14 @@ pd.set_option('display.width', None)
 from gSheet import gSheet
 gSheet.sheetName = 'Node Project Integration'
 from notionDatabase import notionDatabase
+from gSheet import gSheet
+#from gDrive import gDrive
 
 # Path
 prev_dir = os.sep.join(rootPath.split(os.sep)[:-1])
 rec_dir = prev_dir + '/production_rec'
 notiondb_dir = rec_dir + '/notionDatabase'
+file_storage_dir = prev_dir + '/file_storage'
 
 # Any Func
 def load_worksheet(sheet, dirPath):
@@ -50,7 +53,16 @@ def loadNotionDatabase(dirPath):
 
 # Finance System
 class finance:
-    def get_finance_doc_link(project_id, member_name):
+    def get_finance_doc_link():
+        """
+        project_id = 'c3193d9b885043f89cc51c5a0508a1a6'
+        member_name = 'Kaofang.B71'
+        doc_type = 'quotation'
+        """
+        channel_id = task_queue.data['channel_id']
+        member_name = task_queue.data['member_name']
+        doc_type = task_queue.data['doc_type']
+
         old_sheet_name = gSheet.sheetName
         gSheet.sheetName = 'KF_Personal_FlowAccount'
         config_sheet = 'config'
@@ -59,7 +71,7 @@ class finance:
         project_df = pd.read_csv(nt_project_path)
 
         #print(project_df)
-        project_df = project_df[project_df['page_id'] == project_id]
+        project_df = project_df[project_df['discord_channel_id'] == channel_id]
         if project_df.empty:
             return None
         #print(project_df.loc[project_df.index.tolist()[0]])
@@ -105,27 +117,37 @@ class finance:
             if i['is_formula'] == 'TRUE':
                 continue
 
-            print(prop_name, [prop_name in finance_df.columns])
+            #print(prop_name, [prop_name in finance_df.columns])
 
             if prop_name in member_data:
-                '''
+                #'''
                 gSheet.setValue(
                     config_sheet, findKey='property_name', findValue=prop_name,
-                    key='property_value', value=member_data[prop_name]
-                )'''
+                    key='property_value', value=str(member_data[prop_name])
+                )
+                #'''
             elif prop_name in finance_df.columns:
-                print(finance_sl[prop_name])
-                '''
+                #'''
                 gSheet.setValue(
                     config_sheet, findKey = 'property_name', findValue = prop_name,
-                    key = 'property_value', value = finance_sl[prop_name]
-                )'''
+                    key = 'property_value', value=str(finance_sl[prop_name])
+                )
+                #'''
 
-        #Finish
+        #Finish GSheet
         gSheet.sheetName = old_sheet_name
-
         pprint.pprint(link_data)
-        return link_data
+
+        #Save file
+        url = link_data[doc_type + '_pdf_url']
+        res = requests.get(url)
+        project_dir = file_storage_dir + os.sep + project_sl['page_id']
+        if not os.path.exists(project_dir):
+            os.makedirs(project_dir)
+        pdf_path = project_dir + '/{}_{}.pdf'.format(member_sl['page_id'],doc_type)
+        with open(pdf_path, 'wb') as f:
+            f.write(res.content)
+            print('pdf exprted {}'.format(pdf_path.replace(project_dir,'')))
 
 # Member System
 class register:
@@ -355,6 +377,9 @@ class task_queue:
                 elif row['name'] == 'join_project':
                     project.add_project_member()
 
+                elif row['name'] == 'generate_financial_document':
+                    finance.get_finance_doc_link()
+
                 else:
                     clear = False
 
@@ -379,7 +404,7 @@ class task_queue:
 if __name__ == '__main__':
     base_path = os.sep.join(rootPath.split(os.sep)[:-1])
     #load_worksheet('AnimationTracking', base_path + '/production_rec')
-    finance.get_finance_doc_link('c3193d9b885043f89cc51c5a0508a1a6', 'Kaofang.B71')
+    finance.get_finance_doc_link()
 
     #register.update_member()
     #task_queue.run()
