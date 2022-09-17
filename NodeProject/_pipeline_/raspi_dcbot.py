@@ -383,7 +383,7 @@ async def traceback_nortify():
         msg = \
 f'''
 🚨 {i['date_time']}
-`{i['traceback'][:-3000]}`
+`{i['traceback'][-3000:]}`
 '''
         channel = bot.get_channel(channel_dict['log'])
         await channel.send(f'{msg}')

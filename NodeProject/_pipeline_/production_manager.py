@@ -61,7 +61,7 @@ class finance:
         """
         channel_id = task_queue.data['channel_id']
         member_name = task_queue.data['member_name']
-        doc_type = task_queue.data['doc_type']
+        doc_type = task_queue.data['document_type']
 
         old_sheet_name = gSheet.sheetName
         gSheet.sheetName = 'KF_Personal_FlowAccount'
