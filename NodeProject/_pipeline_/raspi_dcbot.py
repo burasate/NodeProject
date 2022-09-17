@@ -499,36 +499,40 @@ async def vote_report():
             vote_ref = int(vote_ref.split('-')[-1])
             #print(vote_ref)
 
-            partial_message = channel.get_partial_message(vote_ref)
-            question_message = await partial_message.fetch()
-            reactions = question_message.reactions
-            #print(reactions)
-
-            up_count = [i for i in reactions if i.emoji == '🔼'][0].count - 1
-            down_count = [i for i in reactions if i.emoji == '🔽'][0].count - 1
-            #print(up_count, down_count)
-
-            if sum([up_count, down_count]) != 0:
-                up_percentage = up_count/sum([up_count, down_count])
-                up_percentage = round(up_percentage * 100)
-                down_percentage = down_count/sum([up_count, down_count])
-                down_percentage = round(down_percentage * 100)
-                #print(up_percentage, down_percentage)
-
+            try:
+                partial_message = channel.get_partial_message(vote_ref)
+            except:
+                await bot_message.delete()
             else:
-                up_percentage, down_percentage = [0,0]
+                question_message = await partial_message.fetch()
+                reactions = question_message.reactions
+                #print(reactions)
 
-            up_bar = '▓' * int(round(up_percentage / 8))
-            down_bar = '▓' * int(round(down_percentage / 8))
-            # print(up_bar, down_bar)
+                up_count = [i for i in reactions if i.emoji == '🔼'][0].count - 1
+                down_count = [i for i in reactions if i.emoji == '🔽'][0].count - 1
+                #print(up_count, down_count)
 
-            msg = f'''
+                if sum([up_count, down_count]) != 0:
+                    up_percentage = up_count/sum([up_count, down_count])
+                    up_percentage = round(up_percentage * 100)
+                    down_percentage = down_count/sum([up_count, down_count])
+                    down_percentage = round(down_percentage * 100)
+                    #print(up_percentage, down_percentage)
+
+                else:
+                    up_percentage, down_percentage = [0,0]
+
+                up_bar = '▓' * int(round(up_percentage / 8))
+                down_bar = '▓' * int(round(down_percentage / 8))
+                # print(up_bar, down_bar)
+
+                msg = f'''
 🔼   {up_bar}  {up_count}
 🔽   {down_bar}  {down_count}
 
 vote_ref-{question_message.id}
 '''
-            await bot_message.edit(content=msg)
+                await bot_message.edit(content=msg)
 
 
 """---------------------------------"""
@@ -621,7 +625,7 @@ async def vote(ctx, question):
     msg = f'''
 vote_ref-{ctx_data['message']['id']}
 '''
-    bot_msg = await ctx.send(msg, delete_after=20)
+    bot_msg = await ctx.send(msg)
     await ctx.message.add_reaction('🔼')
     await ctx.message.add_reaction('🔽')
 
