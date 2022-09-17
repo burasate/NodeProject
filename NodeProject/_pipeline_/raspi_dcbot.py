@@ -499,40 +499,41 @@ async def vote_report():
             vote_ref = int(vote_ref.split('-')[-1])
             #print(vote_ref)
 
-            try:
-                partial_message = channel.get_partial_message(vote_ref)
-            except:
+            ref_id_list = [message.id async for message in channel.history(limit=100)]
+            if not vote_ref in ref_id_list:
                 await bot_message.delete()
+                continue
+                
+            partial_message = channel.get_partial_message(vote_ref)
+            question_message = await partial_message.fetch()
+            reactions = question_message.reactions
+            #print(reactions)
+
+            up_count = [i for i in reactions if i.emoji == '🔼'][0].count - 1
+            down_count = [i for i in reactions if i.emoji == '🔽'][0].count - 1
+            #print(up_count, down_count)
+
+            if sum([up_count, down_count]) != 0:
+                up_percentage = up_count/sum([up_count, down_count])
+                up_percentage = round(up_percentage * 100)
+                down_percentage = down_count/sum([up_count, down_count])
+                down_percentage = round(down_percentage * 100)
+                #print(up_percentage, down_percentage)
+
             else:
-                question_message = await partial_message.fetch()
-                reactions = question_message.reactions
-                #print(reactions)
+                up_percentage, down_percentage = [0,0]
 
-                up_count = [i for i in reactions if i.emoji == '🔼'][0].count - 1
-                down_count = [i for i in reactions if i.emoji == '🔽'][0].count - 1
-                #print(up_count, down_count)
+            up_bar = '▓' * int(round(up_percentage / 8))
+            down_bar = '▓' * int(round(down_percentage / 8))
+            # print(up_bar, down_bar)
 
-                if sum([up_count, down_count]) != 0:
-                    up_percentage = up_count/sum([up_count, down_count])
-                    up_percentage = round(up_percentage * 100)
-                    down_percentage = down_count/sum([up_count, down_count])
-                    down_percentage = round(down_percentage * 100)
-                    #print(up_percentage, down_percentage)
-
-                else:
-                    up_percentage, down_percentage = [0,0]
-
-                up_bar = '▓' * int(round(up_percentage / 8))
-                down_bar = '▓' * int(round(down_percentage / 8))
-                # print(up_bar, down_bar)
-
-                msg = f'''
+            msg = f'''
 🔼   {up_bar}  {up_count}
 🔽   {down_bar}  {down_count}
 
 vote_ref-{question_message.id}
 '''
-                await bot_message.edit(content=msg)
+            await bot_message.edit(content=msg)
 
 
 """---------------------------------"""
