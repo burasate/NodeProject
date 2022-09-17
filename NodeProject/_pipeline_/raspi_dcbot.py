@@ -698,13 +698,18 @@ async def join(ctx, project_name, hour_week):
 
 @bot.command()
 async def finance(ctx, doc_type):
+    await ctx.message.delete(delay=0)
     ctx_data = bot_func.get_ctx_data(ctx)
-    type_list = ['quatation', 'billing', 'invoice']
+    mention = ctx_data['author']['mention']
+
+    type_list = ['quotation', 'billing', 'invoice']
     if not doc_type in type_list:
-        print(f'document type must be in {type_list}')
+        #print(f'document type must be in {type_list}')
+        await ctx.send(f'{mention}! document type must be in {type_list}', mention_author=True, delete_after=2)
         return None
     if ctx_data['category'] != {} and not 'project' in ctx_data['category']['name'].lower():
         print('can\'t run command because the channel\'s not in Node-Project category')
+        await ctx.send(f'{mention}! request\'s not in project channel', mention_author=True, delete_after=2)
         return None
 
     task_name = 'generate_finance_document'
@@ -713,6 +718,7 @@ async def finance(ctx, doc_type):
         'project_id': ctx_data['channel']['id'],
         'document_type' : doc_type
     }
+    await ctx.send(f'{mention} sent request for {doc_type.capitalize()} document', mention_author=True)
 
 """---------------------------------"""
 # Discord Command Recruiter
