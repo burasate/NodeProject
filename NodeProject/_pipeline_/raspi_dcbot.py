@@ -171,6 +171,8 @@ async def on_ready():
         project_channel_update.start()
         traceback_nortify.start()
         auto_translate.start()
+        vote_report.start()
+
 
 """---------------------------------"""
 # Discord Sync
@@ -478,6 +480,57 @@ command `!translate [copy id / copy message link] [en / th]`
     # print('eng alpha', len(eng_alpha), eng_alpha)
     """
 
+@tasks.loop(minutes=1)
+async def vote_report():
+    guild = bot_func.get_guild()
+    text_channels = [i for i in guild.channels if str(i.type) == 'text']
+    for channel in text_channels:
+        channel_id = channel.id
+        bot_messages = [message async for message in channel.history(limit=50)]
+        bot_messages = [i for i in bot_messages if bot.user == i.author]
+        if bot_messages == []:
+            continue
+
+        vote_ref_msg_list = [i for i in bot_messages if 'vote_ref' in str(i.clean_content).split('\n')[-1]]
+
+        for bot_message in vote_ref_msg_list:
+            content = bot_message.clean_content
+            vote_ref = content.split('\n')[-1]
+            vote_ref = int(vote_ref.split('-')[-1])
+            #print(vote_ref)
+
+            partial_message = channel.get_partial_message(vote_ref)
+            question_message = await partial_message.fetch()
+            reactions = question_message.reactions
+            #print(reactions)
+
+            up_count = [i for i in reactions if i.emoji == '🔼'][0].count - 1
+            down_count = [i for i in reactions if i.emoji == '🔽'][0].count - 1
+            #print(up_count, down_count)
+
+            if sum([up_count, down_count]) != 0:
+                up_percentage = up_count/sum([up_count, down_count])
+                up_percentage = round(up_percentage * 100)
+                down_percentage = down_count/sum([up_count, down_count])
+                down_percentage = round(down_percentage * 100)
+                #print(up_percentage, down_percentage)
+
+            else:
+                up_percentage, down_percentage = [0,0]
+
+            up_bar = '▓' * int(round(up_percentage / 8))
+            down_bar = '▓' * int(round(down_percentage / 8))
+            # print(up_bar, down_bar)
+
+            msg = f'''
+🔼   {up_bar}  {up_count}
+🔽   {down_bar}  {down_count}
+
+vote_ref-{question_message.id}
+'''
+            await bot_message.edit(content=msg)
+
+
 """---------------------------------"""
 # Discord Command
 """---------------------------------"""
@@ -558,6 +611,21 @@ command `!translate [copy id / copy message link] [en / th]`
         '''
         await ctx.message.delete()
         await bot_msg.edit(content=new_msg, embed=embed, tts=True)
+
+@bot.command()
+async def vote(ctx, question):
+    ctx_data = bot_func.get_ctx_data(ctx)
+    #await ctx.message.delete(delay=10)
+    print(question)
+    #print(ctx.message.content)
+    msg = f'''
+vote_ref-{ctx_data['message']['id']}
+'''
+    bot_msg = await ctx.send(msg, delete_after=20)
+    await ctx.message.add_reaction('🔼')
+    await ctx.message.add_reaction('🔽')
+
+    #await bot_msg.edit(content=msg, delete_after=5)
 
 """---------------------------------"""
 # Discord Command Member
@@ -683,7 +751,7 @@ typ `!remove [Name]`
 @bot.command()
 @commands.has_role('Node Recruiter')
 async def add(ctx, member_name):
-    #await ctx.message.delete()
+    await ctx.message.delete()
     ctx_data = bot_func.get_ctx_data(ctx)
     channel_id = ctx_data['channel']['id']
     channel = bot.get_channel(channel_id)
@@ -722,6 +790,7 @@ async def remove(ctx, member_name):
         member = [i for i in guild.members if i.id == member_id][0]
         await channel.set_permissions(member, read_messages=False, send_messages=False)
         await ctx.send(f'**{member_name}**   leave channel')
+
 
 """
 @bot.event
