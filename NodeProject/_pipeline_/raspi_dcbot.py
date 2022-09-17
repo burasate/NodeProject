@@ -704,11 +704,11 @@ async def finance(ctx, doc_type):
     type_list = ['quotation', 'billing', 'invoice']
     if not doc_type in type_list:
         #print(f'document type must be in {type_list}')
-        await ctx.send(f'{mention}! document type must be in {type_list}', mention_author=True, delete_after=5)
+        await ctx.send(f'{mention}! document type must be in {type_list}', mention_author=True, delete_after=10)
         return None
     if ctx_data['category'] != {} and not 'project' in ctx_data['category']['name'].lower():
         print('can\'t run command because the channel\'s not in Node-Project category')
-        await ctx.send(f'{mention}! request\'s not in project channel', mention_author=True, delete_after=5)
+        await ctx.send(f'{mention}! request\'s not in project channel', mention_author=True, delete_after=10)
         return None
 
     task_name = 'generate_finance_document'
