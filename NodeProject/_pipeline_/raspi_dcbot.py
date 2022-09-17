@@ -173,7 +173,6 @@ async def on_ready():
         auto_translate.start()
         vote_report.start()
 
-
 """---------------------------------"""
 # Discord Sync
 """---------------------------------"""
@@ -632,6 +631,8 @@ vote_ref-{ctx_data['message']['id']}
 
     #await bot_msg.edit(content=msg, delete_after=5)
 
+
+
 """---------------------------------"""
 # Discord Command Member
 """---------------------------------"""
@@ -694,6 +695,24 @@ async def join(ctx, project_name, hour_week):
         'hour_week': float(hour_week)
     }
     bot_func.add_queue_task(task_name, task_data)
+
+@bot.command()
+async def finance(ctx, doc_type):
+    ctx_data = bot_func.get_ctx_data(ctx)
+    type_list = ['quatation', 'billing', 'invoice']
+    if not doc_type in type_list:
+        print(f'document type must be in {type_list}')
+        return None
+    if ctx_data['category'] != {} and not 'project' in ctx_data['category']['name'].lower():
+        print('can\'t run command because the channel\'s not in Node-Project category')
+        return None
+
+    task_name = 'generate_finance_document'
+    task_data = {
+        'member_id': ctx_data['author']['id'],
+        'project_id': ctx_data['channel']['id'],
+        'document_type' : doc_type
+    }
 
 """---------------------------------"""
 # Discord Command Recruiter
