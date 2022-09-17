@@ -697,6 +697,7 @@ async def join(ctx, project_name, hour_week):
 @bot.command()
 @commands.has_role('Node Freelancer')
 async def finance(ctx, doc_type):
+    doc_type = doc_type.lower()
     await ctx.message.delete(delay=0)
     ctx_data = bot_func.get_ctx_data(ctx)
     mention = ctx_data['author']['mention']
@@ -713,7 +714,8 @@ async def finance(ctx, doc_type):
 
     task_name = 'generate_finance_document'
     task_data = {
-        'member_id': ctx_data['author']['id'],
+        #'member_id': ctx_data['author']['id'],
+        'member_name': ctx_data['author']['nick'],
         'project_id': ctx_data['channel']['id'],
         'document_type' : doc_type
     }
