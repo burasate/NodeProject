@@ -503,7 +503,7 @@ async def vote_report():
             if not vote_ref in ref_id_list:
                 await bot_message.delete()
                 continue
-                
+
             partial_message = channel.get_partial_message(vote_ref)
             question_message = await partial_message.fetch()
             reactions = question_message.reactions
