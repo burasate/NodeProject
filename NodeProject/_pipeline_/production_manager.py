@@ -125,7 +125,7 @@ class finance:
 
             if prop_name in member_data:
                 #'''
-                finance.gSheet.setValue(
+                gSheet.setValue(
                     config_sheet, findKey='property_name', findValue=prop_name,
                     key='property_value', value=str(member_data[prop_name]),
                     sheet_name = finance.flow_account_sheet
@@ -133,7 +133,7 @@ class finance:
                 #'''
             elif prop_name in finance_df.columns:
                 #'''
-                finance.gSheet.setValue(
+                gSheet.setValue(
                     config_sheet, findKey = 'property_name', findValue = prop_name,
                     key = 'property_value', value=str(finance_sl[prop_name]),
                     sheet_name=finance.flow_account_sheet
