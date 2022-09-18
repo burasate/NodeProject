@@ -85,6 +85,7 @@ while True:
         print('========\nSystem Manager\n========')
         importlib.reload(system_manager)
         system_manager.workspaceSetup()
+        system_manager.integration.init_notion_db()
         system_manager.integration.load_notion_db()
         system_manager.data.create_history()
         system_manager.data.clear_past_history()
