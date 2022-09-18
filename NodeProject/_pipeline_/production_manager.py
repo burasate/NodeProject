@@ -63,8 +63,9 @@ class finance:
         member_name = task_queue.data['member_name']
         doc_type = task_queue.data['document_type']
 
-        old_sheet_name = gSheet.sheetName
-        gSheet.sheetName = 'KF_Personal_FlowAccount'
+        from gSheet import gSheet as fin_gSheet
+        #old_sheet_name = gSheet.sheetName
+        fin_gSheet.sheetName = 'KF_Personal_FlowAccount'
         config_sheet = 'config'
 
         nt_project_path = notiondb_dir + '/csv' + '/project.csv'
@@ -88,7 +89,7 @@ class finance:
         finance_sl = finance_df.loc[finance_df.index.tolist()[0]]
         #print(finance_sl)
 
-        finance_config = gSheet.getAllDataS('config')
+        finance_config = fin_gSheet.getAllDataS('config')
 
         nt_member_path = notiondb_dir + '/csv' + '/member.csv'
         member_df = pd.read_csv(nt_member_path)
@@ -121,21 +122,21 @@ class finance:
 
             if prop_name in member_data:
                 #'''
-                gSheet.setValue(
+                fin_gSheet.setValue(
                     config_sheet, findKey='property_name', findValue=prop_name,
                     key='property_value', value=str(member_data[prop_name])
                 )
                 #'''
             elif prop_name in finance_df.columns:
                 #'''
-                gSheet.setValue(
+                fin_gSheet.setValue(
                     config_sheet, findKey = 'property_name', findValue = prop_name,
                     key = 'property_value', value=str(finance_sl[prop_name])
                 )
                 #'''
 
         #Finish GSheet
-        gSheet.sheetName = old_sheet_name
+        #fin_gSheet.sheetName = old_sheet_name
         pprint.pprint(link_data)
 
         #Save file
@@ -404,7 +405,7 @@ class task_queue:
 if __name__ == '__main__':
     base_path = os.sep.join(rootPath.split(os.sep)[:-1])
     #load_worksheet('AnimationTracking', base_path + '/production_rec')
-    finance.get_finance_doc_link()
+    #finance.get_finance_doc_link()
 
     #register.update_member()
     #task_queue.run()

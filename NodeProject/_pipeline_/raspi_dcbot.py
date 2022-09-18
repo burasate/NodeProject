@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from discord.ext import commands, tasks
 import discord
-import requests, os, csv, os, json, time, pprint, sys
+import requests, os, csv, os, json, time, pprint, sys, shutil
 import datetime as dt
 import pandas as pd
 import numpy as np
@@ -22,6 +22,8 @@ if not src_path in sys.path:
 from notionDatabase import notionDatabase as ntdb
 from gSheet import gSheet
 gSheet.sheetName = 'Node Project Integration'
+import system_manager
+import production_manager
 
 config_file_name = os.path.basename(os.path.abspath(__file__)).replace('.py','.json')
 with open(base_path + '/' + config_file_name) as config_f:
@@ -161,6 +163,7 @@ class bot_func:
 @bot.event
 async def on_ready():
     print('bot online now!')
+    dm_finance_document.start()
 
     if not os.name == 'nt':
         channel = bot.get_channel(channel_dict['log'])
@@ -377,13 +380,12 @@ async def project_channel_update():
 
 @tasks.loop(hours=6)
 async def traceback_nortify():
-    import system_manager
     rec = system_manager.error.get_nortify()
     for i in rec:
         msg = \
 f'''
 🚨 {i['date_time']}
-`{i['traceback'][-3000:]}`
+`{str(i['traceback'])[-3000:]}`
 '''
         channel = bot.get_channel(channel_dict['log'])
         await channel.send(f'{msg}')
@@ -534,6 +536,50 @@ vote_ref-{question_message.id}
 '''
             await bot_message.edit(content=msg)
 
+@tasks.loop(minutes=1)
+async def dm_finance_document():
+    members = bot_func.get_guild().members
+    member_rec = bot_func.get_notino_db('member')
+    project_rec = bot_func.get_notino_db('project')
+    type_dict = {
+        'quotation' : 'ใบเสนอราคา',
+        'billing' : 'ใบเสนอราคา',
+        'invoice' : 'ใบแจ้งหนี้/ใบเสร็จรับเงิน'
+    }
+
+    file_storage_dir = production_manager.file_storage_dir
+    project_id_list = os.listdir(file_storage_dir)
+    #print(project_id_list)
+    for project_id in project_id_list:
+        pdf_dir = file_storage_dir + os.sep + project_id
+        pdf_list = os.listdir(pdf_dir)
+        pdf_list = [i for i in pdf_list if i.split('_')[-1].replace('.pdf','') in list(type_dict)]
+        #print(pdf_list)
+
+        for file in pdf_list:
+            file_path = (pdf_dir+os.sep+file).replace('\\','/')
+            #print(file_path)
+            member_id = file.replace('.pdf','').split('_')[0]
+            doc_type = file.replace('.pdf','').split('_')[-1]
+            #print(member_id)
+            member_sl = [i for i in member_rec if i['page_id'] == member_id][0]
+            pprint.pprint(member_sl)
+            discord_id = member_sl['discord_id']
+            #print(discord_id)
+            member = [i for i in members if i.id == discord_id][0]
+            #print(member)
+
+            time.sleep(1)
+            msg = f'''
+กรุณาตรวจสอบและเซ็นเอกสาร {type_dict[doc_type]}
+แล้วส่งกลับมาที่
+embed url....
+'''
+            await member.send(msg, file=discord.File(file_path), delete_after=10)
+
+            if not os.path.exists(pdf_dir+'/dm'):
+                os.makedirs(pdf_dir+'/dm')
+            shutil.move(file_path, pdf_dir + '/dm' + os.sep + file)
 
 """---------------------------------"""
 # Discord Command
