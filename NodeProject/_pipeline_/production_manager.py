@@ -92,7 +92,7 @@ class finance:
         finance_sl = finance_df.loc[finance_df.index.tolist()[0]]
         #print(finance_sl)
 
-        finance_config = gSheet.getAllDataS('config', sheet_name=flow_account_sheet)
+        finance_config = gSheet.getAllDataS('config', sheet_name=finance.flow_account_sheet)
 
         nt_member_path = notiondb_dir + '/csv' + '/member.csv'
         member_df = pd.read_csv(nt_member_path)
@@ -128,7 +128,7 @@ class finance:
                 finance.gSheet.setValue(
                     config_sheet, findKey='property_name', findValue=prop_name,
                     key='property_value', value=str(member_data[prop_name]),
-                    sheet_name = flow_account_sheet
+                    sheet_name = finance.flow_account_sheet
                 )
                 #'''
             elif prop_name in finance_df.columns:
@@ -136,7 +136,7 @@ class finance:
                 finance.gSheet.setValue(
                     config_sheet, findKey = 'property_name', findValue = prop_name,
                     key = 'property_value', value=str(finance_sl[prop_name]),
-                    sheet_name=flow_account_sheet
+                    sheet_name=finance.flow_account_sheet
                 )
                 #'''
 
@@ -411,7 +411,6 @@ if __name__ == '__main__':
     base_path = os.sep.join(rootPath.split(os.sep)[:-1])
     #load_worksheet('AnimationTracking', base_path + '/production_rec')
     print(gSheet.sheetName)
-    print(finance.gSheet.sheetName)
     #finance.get_finance_doc_link()
 
     #register.update_member()
