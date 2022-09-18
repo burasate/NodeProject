@@ -53,6 +53,8 @@ def loadNotionDatabase(dirPath):
 
 # Finance System
 class finance:
+    from gSheet import gSheet
+    finance.gSheet.sheetName = 'KF_Personal_FlowAccount'
     def get_finance_doc_link():
         """
         project_id = 'c3193d9b885043f89cc51c5a0508a1a6'
@@ -63,9 +65,7 @@ class finance:
         member_name = task_queue.data['member_name']
         doc_type = task_queue.data['document_type']
 
-        from gSheet import gSheet as fin_gSheet
         #old_sheet_name = gSheet.sheetName
-        fin_gSheet.sheetName = 'KF_Personal_FlowAccount'
         config_sheet = 'config'
 
         nt_project_path = notiondb_dir + '/csv' + '/project.csv'
@@ -89,7 +89,7 @@ class finance:
         finance_sl = finance_df.loc[finance_df.index.tolist()[0]]
         #print(finance_sl)
 
-        finance_config = fin_gSheet.getAllDataS('config')
+        finance_config = finance.gSheet.getAllDataS('config')
 
         nt_member_path = notiondb_dir + '/csv' + '/member.csv'
         member_df = pd.read_csv(nt_member_path)
@@ -122,14 +122,14 @@ class finance:
 
             if prop_name in member_data:
                 #'''
-                fin_gSheet.setValue(
+                finance.gSheet.setValue(
                     config_sheet, findKey='property_name', findValue=prop_name,
                     key='property_value', value=str(member_data[prop_name])
                 )
                 #'''
             elif prop_name in finance_df.columns:
                 #'''
-                fin_gSheet.setValue(
+                finance.gSheet.setValue(
                     config_sheet, findKey = 'property_name', findValue = prop_name,
                     key = 'property_value', value=str(finance_sl[prop_name])
                 )
