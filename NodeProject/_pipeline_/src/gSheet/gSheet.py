@@ -77,10 +77,13 @@ def setValue(workSheet,findKey=None,findValue=None,key=None,value=None, sheet_na
         if not key in data:
             return None
         if data[findKey] == findValue and key in data:
+            print(sheet_name)
+
             colIndex = 0
             for col in getWorksheetColumnName(workSheet):
                 colIndex += 1
                 if col == key:
+
                     sheet = connect().open(sheet_name).worksheet(workSheet)
                     sheet.update_cell(row=rowIndex,col=colIndex,value=value)
                     print('update cell in > row : {}  column : \'{}\'  value : {}'.format(rowIndex,key,value))
