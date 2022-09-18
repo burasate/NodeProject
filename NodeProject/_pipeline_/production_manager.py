@@ -410,11 +410,10 @@ class task_queue:
 if __name__ == '__main__':
     base_path = os.sep.join(rootPath.split(os.sep)[:-1])
     #load_worksheet('AnimationTracking', base_path + '/production_rec')
-    print(gSheet.sheetName)
     #finance.get_finance_doc_link()
 
-    register.update_member()
-    #task_queue.run()
+    #register.update_member()
+    task_queue.run()
     #project.update_invite()
     #project.add_member(346164580487004171, 'Project_Test', 20)
     pass
