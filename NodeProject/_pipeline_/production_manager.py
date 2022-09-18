@@ -413,7 +413,7 @@ if __name__ == '__main__':
     print(gSheet.sheetName)
     #finance.get_finance_doc_link()
 
-    #register.update_member()
+    register.update_member()
     #task_queue.run()
     #project.update_invite()
     #project.add_member(346164580487004171, 'Project_Test', 20)

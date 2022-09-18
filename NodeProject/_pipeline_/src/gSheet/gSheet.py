@@ -5,6 +5,10 @@ rootPath = os.path.dirname(os.path.abspath(__file__))
 jsonKeyPath = rootPath + '/899435123a5b_production.json'
 sheetName = 'AnimTracking_Template'
 
+def getSheetName():
+    global sheetName
+    return sheetName
+
 def connect(*_):
     scope = ['https://spreadsheets.google.com/feeds',
              'https://www.googleapis.com/auth/drive']
@@ -12,12 +16,16 @@ def connect(*_):
     gc = gspread.authorize(credential)
     return gc
 
-def getWorksheetColumnName(workSheet, sheet_name=sheetName):
+def getWorksheetColumnName(workSheet, sheet_name=''):
+    if sheet_name == '':
+        sheet_name = getSheetName()
     sheet = connect().open(sheet_name).worksheet(workSheet)
     header = sheet.row_values(1)
     return header
 
-def updateFromCSV(csvPath, workSheet, newline='', sheet_name=sheetName):
+def updateFromCSV(csvPath, workSheet, newline='', sheet_name=''):
+    if sheet_name == '':
+        sheet_name = getSheetName()
     sheet = connect().open(sheet_name).worksheet(workSheet)
 
     #load csv
@@ -34,11 +42,15 @@ def updateFromCSV(csvPath, workSheet, newline='', sheet_name=sheetName):
     except:
         raise IOError('Update Sheet Error')
 
-def addRow(workSheet, column, sheet_name=sheetName):
+def addRow(workSheet, column, sheet_name=''):
+    if sheet_name == '':
+        sheet_name = getSheetName()
     sheet = connect().open(sheet_name).worksheet(workSheet)
     sheet.append_row(column,value_input_option='USER_ENTERED')
 
-def deleteRow(workSheet, colName, value, sheet_name=sheetName):
+def deleteRow(workSheet, colName, value, sheet_name=''):
+    if sheet_name == '':
+        sheet_name = getSheetName()
     sheet = connect().open(sheet_name).worksheet(workSheet)
     dataS = sheet.get_all_records()
     rowIndex = 1
@@ -48,12 +60,16 @@ def deleteRow(workSheet, colName, value, sheet_name=sheetName):
             sheet.delete_row(rowIndex)
             print('Sheet "{}" Deleted Row {}'.format(workSheet,rowIndex))
 
-def getAllDataS(workSheet, sheet_name=sheetName):
+def getAllDataS(workSheet, sheet_name=''):
+    if sheet_name == '':
+        sheet_name = getSheetName()
     sheet = connect().open(sheet_name).worksheet(workSheet)
     dataS = sheet.get_all_records()
     return dataS
 
-def setValue(workSheet,findKey=None,findValue=None,key=None,value=None, sheet_name=sheetName):
+def setValue(workSheet,findKey=None,findValue=None,key=None,value=None, sheet_name=''):
+    if sheet_name == '':
+        sheet_name = getSheetName()
     dataS = getAllDataS(workSheet)
     rowIndex = 1
     for data in dataS:
@@ -71,7 +87,9 @@ def setValue(workSheet,findKey=None,findValue=None,key=None,value=None, sheet_na
                     break
             break
 
-def sortFisrtColumn(workSheet, sheet_name=sheetName):
+def sortFisrtColumn(workSheet, sheet_name=''):
+    if sheet_name == '':
+        sheet_name = getSheetName()
     sheet = connect().open(sheet_name).worksheet(workSheet)
     sheet.sort((1, 'asc'))
 
