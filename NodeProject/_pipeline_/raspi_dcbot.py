@@ -575,7 +575,7 @@ async def dm_finance_document():
 แล้วส่งกลับมาที่
 embed url....
 '''
-            await member.send(msg, file=discord.File(file_path), delete_after=10)
+            await member.send(msg, file=discord.File(file_path))
 
             if not os.path.exists(pdf_dir+'/dm'):
                 os.makedirs(pdf_dir+'/dm')
