@@ -12,13 +12,13 @@ def connect(*_):
     gc = gspread.authorize(credential)
     return gc
 
-def getWorksheetColumnName(workSheet):
-    sheet = connect().open(sheetName).worksheet(workSheet)
+def getWorksheetColumnName(workSheet, sheet_name=sheetName):
+    sheet = connect().open(sheet_name).worksheet(workSheet)
     header = sheet.row_values(1)
     return header
 
-def updateFromCSV(csvPath, workSheet,newline=''):
-    sheet = connect().open(sheetName).worksheet(workSheet)
+def updateFromCSV(csvPath, workSheet, newline='', sheet_name=sheetName):
+    sheet = connect().open(sheet_name).worksheet(workSheet)
 
     #load csv
     tableList = []
@@ -34,12 +34,12 @@ def updateFromCSV(csvPath, workSheet,newline=''):
     except:
         raise IOError('Update Sheet Error')
 
-def addRow(workSheet,column):
-    sheet = connect().open(sheetName).worksheet(workSheet)
+def addRow(workSheet, column, sheet_name=sheetName):
+    sheet = connect().open(sheet_name).worksheet(workSheet)
     sheet.append_row(column,value_input_option='USER_ENTERED')
 
-def deleteRow(workSheet,colName,value):
-    sheet = connect().open(sheetName).worksheet(workSheet)
+def deleteRow(workSheet, colName, value, sheet_name=sheetName):
+    sheet = connect().open(sheet_name).worksheet(workSheet)
     dataS = sheet.get_all_records()
     rowIndex = 1
     for data in dataS:
@@ -48,12 +48,12 @@ def deleteRow(workSheet,colName,value):
             sheet.delete_row(rowIndex)
             print('Sheet "{}" Deleted Row {}'.format(workSheet,rowIndex))
 
-def getAllDataS(workSheet):
-    sheet = connect().open(sheetName).worksheet(workSheet)
+def getAllDataS(workSheet, sheet_name=sheetName):
+    sheet = connect().open(sheet_name).worksheet(workSheet)
     dataS = sheet.get_all_records()
     return dataS
 
-def setValue(workSheet,findKey=None,findValue=None,key=None,value=None):
+def setValue(workSheet,findKey=None,findValue=None,key=None,value=None, sheet_name=sheetName):
     dataS = getAllDataS(workSheet)
     rowIndex = 1
     for data in dataS:
@@ -65,14 +65,14 @@ def setValue(workSheet,findKey=None,findValue=None,key=None,value=None):
             for col in getWorksheetColumnName(workSheet):
                 colIndex += 1
                 if col == key:
-                    sheet = connect().open(sheetName).worksheet(workSheet)
+                    sheet = connect().open(sheet_name).worksheet(workSheet)
                     sheet.update_cell(row=rowIndex,col=colIndex,value=value)
                     print('update cell in > row : {}  column : \'{}\'  value : {}'.format(rowIndex,key,value))
                     break
             break
 
-def sortFisrtColumn(workSheet):
-    sheet = connect().open(sheetName).worksheet(workSheet)
+def sortFisrtColumn(workSheet, sheet_name=sheetName):
+    sheet = connect().open(sheet_name).worksheet(workSheet)
     sheet.sort((1, 'asc'))
 
 if __name__ == '__main__':

@@ -53,8 +53,10 @@ def loadNotionDatabase(dirPath):
 
 # Finance System
 class finance:
-    from gSheet import gSheet
-    finance.gSheet.sheetName = 'KF_Personal_FlowAccount'
+    #from gSheet import gSheet as gSheet
+    #gSheet.sheetName = 'KF_Personal_FlowAccount'
+    flow_account_sheet = 'KF_Personal_FlowAccount'
+
     def get_finance_doc_link():
         """
         project_id = 'c3193d9b885043f89cc51c5a0508a1a6'
@@ -66,6 +68,7 @@ class finance:
         doc_type = task_queue.data['document_type']
 
         #old_sheet_name = gSheet.sheetName
+        #gSheet.sheetName = 'KF_Personal_FlowAccount'
         config_sheet = 'config'
 
         nt_project_path = notiondb_dir + '/csv' + '/project.csv'
@@ -89,7 +92,7 @@ class finance:
         finance_sl = finance_df.loc[finance_df.index.tolist()[0]]
         #print(finance_sl)
 
-        finance_config = finance.gSheet.getAllDataS('config')
+        finance_config = gSheet.getAllDataS('config', sheet_name=flow_account_sheet)
 
         nt_member_path = notiondb_dir + '/csv' + '/member.csv'
         member_df = pd.read_csv(nt_member_path)
@@ -124,14 +127,16 @@ class finance:
                 #'''
                 finance.gSheet.setValue(
                     config_sheet, findKey='property_name', findValue=prop_name,
-                    key='property_value', value=str(member_data[prop_name])
+                    key='property_value', value=str(member_data[prop_name]),
+                    sheet_name = flow_account_sheet
                 )
                 #'''
             elif prop_name in finance_df.columns:
                 #'''
                 finance.gSheet.setValue(
                     config_sheet, findKey = 'property_name', findValue = prop_name,
-                    key = 'property_value', value=str(finance_sl[prop_name])
+                    key = 'property_value', value=str(finance_sl[prop_name]),
+                    sheet_name=flow_account_sheet
                 )
                 #'''
 
@@ -405,6 +410,8 @@ class task_queue:
 if __name__ == '__main__':
     base_path = os.sep.join(rootPath.split(os.sep)[:-1])
     #load_worksheet('AnimationTracking', base_path + '/production_rec')
+    print(gSheet.sheetName)
+    print(finance.gSheet.sheetName)
     #finance.get_finance_doc_link()
 
     #register.update_member()
