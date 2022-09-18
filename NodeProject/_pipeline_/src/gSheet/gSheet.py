@@ -77,10 +77,8 @@ def setValue(workSheet,findKey=None,findValue=None,key=None,value=None, sheet_na
         if not key in data:
             return None
         if data[findKey] == findValue and key in data:
-            print(sheet_name)
-
             colIndex = 0
-            for col in getWorksheetColumnName(workSheet):
+            for col in getWorksheetColumnName(workSheet, sheet_name=sheet_name):
                 colIndex += 1
                 if col == key:
 
