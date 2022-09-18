@@ -70,7 +70,7 @@ def getAllDataS(workSheet, sheet_name=''):
 def setValue(workSheet,findKey=None,findValue=None,key=None,value=None, sheet_name=''):
     if sheet_name == '':
         sheet_name = getSheetName()
-    dataS = getAllDataS(workSheet)
+    dataS = getAllDataS(workSheet, sheet_name=sheet_name)
     rowIndex = 1
     for data in dataS:
         rowIndex += 1
