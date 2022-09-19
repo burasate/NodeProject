@@ -163,7 +163,6 @@ class bot_func:
 @bot.event
 async def on_ready():
     print('bot online now!')
-    print_time.start()
 
     if not os.name == 'nt':
         channel = bot.get_channel(channel_dict['log'])
@@ -181,7 +180,7 @@ async def on_ready():
 """---------------------------------"""
 # Discord Sync
 """---------------------------------"""
-@tasks.loop(minutes=1)
+@tasks.loop(minutes=30)
 async def print_time():
     print(f'\n==========[     {dt.datetime.now()}     ]==========\n')
 
