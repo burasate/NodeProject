@@ -77,7 +77,7 @@ while True:
 
         while not has_internet():
             os.system('cls||clear')
-            print('{}   no internet connection!'.format(now))
+            print('{}   no internet connection!')
             time.sleep(30)
 
         print(os.system('cls||clear'))
