@@ -1,12 +1,17 @@
-from Google import Create_Service
 from googleapiclient.http import MediaFileUpload
-import pprint, os, mimetypes
-import pandas as pd
+import pprint, os, mimetypes, sys
+#import pandas as pd
 
 # Reference
 # https://developers.google.com/drive/api/v3/reference/files
 
-CLIENT_SECRET_FILE = 'credentials.json'
+#Environment
+root_path = os.path.dirname(os.path.abspath(__file__))
+if not root_path in sys.path:
+    sys.path.insert(0,root_path)
+from Google import Create_Service
+
+CLIENT_SECRET_FILE = root_path + os.sep + 'credentials.json'
 API_NAME = 'drive'
 API_VERSION = 'v3'
 SCOPES = ['https://www.googleapis.com/auth/drive']
