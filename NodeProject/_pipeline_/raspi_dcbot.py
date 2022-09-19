@@ -163,12 +163,14 @@ class bot_func:
 @bot.event
 async def on_ready():
     print('bot online now!')
+    print_time.start()
 
     if not os.name == 'nt':
         channel = bot.get_channel(channel_dict['log'])
         await channel.send(f'`{dt.datetime.now()}`\nHello, I just woke up\n(Runnig on os \"{os.name}\")')
 
         #project_invite.start()
+        print_time.start()
         vote_report.start()
         role_update.start()
         project_channel_update.start()
@@ -179,6 +181,10 @@ async def on_ready():
 """---------------------------------"""
 # Discord Sync
 """---------------------------------"""
+@tasks.loop(minutes=1)
+async def print_time():
+    print(f'\n==========[     {dt.datetime.now()}     ]==========\n')
+
 @tasks.loop(minutes=10)
 async def role_update():
     regis_rec = bot_func.get_notino_db('member', dropna=True)
@@ -218,7 +224,7 @@ async def role_update():
         else:
             await member.remove_roles(apply_role)
 
-    print(dt.datetime.now(), 'member role updated')
+    print('member role updated')
 
 """
 @tasks.loop(minutes=10)
