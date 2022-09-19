@@ -52,7 +52,7 @@ while not has_internet():
     print(has_internet())
     now = str(dt.datetime.now().strftime('%Y/%m/%d %H:%M:%S'))
     print('{}   no internet connection!'.format(now))
-    time.sleep(1)
+    time.sleep(10)
 
 # Discord Bot
 if not os.name == 'nt':
@@ -74,6 +74,11 @@ while True:
             raspi_update.update()
             time.sleep(3)
         """
+
+        while not has_internet():
+            os.system('cls||clear')
+            print('{}   no internet connection!'.format(now))
+            time.sleep(30)
 
         print(os.system('cls||clear'))
         dateTime = dt.datetime.now().strftime('%Y/%m/%d %H:%M:%S')

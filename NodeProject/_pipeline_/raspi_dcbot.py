@@ -163,7 +163,6 @@ class bot_func:
 @bot.event
 async def on_ready():
     print('bot online now!')
-    dm_finance_document.start()
 
     if not os.name == 'nt':
         channel = bot.get_channel(channel_dict['log'])
@@ -175,6 +174,7 @@ async def on_ready():
         traceback_nortify.start()
         auto_translate.start()
         vote_report.start()
+        dm_finance_document.start()
 
 """---------------------------------"""
 # Discord Sync
