@@ -169,11 +169,11 @@ async def on_ready():
         await channel.send(f'`{dt.datetime.now()}`\nHello, I just woke up\n(Runnig on os \"{os.name}\")')
 
         #project_invite.start()
+        vote_report.start()
         role_update.start()
         project_channel_update.start()
         traceback_nortify.start()
         auto_translate.start()
-        vote_report.start()
         dm_finance_document.start()
 
 """---------------------------------"""
@@ -481,7 +481,7 @@ command `!translate [copy id / copy message link] [en / th]`
     # print('eng alpha', len(eng_alpha), eng_alpha)
     """
 
-@tasks.loop(minutes=1)
+@tasks.loop(seconds=30)
 async def vote_report():
     guild = bot_func.get_guild()
     text_channels = [i for i in guild.channels if str(i.type) == 'text']
@@ -498,7 +498,7 @@ async def vote_report():
             content = bot_message.clean_content
             vote_ref = content.split('\n')[-1]
             vote_ref = int(vote_ref.split('-')[-1])
-            #print(vote_ref)
+            #print(vote_ref,content)
 
             ref_id_list = [message.id async for message in channel.history(limit=100)]
             if not vote_ref in ref_id_list:
@@ -527,14 +527,17 @@ async def vote_report():
             up_bar = '▓' * int(round(up_percentage / 8))
             down_bar = '▓' * int(round(down_percentage / 8))
             # print(up_bar, down_bar)
+            up_count_text = '{:0>2d}'.format(up_count)
+            down_count_text = '{:0>2d}'.format(down_count)
 
             msg = f'''
-🔼   {up_bar}  {up_count}
-🔽   {down_bar}  {down_count}
+🔼   {up_bar}  {up_count_text}  ({up_percentage}%)
+🔽   {down_bar}  {down_count_text}  ({down_percentage}%)
 
 vote_ref-{question_message.id}
 '''
             await bot_message.edit(content=msg)
+    print('voting updated')
 
 @tasks.loop(minutes=1)
 async def dm_finance_document():
