@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 from discord.ext import commands, tasks
-import discord
+import discord, urllib
 import requests, os, csv, os, json, time, pprint, sys, shutil
 import datetime as dt
 import pandas as pd
 import numpy as np
+import urllib.parse
 
 """
 https://discordpy.readthedocs.io/en/stable/api.html
@@ -579,11 +580,23 @@ async def dm_finance_document():
 
             time.sleep(1)
             msg = f'''
-กรุณาตรวจสอบและเซ็นเอกสาร {type_dict[doc_type]}
-แล้วส่งกลับมาที่
-embed url....
+กรุณาตรวจสอบและเซ็นเอกสาร {type_dict[doc_type]} แล้วส่งกลับมาที่ลิงค์ด้านล่างนี้
+Please sign {doc_type} and send back to the link below message.
 '''
-            await member.send(msg, file=discord.File(file_path))
+            message = await member.send(msg, file=discord.File(file_path))
+
+            doc_name = '{} {}'.format(member_sl['title'], doc_type.capitalize())
+            form_param = urllib.parse.urlencode({
+                'usp': 'pp_url',
+                'entry.21514028': doc_name,  # document_name
+                'entry.539277546': member_id,  # member_nt_ref
+                'entry.1860269556': project_id,  # project_nt_ref
+                'entry.781252395': discord_id,  # member_dc_ref
+                'entry.277609094': message.id  # message_ref
+            })
+            form_url = 'https://docs.google.com/forms/d/e/1FAIpQLSeq6iGMdZfAsputj3mo48OlFdTYck8APClpjDkSOk6dMbZq5A/viewform?' + form_param
+            embed = discord.Embed(title=doc_name, url=form_url)
+            message.edit(embed=embed)
 
             if not os.path.exists(pdf_dir+'/dm'):
                 os.makedirs(pdf_dir+'/dm')
@@ -749,7 +762,7 @@ async def join(ctx, project_name, hour_week):
     bot_func.add_queue_task(task_name, task_data)
 
 @bot.command()
-@commands.has_role('Node Freelancer')
+@commands.has_role('Node Recruiter')
 async def finance(ctx, doc_type):
     doc_type = doc_type.lower()
     await ctx.message.delete(delay=0)
