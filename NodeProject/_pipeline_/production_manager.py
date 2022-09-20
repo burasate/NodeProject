@@ -383,6 +383,7 @@ class task_queue:
                     project.add_project_member()
 
                 elif row['name'] == 'generate_financial_document':
+                    time.sleep(45)
                     finance.get_finance_doc_link()
 
                 else:
