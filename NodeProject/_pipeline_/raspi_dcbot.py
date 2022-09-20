@@ -596,7 +596,7 @@ Please sign {doc_type} and send back to the link below message.
             })
             form_url = 'https://docs.google.com/forms/d/e/1FAIpQLSeq6iGMdZfAsputj3mo48OlFdTYck8APClpjDkSOk6dMbZq5A/viewform?' + form_param
             embed = discord.Embed(title=doc_name, url=form_url)
-            message.edit(embed=embed)
+            await message.edit(embed=embed)
 
             if not os.path.exists(pdf_dir+'/dm'):
                 os.makedirs(pdf_dir+'/dm')
