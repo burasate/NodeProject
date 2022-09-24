@@ -30,7 +30,6 @@ from gSheet import gSheet
 gSheet.sheetName = 'Node Project Integration'
 from notionDatabase import notionDatabase
 from gSheet import gSheet
-#from gDrive import gDrive
 
 # Path
 prev_dir = os.sep.join(rootPath.split(os.sep)[:-1])
