@@ -27,7 +27,7 @@ pd.set_option('display.width', None)
 from gSheet import gSheet
 gSheet.sheetName = 'Node Project Integration'
 from notionDatabase import notionDatabase as ntdb
-from gDrive import gDrive
+#from gDrive import gDrive
 from maReader import maReader
 
 # Path
