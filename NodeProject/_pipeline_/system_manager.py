@@ -27,7 +27,8 @@ pd.set_option('display.width', None)
 from gSheet import gSheet
 gSheet.sheetName = 'Node Project Integration'
 from notionDatabase import notionDatabase as ntdb
-#from gDrive import gDrive
+from gDrive import gDrive
+from maReader import maReader
 
 # Path
 prev_dir = os.sep.join(root_path.split(os.sep)[:-1])
@@ -229,6 +230,85 @@ class fika: #teletubbies files
                 if not is_exists:
                     shutil.copyfile(file_path, dest_file_path)
                     print(file_path)
+
+    def ttf_ma_stat(limit_count = 15):
+        vpn_log = open(r"C:\Users\DEX3D_I7\OpenVPN\log\GPLpfSenseA-UDP4-1196-fika_guest_3-config.log").readlines()
+        if not 'Initialization Sequence Completed' in vpn_log[-1]:
+            return None
+        print('Fika Connection : {}'.format(vpn_log[-1]))
+
+        stat_json_dir = r'D:\GDrive\Temp\Fika\Stat\json'
+
+        all_ma_path_list = []
+        ep_list = ['1003','1005','1006','1007']
+        for ep in ep_list:
+            ep_path = r'E:\Shots\Publish\{}'.format(ep)
+            try:
+                seq_list = os.listdir(ep_path)
+            except:
+                return None
+
+            for seq in seq_list:
+                seq_path = ep_path + os.sep + seq
+                shot_list = os.listdir(seq_path)
+                #print(seq_path)
+                #shot_dir = seq_path + os.sep + seq
+                ma_path_list = [
+                    seq_path + os.sep + i + os.sep + 'Layout' + os.sep + f'{ep}_{seq}_{i}_Layout.ma'
+                    for i in shot_list
+                ]
+                ma_path_list = [i for i in ma_path_list if os.path.exists(i)]
+                #print(ma_path_list)
+                all_ma_path_list += ma_path_list
+                print('found ma path files ', len(all_ma_path_list))
+                #break
+            #break
+
+        load_count = 0
+        for ma_path in all_ma_path_list:
+            dir_path = os.path.dirname(ma_path).replace('.ma','')
+            name = os.path.basename(ma_path)
+            version = sorted([i for i in os.listdir(dir_path) if not '.' in i])[-1]
+            ep = name.split('_')[0]
+            seq = name.split('_')[1]
+            shot = name.split('_')[2]
+
+            j_path = stat_json_dir + f'/{name}_{version}.json'.replace('.ma', '')
+            if os.path.exists(j_path):
+                continue
+            if load_count > 15:
+                return None
+
+            data = maReader.getStat(ma_path)
+            data['name'] = name
+            data['version'] = version
+            data['episode'] = ep
+            data['sequence'] = seq
+            data['shot'] = shot
+            print('record stat {}'.format(name))
+
+            with open(j_path, 'w') as j_file:
+                json.dump(data, j_file, indent=4)
+            load_count += 1
+
+    def stat_upload():
+        df = pd.DataFrame()
+        stat_json_dir = r'D:\GDrive\Temp\Fika\Stat\json'
+        stat_path_list = [stat_json_dir + os.sep + i for i in os.listdir(stat_json_dir)]
+
+        for j_path in stat_path_list:
+            #print(j_path)
+            data = json.load(open(j_path))
+            df = df.append(pd.DataFrame([data]))
+        df.reset_index(inplace=True, drop=True)
+
+        csv_path = r'D:\GDrive\Temp\Fika\Stat'+os.sep+'ttf_version_stat.csv'
+        df.to_csv(csv_path, index=False)
+
+        time.sleep(5)
+        gSheet.updateFromCSV(csv_path, 'ma_stat', newline='', sheet_name='Fika_TTF_Stat')
+        print('update fika sheet')
+
     """
     def cache_audio_file():
         dir_path = r'E:\Mocap'
@@ -256,13 +336,15 @@ if __name__ == '__main__':
     #base_path = os.sep.join(root_path.split(os.sep)[:-1])
     #workspaceSetup()
     #versionBackup('.ma', base_path)
-    integration.init_notion_db()
-    integration.load_notion_db()
-    integration.notion_sheet()
+    #integration.init_notion_db()
+    #integration.load_notion_db()
+    #integration.notion_sheet()
     #data.create_history()
     #data.clear_past_history()
     #print(data.get_history_path_list(r"D:\GDrive\Documents\2022\BRSAnimPipeline\work\NodeProject\NodeProject\production_rec\notionDatabase\csv\project.csv"))
 
     #fika.cache_layout_file()
     #fika.cache_audio_file()
+    #fika.ttf_ma_stat()
+    fika.stat_upload()
     pass

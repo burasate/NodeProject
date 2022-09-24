@@ -105,6 +105,8 @@ while True:
             #system_manager.versionBackup('.ma', r'C:\Fika\Projects\Dug\Shots', dateFormat='%Y%m%d_%H%M')
             system_manager.versionBackup('.ma', r"D:\GDrive\Temp\Fika\Works", dateFormat='%Y%m%d_%H%M')
             system_manager.versionBackup('.mov', r"D:\GDrive\Temp\Fika\Works", dateFormat='%Y%m%d_%H%M')
+            system_manager.fika.ttf_ma_stat()
+            system_manager.fika.stat_upload()
 
         """
         Production Manager (update, record and cleanup data of production)
