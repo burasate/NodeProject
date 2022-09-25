@@ -93,8 +93,10 @@ class finance:
         finance_sl = finance_df.loc[finance_df.index.tolist()[0]]
         #print(finance_sl)
 
+        finance_sl['service_unit_price'] = finance_sl['service_unit_price'] * finance_sl['service_quantity']
+        finance_sl['service_quantity'] = 1
         workload_percentile = project.get_member_workload(project_sl['project_name'], member_name)
-        finance_sl['price_baht'] = finance_sl['price_baht'] * workload_percentile
+        finance_sl['service_unit_price'] = finance_sl['service_unit_price'] * workload_percentile
 
         finance_config = gSheet.getAllDataS('config', sheet_name=finance.flow_account_sheet)
 
@@ -162,7 +164,7 @@ class finance:
 
     def get_document_review():
         doc_data = gSheet.getAllDataS('Document')
-        pprint.pprint(doc_data)
+        #pprint.pprint(doc_data)
         r_data = []
         for data in doc_data:
             if not data['document_type'] == 'financial':
