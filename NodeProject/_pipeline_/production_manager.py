@@ -96,7 +96,7 @@ class finance:
         finance_sl['service_unit_price'] = finance_sl['service_unit_price'] * finance_sl['service_quantity']
         finance_sl['service_quantity'] = 1
         workload_percentile = project.get_member_workload(project_sl['project_name'], member_name)
-        finance_sl['service_unit_price'] = finance_sl['service_unit_price'] * workload_percentile
+        finance_sl['service_unit_price'] = finance_sl['service_unit_price'].sum() * workload_percentile
 
         finance_config = gSheet.getAllDataS('config', sheet_name=finance.flow_account_sheet)
 
@@ -373,7 +373,7 @@ class project:
         #print(sec_dur, sec_total, sec_dur/sec_total)
 
         if percentile:
-            return sec_dur/sec_total
+            return round(sec_dur/sec_total,2)
         else:
             return sec_dur
 

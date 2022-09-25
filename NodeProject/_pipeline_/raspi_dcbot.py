@@ -488,7 +488,7 @@ command `!translate [copy id / copy message link] [en / th]`
     # print('eng alpha', len(eng_alpha), eng_alpha)
     """
 
-@tasks.loop(seconds=30)
+@tasks.loop(minutes=30)
 async def vote_report():
     guild = bot_func.get_guild()
     text_channels = [i for i in guild.channels if str(i.type) == 'text']
