@@ -56,7 +56,7 @@ class finance:
     #gSheet.sheetName = 'KF_Personal_FlowAccount'
     flow_account_sheet = 'KF_Personal_FlowAccount'
 
-    def get_finance_doc_link():
+    def generate_document():
         """
         project_id = 'c3193d9b885043f89cc51c5a0508a1a6'
         member_name = 'Kaofang.B71'
@@ -153,6 +153,28 @@ class finance:
         with open(pdf_path, 'wb') as f:
             f.write(res.content)
             print('pdf exprted {}'.format(pdf_path.replace(project_dir,'')))
+
+    def get_document_review():
+        doc_data = gSheet.getAllDataS('Document')
+        pprint.pprint(doc_data)
+        r_data = []
+        for data in doc_data:
+            if not data['document_type'] == 'financial':
+                continue
+            if data['request_count'] > 0:
+                continue
+
+            #print(data)
+            data['request_count'] += 1
+            #'''
+            gSheet.setValue(
+                'Document', findKey='Timestamp', findValue=data['Timestamp'],
+                key='request_count', value=data['request_count']
+            )
+            #'''
+            r_data.append(data)
+
+        return r_data
 
 # Member System
 class register:
@@ -384,7 +406,7 @@ class task_queue:
 
                 elif row['name'] == 'generate_financial_document':
                     time.sleep(45)
-                    finance.get_finance_doc_link()
+                    finance.generate_document()
 
                 else:
                     clear = False
@@ -411,6 +433,7 @@ if __name__ == '__main__':
     base_path = os.sep.join(rootPath.split(os.sep)[:-1])
     #load_worksheet('AnimationTracking', base_path + '/production_rec')
     #finance.get_finance_doc_link()
+    finance.get_document_review()
 
     #register.update_member()
     #task_queue.run()

@@ -164,6 +164,7 @@ class bot_func:
 @bot.event
 async def on_ready():
     print('bot online now!')
+    dm_finance_review.start()
 
     if not os.name == 'nt':
         channel = bot.get_channel(channel_dict['log'])
@@ -314,7 +315,7 @@ async def project_channel_update():
             find_name = category_channel_list[find_index]
             channel = bot.get_channel(channel_id)
             if str(channel.name) != channel_name:
-                await channel.edit(name=channel_name, sync_permissions=True)
+                await channel.edit(name=channel_name)
                 print('Rename project channel {}'.format(channel_name))
 
     # Archive
@@ -560,6 +561,7 @@ async def dm_finance_document():
     project_id_list = os.listdir(file_storage_dir)
     #print(project_id_list)
     for project_id in project_id_list:
+        project_sl = [i for i in project_rec if i['page_id'] == project_id][0]
         pdf_dir = file_storage_dir + os.sep + project_id
         pdf_list = os.listdir(pdf_dir)
         pdf_list = [i for i in pdf_list if i.split('_')[-1].replace('.pdf','') in list(type_dict)]
@@ -580,27 +582,54 @@ async def dm_finance_document():
 
             time.sleep(1)
             msg = f'''
+**{project_sl['title']}**
 กรุณาตรวจสอบและเซ็นเอกสาร {type_dict[doc_type]} แล้วส่งกลับมาที่ลิงค์ด้านล่างนี้
 Please sign {doc_type} and send back to the link below message.
 '''
             message = await member.send(msg, file=discord.File(file_path))
 
-            doc_name = '{} {}'.format(member_sl['title'], doc_type.capitalize())
+            doc_name = '{} Sent {}'.format(member_sl['title'], doc_type.capitalize())
             form_param = urllib.parse.urlencode({
                 'usp': 'pp_url',
                 'entry.21514028': doc_name,  # document_name
                 'entry.539277546': member_id,  # member_nt_ref
                 'entry.1860269556': project_id,  # project_nt_ref
                 'entry.781252395': discord_id,  # member_dc_ref
-                'entry.277609094': message.id  # message_ref
+                'entry.277609094': message.id,  # message_ref
+                'entry.975867958': 'financial'  # document_type
             })
             form_url = 'https://docs.google.com/forms/d/e/1FAIpQLSeq6iGMdZfAsputj3mo48OlFdTYck8APClpjDkSOk6dMbZq5A/viewform?' + form_param
-            embed = discord.Embed(title=doc_name, url=form_url)
+            embed = discord.Embed(title=f'Send {doc_type.capitalize()} Document', url=form_url,
+                                  description='with Node eDoc Uploader',color=0x16CCFF)
             await message.edit(embed=embed)
 
             if not os.path.exists(pdf_dir+'/dm'):
                 os.makedirs(pdf_dir+'/dm')
             shutil.move(file_path, pdf_dir + '/dm' + os.sep + file)
+
+@tasks.loop(minutes=15)
+async def dm_finance_review():
+    members = bot_func.get_guild().members
+    r_data = production_manager.finance.get_document_review()
+    project_rec = bot_func.get_notino_db('project')
+    #print(r_data)
+    #pprint.pprint(project_rec)
+
+    for data in r_data:
+        project_sl = [ i for i in project_rec if i['page_id'] == data['project_nt_ref'] ][0]
+        #print(project_sl)
+        recruiter_name = project_sl['recruiter_name']
+        member = [i for i in members if i.nick == recruiter_name][0]
+        #print(member)
+
+        #time.sleep(1)
+        msg = f'''
+**{project_sl['title']}** - {data['document_name']}
+Please review {data['document_type']} document
+'''
+        embed = discord.Embed(title='Review', url=data['document_file'],
+                              description=data['document_name'],color=0xA628E3)
+        await member.send(msg, embed=embed)
 
 """---------------------------------"""
 # Discord Command
@@ -787,7 +816,7 @@ async def finance(ctx, doc_type):
         'document_type' : doc_type
     }
     bot_func.add_queue_task(task_name, task_data)
-    await ctx.send(f'{mention} sent request for {doc_type.capitalize()} document\nเอกสารจะถูกส่งเข้า dm ส่วนตัวเพื่อให้ตรวจสอบ..', mention_author=True)
+    await ctx.send(f'{mention} sent request for {doc_type.capitalize()} document\nเอกสารจะถูกส่งไปที่ข้อความส่วนตัวเพื่อให้ตรวจสอบ..', mention_author=True)
 
 """---------------------------------"""
 # Discord Command Recruiter
