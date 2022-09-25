@@ -138,7 +138,7 @@ class finance:
                     sheet_name=finance.flow_account_sheet
                 )
                 #'''
-            time.sleep(5)
+            time.sleep(2)
 
         #Finish GSheet
         #fin_gSheet.sheetName = old_sheet_name
