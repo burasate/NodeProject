@@ -165,10 +165,10 @@ class finance:
 
     def get_document_review():
         doc_data = gSheet.getAllDataS('Document')
-        #pprint.pprint(doc_data)
+        pprint.pprint(doc_data)
         r_data = []
         for data in doc_data:
-            if not data['request_count'] is int():
+            if data['request_count'] == '':
                 data['request_count'] = 0
             if not data['document_type'] == 'financial':
                 continue
@@ -465,8 +465,8 @@ if __name__ == '__main__':
     base_path = os.sep.join(rootPath.split(os.sep)[:-1])
     #load_worksheet('AnimationTracking', base_path + '/production_rec')
     #finance.get_finance_doc_link()
-    #finance.get_document_review()
-    project.get_member_workload('Financial_test1', 'Kaofang.B71')
+    finance.get_document_review()
+    #project.get_member_workload('Financial_test1', 'Kaofang.B71')
 
     #register.update_member()
     #task_queue.run()
