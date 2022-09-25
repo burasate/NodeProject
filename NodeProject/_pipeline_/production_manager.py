@@ -138,6 +138,7 @@ class finance:
                     sheet_name=finance.flow_account_sheet
                 )
                 #'''
+            time.sleep(5)
 
         #Finish GSheet
         #fin_gSheet.sheetName = old_sheet_name
@@ -374,6 +375,8 @@ class task_queue:
     '''
 
     def run(*_):
+        if os.name == 'nt':
+            return None
         request_sheet = 'Request'
         request_path = '{}/{}.json'.format(rec_dir,request_sheet)
         load_worksheet(request_sheet, rec_dir)
