@@ -169,8 +169,7 @@ class finance:
         r_data = []
         for data in doc_data:
             if not data['request_count'] is int():
-                gSheet.setValue('Document', findKey='Timestamp', findValue=data['Timestamp'],
-                                key='request_count', value=0)
+                data['request_count'] = 0
             if not data['document_type'] == 'financial':
                 continue
             if data['request_count'] > 0:
