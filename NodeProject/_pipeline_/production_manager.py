@@ -165,7 +165,7 @@ class finance:
 
     def get_document_review():
         doc_data = gSheet.getAllDataS('Document')
-        pprint.pprint(doc_data)
+        #pprint.pprint(doc_data)
         r_data = []
         for data in doc_data:
             if data['request_count'] == '':
@@ -177,10 +177,8 @@ class finance:
 
             #print(data)
             data['request_count'] += 1
-            #'''
             gSheet.setValue('Document', findKey='Timestamp', findValue=data['Timestamp'],
                             key='request_count', value=data['request_count'])
-            #'''
             r_data.append(data)
 
         return r_data
