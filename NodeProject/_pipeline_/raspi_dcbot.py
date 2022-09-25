@@ -574,7 +574,7 @@ async def dm_finance_document():
             doc_type = file.replace('.pdf','').split('_')[-1]
             #print(member_id)
             member_sl = [i for i in member_rec if i['page_id'] == member_id][0]
-            pprint.pprint(member_sl)
+            #pprint.pprint(member_sl)
             discord_id = member_sl['discord_id']
             #print(discord_id)
             member = [i for i in members if i.id == discord_id][0]
@@ -607,7 +607,7 @@ Please sign {doc_type} and send back to the link below message.
                 os.makedirs(pdf_dir+'/dm')
             shutil.move(file_path, pdf_dir + '/dm' + os.sep + file)
 
-@tasks.loop(minutes=15)
+@tasks.loop(minutes=3)
 async def dm_finance_review():
     members = bot_func.get_guild().members
     r_data = production_manager.finance.get_document_review()
