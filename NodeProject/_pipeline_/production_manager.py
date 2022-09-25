@@ -93,6 +93,9 @@ class finance:
         finance_sl = finance_df.loc[finance_df.index.tolist()[0]]
         #print(finance_sl)
 
+        workload_percentile = project.get_member_workload(project_sl['project_name'], member_name)
+        finance_sl['price_baht'] = finance_sl['price_baht'] * workload_percentile
+
         finance_config = gSheet.getAllDataS('config', sheet_name=finance.flow_account_sheet)
 
         nt_member_path = notiondb_dir + '/csv' + '/member.csv'
@@ -257,6 +260,7 @@ class register:
 
 # Project System
 class project:
+    '''
     def update_invite(*_):
         nt_project_path = notiondb_dir + '/csv' + '/project.csv'
         nt_member_path = notiondb_dir + '/csv' + '/member.csv'
@@ -267,8 +271,8 @@ class project:
         #print(project_df)
         for i in project_df.index.tolist():
             row = project_df.loc[i]
-            if not row['title'] in ['Ingma','Project Test']:
-                continue
+            #if not row['title'] in ['Ingma','Project Test']:
+                #continue
             #print(row)
 
             ready_to_invite = row['ready_to_invite']
@@ -276,6 +280,7 @@ class project:
 
             if ready_to_invite and not sent_invite:
                 notionDatabase.updatePageProperty(row['page_id'], 'sent_invite', True)
+    '''
 
     def add_project_member(*_):
         discord_id = task_queue.data['discord_id']
@@ -353,6 +358,23 @@ class project:
         project_member_df.reset_index(drop=True, inplace=True)
         project_member_df.to_csv(nt_project_member_path, index=False)
 
+    def get_member_workload(project_name, member_name, percentile=True):
+        nt_project_member_path = notiondb_dir + '/csv' + '/project_member.csv'
+        pm_df = pd.read_csv(nt_project_member_path)
+        #print(pm_df)
+        pm_df = pm_df[pm_df['project_name'] == project_name]
+        if pm_df.empty:
+            return 0.0
+
+        sec_total = pm_df['second_duration'].sum()
+        sec_dur = pm_df[pm_df['member_name'] == member_name]['second_duration'].sum()
+        #print(sec_dur, sec_total, sec_dur/sec_total)
+
+        if percentile:
+            return sec_dur/sec_total
+        else:
+            return sec_dur
+
 # Task System
 class task_queue:
     data = {}
@@ -411,7 +433,8 @@ class task_queue:
                     project.add_project_member()
 
                 elif row['name'] == 'generate_financial_document':
-                    time.sleep(45)
+                    print('financial document - clear request quota...')
+                    time.sleep(30)
                     finance.generate_document()
 
                 else:
@@ -439,7 +462,8 @@ if __name__ == '__main__':
     base_path = os.sep.join(rootPath.split(os.sep)[:-1])
     #load_worksheet('AnimationTracking', base_path + '/production_rec')
     #finance.get_finance_doc_link()
-    finance.get_document_review()
+    #finance.get_document_review()
+    project.get_member_workload('Financial_test1', 'Kaofang.B71')
 
     #register.update_member()
     #task_queue.run()
