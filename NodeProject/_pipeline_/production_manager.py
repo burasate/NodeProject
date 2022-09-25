@@ -76,12 +76,14 @@ class finance:
         #print(project_df)
         project_df = project_df[project_df['discord_channel_id'] == channel_id]
         if project_df.empty:
+            raise Warning('Not Found Project')
             return None
         #print(project_df.loc[project_df.index.tolist()[0]])
         project_sl = project_df.loc[project_df.index.tolist()[0]]
         project_finance = project_sl['finance']
         #print(project_finance, 'nan', project_finance is np.nan)
         if project_finance is np.nan:
+            raise Warning('Not Found Project Finance')
             return None
 
         nt_finance_path = notiondb_dir + '/csv' + '/project_finance.csv'
@@ -278,6 +280,7 @@ class project:
     def add_project_member(*_):
         discord_id = task_queue.data['discord_id']
         project_name = task_queue.data['project_name']
+        hour_week = task_queue.data['hour_week']
 
         regis_sheet = 'Registration'
         regis_path = '{}/{}.json'.format(rec_dir, regis_sheet)
