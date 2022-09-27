@@ -336,7 +336,7 @@ class project:
             row = project_member_df.loc[i]
             is_exists = (
                 row['member_name'] == member_sl['title'] and
-                row['project'] == project_sl['title']
+                row['project_name'] == project_sl['title']
             )
             if is_exists:
                 notionDatabase.updatePageProperty(row['page_id'], 'member', member_sl['page_id'])
