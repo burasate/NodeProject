@@ -345,7 +345,7 @@ class project:
         if not is_exists:
             new_page = notionDatabase.createPage(dest_db_id, 'member_name', member_sl['title'])
             notionDatabase.updatePageProperty(new_page['id'], 'member', member_sl['page_id'])
-            notionDatabase.updatePageProperty(new_page['id'], 'project', project_sl['page_id'])
+            notionDatabase.updatePageProperty(new_page['id'], 'project_name', project_sl['page_id'])
 
             gSheet.setValue(
                 regis_sheet, findKey='Discord ID', findValue=discord_id,
@@ -354,7 +354,7 @@ class project:
 
             project_member_df = project_member_df.append(pd.DataFrame.from_records([{
                 'page_id' : new_page['id'], 'member': member_sl['page_id'],
-                'project' : project_sl['page_id'], 'hour_week' : hour_week
+                'project_name' : project_sl['page_id'], 'hour_week' : hour_week
             }]))
 
         project_member_df.reset_index(drop=True, inplace=True)
