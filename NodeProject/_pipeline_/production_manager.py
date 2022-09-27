@@ -93,6 +93,7 @@ class finance:
         finance_sl = finance_df.loc[finance_df.index.tolist()[0]]
         #print(finance_sl)
 
+        #Price
         finance_sl['service_unit_price'] = finance_sl['service_unit_price'] * finance_sl['service_quantity']
         finance_sl['service_quantity'] = 1
         workload_percentile = project.get_member_workload(project_sl['project_name'], member_name)
@@ -325,9 +326,9 @@ class project:
         project_sl = project_df.loc[project_index]
         #print(project_sl)
 
-        project_member_df['project'] = project_member_df['project'].str.strip()
-        project_member_df['project'] = project_member_df['project'].str.replace(' ', '_')
-        project_member_df['project'] = project_member_df['project'].str.lower()
+        project_member_df['project_name'] = project_member_df['project_name'].str.strip()
+        project_member_df['project_name'] = project_member_df['project_name'].str.replace(' ', '_')
+        project_member_df['project_name'] = project_member_df['project_name'].str.lower()
         #print(project_member_df)
 
         is_exists = False
@@ -362,12 +363,14 @@ class project:
     def get_member_workload(project_name, member_name, percentile=True):
         nt_project_member_path = notiondb_dir + '/csv' + '/project_member.csv'
         pm_df = pd.read_csv(nt_project_member_path)
-        #print(pm_df)
         pm_df = pm_df[pm_df['project_name'] == project_name]
         if pm_df.empty:
             return 0.0
+        #print(pm_df)
 
         sec_total = pm_df['second_duration'].sum()
+        if sec_total == 0.0:
+            raise Warning('total second duration error {}\nplease check you data or assignment'.format(sec_total))
         sec_dur = pm_df[pm_df['member_name'] == member_name]['second_duration'].sum()
         #print(sec_dur, sec_total, sec_dur/sec_total)
 
@@ -463,7 +466,8 @@ if __name__ == '__main__':
     base_path = os.sep.join(rootPath.split(os.sep)[:-1])
     #load_worksheet('AnimationTracking', base_path + '/production_rec')
     #finance.get_finance_doc_link()
-    finance.get_document_review()
+    #finance.get_document_review()
+    print(project.get_member_workload('Ailynn AIS', 'Kaofang.B71'))
     #project.get_member_workload('Financial_test1', 'Kaofang.B71')
 
     #register.update_member()

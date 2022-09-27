@@ -231,15 +231,16 @@ class fika: #teletubbies files
                     print(file_path)
 
     def ttf_ma_stat(limit_count = 15):
+
         vpn_log = open(r"C:\Users\DEX3D_I7\OpenVPN\log\GPLpfSenseA-UDP4-1196-fika_guest_3-config.log").readlines()
-        if not 'Initialization Sequence Completed' in vpn_log[-1]:
-            return None
+        #if not 'Initialization Sequence Completed' in vpn_log[-1]:
+            #return None
         print('Fika Connection : {}'.format(vpn_log[-1]))
 
         stat_json_dir = r'D:\GDrive\Temp\Fika\Stat\json'
 
         all_ma_path_list = []
-        ep_list = ['1003','1005','1006','1007']
+        ep_list = ['1005','1006','1007']
         for ep in ep_list:
             ep_path = r'E:\Shots\Publish\{}'.format(ep)
             try:
@@ -259,7 +260,11 @@ class fika: #teletubbies files
                 ma_path_list = [i for i in ma_path_list if os.path.exists(i)]
                 #print(ma_path_list)
                 all_ma_path_list += ma_path_list
-                print('found ma path files ', len(all_ma_path_list))
+                print('found ma path files ', len(all_ma_path_list), ' - ', end='')
+                for i in ma_path_list:
+                    time.sleep(0.4)
+                    print('▓', end='')
+                print('')
                 #break
             #break
 
@@ -278,17 +283,20 @@ class fika: #teletubbies files
             if load_count > 15:
                 return None
 
+            print('record stat {}'.format(name), end='')
             data = maReader.getStat(ma_path)
             data['name'] = name
             data['version'] = version
             data['episode'] = ep
             data['sequence'] = seq
             data['shot'] = shot
-            print('record stat {}'.format(name))
+            data['publish_dir'] = f'file:///E:/Shots/Publish/{ep}/{seq}/{shot}/Layout/'
 
             with open(j_path, 'w') as j_file:
                 json.dump(data, j_file, indent=4)
             load_count += 1
+
+            print('    finished!')
 
     def stat_upload():
         df = pd.DataFrame()

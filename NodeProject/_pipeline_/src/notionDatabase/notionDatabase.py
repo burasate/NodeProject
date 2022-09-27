@@ -208,13 +208,21 @@ def updatePageProperty(page_id, property, value):
         print('property ({}) \'{}\' : {}  updated'.format(prop_id, property, value))
         return res_j
 
-def notionJsonParser(database_id, dir_path, replace_name = ''):
+def notionJsonParser(database_id, dir_path, replace_name = '', force_update = False):
     j_path = dir_path + '/' + database_id + '.json'
     if replace_name != '':
         j_path = dir_path + '/' + replace_name + '.json'
     print(j_path)
 
     data = {}
+
+    # Force Update
+    if force_update:
+        try:
+            os.remove(j_path)
+        except:
+            pass
+
     # Load Exist
     if os.path.exists(dir_path) and os.path.exists(j_path):
         try :
