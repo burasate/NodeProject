@@ -193,7 +193,7 @@ async def print_time():
 @tasks.loop(minutes=10)
 async def role_update():
     regis_rec = bot_func.get_notino_db('member', dropna=True)
-    regis_id_list = [ i['discord_id'] for i in regis_rec if str(i['discord_id']).isdigit()]
+    regis_id_list = [ int(i['discord_id']) for i in regis_rec if str(i['discord_id']).isdigit()]
     regis_id_list = [ int(i) for i in regis_id_list ]
     find_role_name = 'Node Freelancer'
 
