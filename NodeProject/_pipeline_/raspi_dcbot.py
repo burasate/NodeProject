@@ -226,7 +226,7 @@ async def role_update():
             if member.nick != user_name:
                 await member.edit(nick=user_name)
 
-        else:
+        elif not is_id_found and is_role_found:
             await member.remove_roles(apply_role)
 
     print('member role updated')
