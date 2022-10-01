@@ -94,7 +94,9 @@ class bot_func:
         for i in ctx.guild.roles:
             data['guild']['roles'].append({
                 'id': i.id,
-                'name': i.name})
+                'name': i.name,
+                'mention': i.mention,
+            })
         for i in ctx.author.roles:
             data['author']['roles'].append({
                 'id': i.id,
@@ -866,20 +868,26 @@ Please fill out the information for issuing financial documents.
     form_url = 'https://docs.google.com/forms/d/e/1FAIpQLSdoHb7WZKZWbJJTfPnwFgozGaiphzSOEjs0WimFVzqhTZAQ5w/viewform?' + form_param
     embed = discord.Embed(title=f'''{project_sl['title']} - {doc_type.capitalize()}''', url=form_url,
                           description='with Node Flow Account', color=0xfcba03)
+    await ctx.author.send(msg, embed=embed)
 
-    message = await ctx.author.send(msg, embed=embed, delete_after=20)
+    freelance_role = [i for i in ctx_data['guild']['roles'] if i['name'] == 'Node Freelancer'][0]
+    msg2 = f'''
+{mention}'s working on financial documents.
 
-    """
-    task_name = 'generate_financial_document'
-    task_data = {
-        #'member_id': ctx_data['author']['id'],
-        'member_name': ctx_data['author']['nick'],
-        'channel_id': ctx_data['channel']['id'],
-        'document_type' : doc_type
-    }
-    bot_func.add_queue_task(task_name, task_data)
-    await ctx.send(f'{mention} sent request for {doc_type.capitalize()} document\nเอกสารจะถูกส่งไปที่ข้อความส่วนตัวเพื่อให้ตรวจสอบ..', mention_author=True)
-    """
+{freelance_role['mention']} 
+Please check and update your account information.
+กรุณาอัพเดทข้อมูลข้อมูลที่จำเป็นเกี่ยวกับเอกสารทางการเงิน..
+'''
+    embed2 = discord.Embed(title='update account รnformation', url='https://forms.gle/QrqycQV75o4xRJ4ZA')
+    await ctx.send(msg2, embed=embed2)
+
+@bot.command()
+@commands.has_role('Node Recruiter')
+async def test(ctx):
+    await ctx.message.delete(delay=0)
+    ctx_data = bot_func.get_ctx_data(ctx)
+    freelance_role = [i for i in ctx_data['guild']['roles'] if i['name'] == 'Node Freelancer'][0]
+    print(role_mention)
 
 """---------------------------------"""
 # Discord Command Recruiter
