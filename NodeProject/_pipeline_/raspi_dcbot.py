@@ -626,8 +626,9 @@ async def dm_finance_review():
         recruiter_discord_id = int(project_sl['recruiter_discord_id'])
         #print(recruiter_discord_id, type(recruiter_discord_id))
         member = [i for i in members if (i.nick == recruiter_name) or (str(i.id) == str(recruiter_discord_id))][0]
+        print('sending review message to {}'.format(member))
 
-        #time.sleep(1)
+        time.sleep(1)
         msg = f'''
 **{project_sl['title']}** - {data['document_name']}
 Please review {data['document_type']} document
