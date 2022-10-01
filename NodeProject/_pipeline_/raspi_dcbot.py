@@ -832,8 +832,7 @@ async def finance(ctx, doc_type):
     doc_type = doc_type.lower()
     await ctx.message.delete(delay=0)
     ctx_data = bot_func.get_ctx_data(ctx)
-    channel_id = 1012438801626443857
-    #channel_id = ctx_data['channel']['id']
+    channel_id = ctx_data['channel']['id']
     mention = ctx_data['author']['mention']
     projects = bot_func.get_notino_db('project')
 
@@ -847,7 +846,7 @@ async def finance(ctx, doc_type):
         await ctx.send(f'{mention}! request\'s not in project channel', mention_author=True, delete_after=10)
         return None
 
-    project_sl = [i for i in projects if i['discord_channel_id'] == channel_id][0]
+    project_sl = [i for i in projects if str(i['discord_channel_id']) == str(channel_id)][0]
     msg = f'''
 Project : {project_sl['title']}
 Document Type : {doc_type.capitalize()}
