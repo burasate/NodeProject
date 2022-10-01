@@ -184,6 +184,7 @@ async def on_ready():
         auto_translate.start()
         dm_finance_document.start()
         dm_finance_review.start()
+        auto_clear_all_dm_message.start()
 
 """---------------------------------"""
 # Discord Sync
@@ -639,6 +640,29 @@ Please review {data['document_type']} document
                               description=data['document_name'],color=0xA628E3)
         await member.send(msg, embed=embed)
 
+@tasks.loop(hours=24)
+async def auto_clear_all_dm_message():
+    guild = bot_func.get_guild()
+    members = guild.members
+
+    all_direct_messages = []
+    for member in members:
+        if member == bot.user:
+            continue
+        messages = [message async for message in member.history(limit=50)]
+        messages = [i for i in messages if i.author == bot.user]
+
+        #print(messages)
+        all_direct_messages = all_direct_messages + messages
+    #print(all_direct_messages)
+    for message in all_direct_messages:
+        #print('delete',message.created_at,message)
+        create_at = message.created_at
+        days = (dt.datetime.now() - create_at).days
+        #print(create_at, days)
+        if days >= 15:
+            await message.delete()
+
 """---------------------------------"""
 # Discord Command
 """---------------------------------"""
@@ -880,27 +904,6 @@ Please check and update your account information.
 '''
     embed2 = discord.Embed(title='update account รnformation', url='https://forms.gle/QrqycQV75o4xRJ4ZA')
     await ctx.send(msg2, embed=embed2)
-
-@bot.command()
-@commands.has_role('Node Developer')
-async def clear_all_dm_message(ctx):
-    await ctx.message.delete(delay=0)
-    guild = bot_func.get_guild()
-    members = guild.members
-
-    all_direct_messages = []
-    for member in members:
-        if member == bot.user:
-            continue
-        messages = [message async for message in member.history(limit=500)]
-        messages = [i for i in messages if i.author == bot.user]
-
-        print(messages)
-        all_direct_messages = all_direct_messages + messages
-    #print(all_direct_messages)
-    for message in all_direct_messages:
-        print('delete',message.created_at,message)
-        await message.delete()
 
 """---------------------------------"""
 # Discord Command Recruiter
