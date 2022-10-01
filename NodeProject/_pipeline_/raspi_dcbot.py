@@ -882,12 +882,25 @@ Please check and update your account information.
     await ctx.send(msg2, embed=embed2)
 
 @bot.command()
-@commands.has_role('Node Recruiter')
-async def test(ctx):
+@commands.has_role('Node Developer')
+async def clear_all_dm_message(ctx):
     await ctx.message.delete(delay=0)
-    ctx_data = bot_func.get_ctx_data(ctx)
-    freelance_role = [i for i in ctx_data['guild']['roles'] if i['name'] == 'Node Freelancer'][0]
-    print(role_mention)
+    guild = bot_func.get_guild()
+    members = guild.members
+
+    all_direct_messages = []
+    for member in members:
+        if member == bot.user:
+            continue
+        messages = [message async for message in member.history(limit=500)]
+        messages = [i for i in messages if i.author == bot.user]
+
+        print(messages)
+        all_direct_messages = all_direct_messages + messages
+    #print(all_direct_messages)
+    for message in all_direct_messages:
+        print('delete',message.created_at,message)
+        await message.delete()
 
 """---------------------------------"""
 # Discord Command Recruiter
