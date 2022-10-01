@@ -828,7 +828,7 @@ async def finance(ctx, doc_type):
 
 @bot.command()
 @commands.has_role('Node Recruiter')
-async def finance2(ctx, doc_type):
+async def finance(ctx, doc_type):
     doc_type = doc_type.lower()
     await ctx.message.delete(delay=0)
     ctx_data = bot_func.get_ctx_data(ctx)
