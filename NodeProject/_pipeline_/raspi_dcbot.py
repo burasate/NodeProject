@@ -193,7 +193,7 @@ async def print_time():
 @tasks.loop(minutes=10)
 async def role_update():
     regis_rec = bot_func.get_notino_db('member', dropna=True)
-    regis_id_list = [ int(i['discord_id']) for i in regis_rec if str(i['discord_id']).isdigit()]
+    regis_id_list = [ i['discord_id'] for i in regis_rec if str(i['discord_id']).isdigit()]
     regis_id_list = [ int(i) for i in regis_id_list ]
     find_role_name = 'Node Freelancer'
 
@@ -581,7 +581,7 @@ async def dm_finance_document():
             #pprint.pprint(member_sl)
             discord_id = member_sl['discord_id']
             #print(discord_id)
-            member = [i for i in members if i.id == discord_id][0]
+            member = [i for i in members if i.id == int(discord_id)][0]
             #print(member)
 
             time.sleep(1)
