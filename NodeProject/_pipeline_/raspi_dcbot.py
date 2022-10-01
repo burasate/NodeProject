@@ -47,6 +47,7 @@ channel_dict = {
 }
 
 class bot_func:
+    @staticmethod
     def add_queue_task(task_name, data_dict):
         if type(data_dict) != type(dict()):
             return None
@@ -63,6 +64,7 @@ class bot_func:
         print(response.text)
         print(data)
 
+    @staticmethod
     def get_ctx_data(ctx):
         data = {
             'guild': {
@@ -129,11 +131,12 @@ class bot_func:
         guild = [bot.guilds[i] for i in range(len(bot.guilds)) if str(bot.guilds[i].id) == sever_id][0]
         return guild
 
+    @staticmethod
     def get_notino_db(csv_name, dropna=False):
         prev_dir = os.sep.join(base_path.split(os.sep)[:-1])
         file_path = prev_dir + '/production_rec/notionDatabase/csv/{}.csv'.format(csv_name)
 
-        df = pd.read_csv(file_path)
+        df = pd.read_csv(file_path, dtype='str')
         if dropna:
             df.dropna(subset=['title'],inplace=True)
         rec = []
@@ -142,6 +145,7 @@ class bot_func:
             rec.append(row.to_dict())
         return rec
 
+    @staticmethod
     def get_translate(msg_content, target_lang):
         print(f'translate into {target_lang}...')
         data = gSheet.getAllDataS('dc_translate')
@@ -617,10 +621,11 @@ async def dm_finance_review():
 
     for data in r_data:
         project_sl = [ i for i in project_rec if i['page_id'] == data['project_nt_ref'] ][0]
-        #print(project_sl)
+        #pprint.pprint(project_sl)
         recruiter_name = project_sl['recruiter_name']
-        member = [i for i in members if i.nick == recruiter_name][0]
-        #print(member)
+        recruiter_discord_id = int(project_sl['recruiter_discord_id'])
+        #print(recruiter_discord_id, type(recruiter_discord_id))
+        member = [i for i in members if (i.nick == recruiter_name) or (str(i.id) == str(recruiter_discord_id))][0]
 
         #time.sleep(1)
         msg = f'''
@@ -790,6 +795,7 @@ async def join(ctx, project_name, hour_week):
     }
     bot_func.add_queue_task(task_name, task_data)
 
+"""
 @bot.command()
 @commands.has_role('Node Recruiter')
 async def finance(ctx, doc_type):
@@ -817,12 +823,80 @@ async def finance(ctx, doc_type):
     }
     bot_func.add_queue_task(task_name, task_data)
     await ctx.send(f'{mention} sent request for {doc_type.capitalize()} document\nเอกสารจะถูกส่งไปที่ข้อความส่วนตัวเพื่อให้ตรวจสอบ..', mention_author=True)
+"""
+
+@bot.command()
+@commands.has_role('Node Recruiter')
+async def finance2(ctx, doc_type):
+    doc_type = doc_type.lower()
+    await ctx.message.delete(delay=0)
+    ctx_data = bot_func.get_ctx_data(ctx)
+    channel_id = 1012438801626443857
+    #channel_id = ctx_data['channel']['id']
+    mention = ctx_data['author']['mention']
+    projects = bot_func.get_notino_db('project')
+
+    type_list = ['quotation', 'billing', 'invoice']
+    if not doc_type in type_list:
+        #print(f'document type must be in {type_list}')
+        await ctx.send(f'{mention}! document type must be in {type_list}', mention_author=True, delete_after=10)
+        return None
+    if ctx_data['category'] != {} and not 'project' in ctx_data['category']['name'].lower():
+        print('can\'t run command because the channel\'s not in Node-Project category')
+        await ctx.send(f'{mention}! request\'s not in project channel', mention_author=True, delete_after=10)
+        return None
+
+    project_sl = [i for i in projects if i['discord_channel_id'] == channel_id][0]
+    msg = f'''
+Project : {project_sl['title']}
+Document Type : {doc_type.capitalize()}
+Please fill out the information for issuing financial documents.
+'''
+    form_param = urllib.parse.urlencode({
+        'usp': 'pp_url',
+        'entry.1195174781': project_sl['page_id'],
+        'entry.294203430' : ctx_data['author']['id'],
+        #'entry.620584290' : member_name,
+        'entry.334540373' : project_sl['title'],
+        'entry.1543450070' : 1,
+        'entry.1362031786' : 'Baht',
+        'entry.872234013' : 3,
+        'entry.1336336038' : doc_type
+    })
+    form_url = 'https://docs.google.com/forms/d/e/1FAIpQLSdoHb7WZKZWbJJTfPnwFgozGaiphzSOEjs0WimFVzqhTZAQ5w/viewform?' + form_param
+    embed = discord.Embed(title=f'''{project_sl['title']} - {doc_type.capitalize()}''', url=form_url,
+                          description='with Node Flow Account', color=0xfcba03)
+
+    message = await ctx.author.send(msg, embed=embed, delete_after=20)
+
+    """
+    task_name = 'generate_financial_document'
+    task_data = {
+        #'member_id': ctx_data['author']['id'],
+        'member_name': ctx_data['author']['nick'],
+        'channel_id': ctx_data['channel']['id'],
+        'document_type' : doc_type
+    }
+    bot_func.add_queue_task(task_name, task_data)
+    await ctx.send(f'{mention} sent request for {doc_type.capitalize()} document\nเอกสารจะถูกส่งไปที่ข้อความส่วนตัวเพื่อให้ตรวจสอบ..', mention_author=True)
+    """
 
 """---------------------------------"""
 # Discord Command Recruiter
 """---------------------------------"""
 #@bot.command()
 #async def new_project(ctx, project_name, hour_week):
+
+@bot.command()
+@commands.has_role('Node Recruiter')
+async def member_id(ctx, member_mention):
+    await ctx.message.delete(delay=10)
+    #print(member_mention,type(member_mention))
+    if not '@' in member_mention:
+        return None
+    member_id = int(''.join([i for i in member_mention if i.isdigit()]))
+    #print(member_id)
+    await ctx.send(f'member id {member_id}', delete_after=10)
 
 @bot.command()
 @commands.has_role('Node Recruiter')
@@ -833,18 +907,23 @@ async def all_member(ctx):
     mention = ctx_data['author']['mention']
     regis_rec = bot_func.get_notino_db('member')
 
-    member_text_list = [ ',  {}  '.format(i['title']) for i in members ]
+    #member_text_list = [ ',  {}  '.format(i['title']) for i in members ]
+    member_text_list = [ '{}  -  *{}*\n'.format(i['title'], i['hour_week_text']) for i in members ]
+
+    """
     for i in member_text_list:
         index = member_text_list.index(i)
         if index % 3 == 0:
             member_text_list[index] = member_text_list[index] + '\n'
+    """
     msg = \
 f'''
 **All member list**
 {''.join(member_text_list)}
 '''
-    await ctx.send(f'{mention}{msg}', mention_author=True)
+    await ctx.author.send(f'{mention}{msg}', mention_author=True, delete_after=30)
 
+"""
 @bot.command()
 @commands.has_role('Node Recruiter')
 async def project_member(ctx):
@@ -875,6 +954,7 @@ for remove member
 typ `!remove [Name]`
 '''
         await ctx.send(f'{mention}{msg}', mention_author=True, delete_after=180)
+"""
 
 @bot.command()
 @commands.has_role('Node Recruiter')
@@ -918,7 +998,6 @@ async def remove(ctx, member_name):
         member = [i for i in guild.members if i.id == member_id][0]
         await channel.set_permissions(member, read_messages=False, send_messages=False)
         await ctx.send(f'**{member_name}**   leave channel')
-
 
 """
 @bot.event

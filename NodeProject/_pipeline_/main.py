@@ -115,6 +115,7 @@ while True:
         importlib.reload(production_manager)
         #production_manager.loadNotionDatabase(projectPath + '/production_rec/notionDatabase')
         production_manager.register.update_member()
+        production_manager.finance.auto_generate_document()
         production_manager.task_queue.run()
 
         """

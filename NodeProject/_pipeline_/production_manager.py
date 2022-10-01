@@ -164,6 +164,85 @@ class finance:
             f.write(res.content)
             print('pdf exprted {}'.format(pdf_path.replace(project_dir,'')))
 
+    def auto_generate_document():
+        flow_account_rec = gSheet.getAllDataS('FlowAccount')
+
+        for data in flow_account_rec:
+            if data['request_count'] == 1:
+                continue
+
+            #pprint.pprint(data)
+            data_new = {}
+            for i in data:
+                data_new[i.strip().replace(' ','_').lower()] = data[i]
+            #pprint.pprint(data_new)
+
+            nt_member_path = notiondb_dir + '/csv' + '/member.csv'
+            member_df = pd.read_csv(nt_member_path)
+            member_df = member_df[member_df['member_name'] == data['Member Name']]
+            if member_df.empty:
+                return None
+            member_sl = member_df.loc[member_df.index.tolist()[0]]
+            #print(member_sl)
+            member_data = {
+                'company_name': member_sl['bank_account_name'],
+                'company_address': member_sl['address'],
+                'company_tax_id': '{:0>13d}'.format(int(member_sl['tax_id'])),
+                'company_mobile': '{:0>10d}'.format(int(member_sl['mobile'])),
+                'bank_account_name': member_sl['bank_account_name'],
+                'bank_company_name': member_sl['bank_company_name'],
+                'bank_account_number': '{:0>10d}'.format(int(member_sl['bank_account_number']))
+            }
+
+            finance_config = gSheet.getAllDataS('config', sheet_name=finance.flow_account_sheet)
+            for i in finance_config:
+                prop_name, prop_value = (i['property_name'], i['property_value'])
+                if i['is_formula'] == 'TRUE':
+                    continue
+                if prop_name in member_data:
+                    value = ''
+                    if not str(prop_value) == str(member_data[prop_name]):
+                        #print(str(member_data[prop_name]))
+                        gSheet.setValue(
+                            'config', findKey='property_name', findValue=prop_name,
+                            key='property_value', value=str(member_data[prop_name]),
+                            sheet_name=finance.flow_account_sheet
+                        )
+                        time.sleep(2)
+                elif prop_name in list(data_new):
+                    if not str(prop_value) == str(data_new[prop_name]):
+                        #print(str(data_new[prop_name]))
+                        gSheet.setValue(
+                            'config', findKey='property_name', findValue=prop_name,
+                            key='property_value', value=str(data_new[prop_name]),
+                            sheet_name=finance.flow_account_sheet
+                        )
+                        time.sleep(2)
+
+
+            pdf_url = [i for i in finance_config
+                       if i['property_name'] == f'''{data_new['document_type']}_pdf_url'''
+                       ][0]['property_value']
+            #print(pdf_url)
+
+            #Save file
+            res = requests.get(pdf_url)
+            project_dir = file_storage_dir + os.sep + data_new['project_id']
+            if not os.path.exists(project_dir):
+                os.makedirs(project_dir)
+            pdf_path = project_dir + '/{}_{}.pdf'.format(member_sl['page_id'], data_new['document_type'])
+            with open(pdf_path, 'wb') as f:
+                f.write(res.content)
+                print('pdf exprted {}'.format(os.path.basename(pdf_path)))
+
+            #'''
+            if data['request_count'] != 1:
+                gSheet.setValue('FlowAccount', findKey='Timestamp', findValue=data['Timestamp'],
+                                key='request_count', value=1)
+            elif data['request_count'] <= 1:
+                continue
+            #'''
+
     def get_document_review():
         doc_data = gSheet.getAllDataS('Document')
         #pprint.pprint(doc_data)
@@ -360,6 +439,7 @@ class project:
         project_member_df.reset_index(drop=True, inplace=True)
         project_member_df.to_csv(nt_project_member_path, index=False)
 
+    @staticmethod
     def get_member_workload(project_name, member_name, percentile=True):
         nt_project_member_path = notiondb_dir + '/csv' + '/project_member.csv'
         pm_df = pd.read_csv(nt_project_member_path)
@@ -467,7 +547,8 @@ if __name__ == '__main__':
     #load_worksheet('AnimationTracking', base_path + '/production_rec')
     #finance.get_finance_doc_link()
     #finance.get_document_review()
-    print(project.get_member_workload('Ailynn AIS', 'Kaofang.B71'))
+    #finance.auto_generate_document()
+    #print(project.get_member_workload('Ailynn AIS', 'Kaofang.B71'))
     #project.get_member_workload('Financial_test1', 'Kaofang.B71')
 
     #register.update_member()

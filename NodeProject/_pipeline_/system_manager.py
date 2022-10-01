@@ -167,6 +167,7 @@ class data:
                         print('remove off-limit[{}] history files'.format(file_limit), del_file)
                         os.remove(i)
 
+    @staticmethod
     def get_history_path_list(file_path):
         ext = '.csv'
         file_path = file_path.replace('/',os.sep)
@@ -180,6 +181,8 @@ class data:
 
 class error:
     file_path = rec_dir + '/main_traceback.csv'
+
+    @staticmethod
     def record(text):
         try:
             data = {
@@ -197,6 +200,7 @@ class error:
         except:
             pass
 
+    @staticmethod
     def get_nortify(clear_after = True):
         if os.path.exists(error.file_path):
             df = pd.read_csv(error.file_path)
@@ -230,6 +234,7 @@ class fika: #teletubbies files
                     shutil.copyfile(file_path, dest_file_path)
                     print(file_path)
 
+    @staticmethod
     def ttf_ma_stat(limit_count = 15):
 
         vpn_log = open(r"C:\Users\DEX3D_I7\OpenVPN\log\GPLpfSenseA-UDP4-1196-fika_guest_3-config.log").readlines()
@@ -253,18 +258,17 @@ class fika: #teletubbies files
                 shot_list = os.listdir(seq_path)
                 #print(seq_path)
                 #shot_dir = seq_path + os.sep + seq
-                ma_path_list = [
-                    seq_path + os.sep + i + os.sep + 'Layout' + os.sep + f'{ep}_{seq}_{i}_Layout.ma'
-                    for i in shot_list
-                ]
-                ma_path_list = [i for i in ma_path_list if os.path.exists(i)]
-                #print(ma_path_list)
-                all_ma_path_list += ma_path_list
-                print('found ma path files ', len(all_ma_path_list), ' - ', end='')
-                for i in ma_path_list:
-                    time.sleep(0.4)
-                    print('▓', end='')
-                print('')
+                shot_path_list = [seq_path + os.sep + i for i in os.listdir(seq_path)]
+                #print(shot_path_list)
+                for s_path in shot_path_list:
+                    shot = os.path.basename(s_path)
+                    ma_path_list = [f'{s_path}/{st}/' + f'{ep}_{seq}_{shot}_{st}.ma' for st in os.listdir(s_path)]
+                    #print(ma_path_list)
+                    all_ma_path_list += ma_path_list
+                    print('ma files ', len(all_ma_path_list), ' - ', end='')
+                    for i in all_ma_path_list:
+                        print('|', end='')
+                    print('')
                 #break
             #break
 
@@ -272,10 +276,15 @@ class fika: #teletubbies files
         for ma_path in all_ma_path_list:
             dir_path = os.path.dirname(ma_path).replace('.ma','')
             name = os.path.basename(ma_path)
-            version = sorted([i for i in os.listdir(dir_path) if not '.' in i])[-1]
+            version = sorted([i for i in os.listdir(dir_path) if not '.' in i])
+            if version != []:
+                version = version[-1]
+            else:
+                version = 'v000'
             ep = name.split('_')[0]
             seq = name.split('_')[1]
             shot = name.split('_')[2]
+            stage = name.split('_')[3]
 
             j_path = stat_json_dir + f'/{name}_{version}.json'.replace('.ma', '')
             if os.path.exists(j_path):
@@ -285,12 +294,15 @@ class fika: #teletubbies files
 
             print('record stat {}'.format(name), end='')
             data = maReader.getStat(ma_path)
+            if data == None:
+                continue
             data['name'] = name
             data['version'] = version
             data['episode'] = ep
             data['sequence'] = seq
             data['shot'] = shot
-            data['publish_dir'] = f'file:///E:/Shots/Publish/{ep}/{seq}/{shot}/Layout/'
+            data['stage'] = stage
+            data['publish_dir'] = f'file:///E:/Shots/Publish/{ep}/{seq}/{shot}/{stage}/'
 
             with open(j_path, 'w') as j_file:
                 json.dump(data, j_file, indent=4)
@@ -343,9 +355,9 @@ if __name__ == '__main__':
     #base_path = os.sep.join(root_path.split(os.sep)[:-1])
     #workspaceSetup()
     #versionBackup('.ma', base_path)
-    #integration.init_notion_db()
-    #integration.load_notion_db()
-    #integration.notion_sheet()
+    integration.init_notion_db()
+    integration.load_notion_db()
+    integration.notion_sheet()
     #data.create_history()
     #data.clear_past_history()
     #print(data.get_history_path_list(r"D:\GDrive\Documents\2022\BRSAnimPipeline\work\NodeProject\NodeProject\production_rec\notionDatabase\csv\project.csv"))
@@ -353,5 +365,5 @@ if __name__ == '__main__':
     #fika.cache_layout_file()
     #fika.cache_audio_file()
     #fika.ttf_ma_stat()
-    fika.stat_upload()
+    #fika.stat_upload()
     pass
