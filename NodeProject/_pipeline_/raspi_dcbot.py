@@ -902,7 +902,7 @@ Please fill out the information for issuing financial documents.
 Please check and update your account information.
 กรุณาอัพเดทข้อมูลข้อมูลที่จำเป็นเกี่ยวกับเอกสารทางการเงิน..
 '''
-    embed2 = discord.Embed(title='update account รnformation', url='https://forms.gle/QrqycQV75o4xRJ4ZA')
+    embed2 = discord.Embed(title='update account information', url='https://forms.gle/QrqycQV75o4xRJ4ZA')
     await ctx.send(msg2, embed=embed2)
 
 """---------------------------------"""
