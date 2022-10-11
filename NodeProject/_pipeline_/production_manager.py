@@ -56,6 +56,7 @@ class finance:
     #gSheet.sheetName = 'KF_Personal_FlowAccount'
     flow_account_sheet = 'KF_Personal_FlowAccount'
 
+    @staticmethod
     def generate_document():
         """
         project_id = 'c3193d9b885043f89cc51c5a0508a1a6'
@@ -164,6 +165,7 @@ class finance:
             f.write(res.content)
             print('pdf exprted {}'.format(pdf_path.replace(project_dir,'')))
 
+    @staticmethod
     def auto_generate_document():
         flow_account_rec = gSheet.getAllDataS('FlowAccount')
 
