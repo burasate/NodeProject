@@ -245,11 +245,12 @@ class fika: #teletubbies files
         stat_json_dir = r'D:\GDrive\Temp\Fika\Stat\json'
 
         all_ma_path_list = []
-        ep_list = ['1005','1006','1007']
+        ep_list = ['1005','1007','1014']
         for ep in ep_list:
             ep_path = r'E:\Shots\Publish\{}'.format(ep)
             try:
                 seq_list = os.listdir(ep_path)
+                seq_list = [i for i in seq_list if not '.' in i]
             except:
                 return None
 
@@ -262,12 +263,15 @@ class fika: #teletubbies files
                 #print(shot_path_list)
                 for s_path in shot_path_list:
                     shot = os.path.basename(s_path)
+                    if '.' in shot: continue;
                     ma_path_list = [f'{s_path}/{st}/' + f'{ep}_{seq}_{shot}_{st}.ma' for st in os.listdir(s_path)]
+                    ma_path_list = [i for i in ma_path_list if os.path.exists(i)]
                     #print(ma_path_list)
                     all_ma_path_list += ma_path_list
                     print('ma files ', len(all_ma_path_list), ' - ', end='')
-                    for i in all_ma_path_list:
-                        print('|', end='')
+                    for i in range(len(all_ma_path_list)):
+                        if i % 15 == 0:
+                            print('|', end='')
                     print('')
                 #break
             #break
