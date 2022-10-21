@@ -170,6 +170,7 @@ class bot_func:
 @bot.event
 async def on_ready():
     print('bot online now!')
+    role_update.start()
 
     if not os.name == 'nt':
         channel = bot.get_channel(channel_dict['log'])
@@ -995,7 +996,7 @@ async def add(ctx, member_name):
         await ctx.send(f'member name \"{member_name}\" are not found', delete_after=2)
     else:
         find_member = find_member[0]
-        member_id = find_member['discord_id']
+        member_id = int(find_member['discord_id'])
 
         guild = bot_func.get_guild()
         member = [i for i in guild.members if i.id == member_id][0]
@@ -1016,7 +1017,7 @@ async def remove(ctx, member_name):
         await ctx.send(f'member name \"{member_name}\" are not found', delete_after=2)
     else:
         find_member = find_member[0]
-        member_id = find_member['discord_id']
+        member_id = int(find_member['discord_id'])
 
         guild = bot_func.get_guild()
         member = [i for i in guild.members if i.id == member_id][0]
