@@ -1026,7 +1026,31 @@ async def remove(ctx, member_name):
 
 @bot.event
 async def on_message(message):
-    print(message.content)
+    if not message.guild == bot_func.get_guild():
+        return None
+
+    member_name = message.author.display_name
+
+    #Image attachment outside from project channel -------------------------------------
+    is_attachment = message.attachments != []
+    is_project_channel = 'proj-' in message.channel.name
+    media_ext_list = ['jpg', 'jpeg', 'png', 'gif', 'mov', 'mp4']
+    #print(message)
+    #print(message.channel.name)
+    #print(is_attachment and is_project_channel)
+    if not is_project_channel and is_attachment:
+        attach_sl = (message.attachments)[0]
+        is_media = attach_sl.url.split('.')[-1] in media_ext_list
+        if is_media:
+            log_text = f'Found member \"{member_name}\" shared media outside project (\"{message.channel.name}\").'
+            log_channel = bot.get_channel(channel_dict['log'])
+            await log_channel.send(log_text)
+
+            dm_text = f'**Just notice to you**\nbecause you just shared some media outside ' \
+                      f'(\"{message.channel.name}\") that isn\'t a project channel \nand might be ' \
+                      f'risked to confidentiality of project\nplease re-check it again.'
+            await message.author.send(dm_text)
+            await log_channel.send('sent dm message to member already.')
 
 """---------------------------------"""
 # Run
