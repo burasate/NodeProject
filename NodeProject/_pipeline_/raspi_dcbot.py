@@ -170,6 +170,7 @@ class bot_func:
 @bot.event
 async def on_ready():
     print('bot online now!')
+    project_channel_update.start()
 
     if not os.name == 'nt':
         channel = bot.get_channel(channel_dict['log'])
@@ -343,7 +344,7 @@ async def project_channel_update():
     project_category = [i for i in categories if 'node' in (i.name).lower() and 'project' in (i.name).lower()][0]
     meeting_channels = meeting_category.channels
     project_channels = project_category.channels
-    v_channel_timeout_seconds = 3*60*60
+    v_channel_timeout_days = 1
 
     for proj_channel in project_channels:
         if not prefix_ready in str(proj_channel):
@@ -359,9 +360,9 @@ async def project_channel_update():
             is_active = False
             continue
         last_meesage = last_meesage_list[0]
-        inactive_seconds = (dt.datetime.now() - last_meesage.created_at).seconds
-        #print(inactive_seconds, v_channel_timeout_seconds)
-        if inactive_seconds > v_channel_timeout_seconds:
+        inactive_days = (dt.datetime.now() - last_meesage.created_at).days
+        #print(inactive_days, v_channel_timeout_days)
+        if inactive_days > v_channel_timeout_days:
             is_active = False
 
         is_exists = v_channel_name in [i.name for i in meeting_channels]
