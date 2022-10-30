@@ -1024,19 +1024,9 @@ async def remove(ctx, member_name):
         await channel.set_permissions(member, read_messages=False, send_messages=False)
         await ctx.send(f'**{member_name}**   leave channel')
 
-"""
 @bot.event
 async def on_message(message):
-    alphabet_list = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
-                     'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
-    alphabet_list = alphabet_list + [i.upper() for i in alphabet_list]
-
-    #print(message)
     print(message.content)
-
-    eng_alpha = ''.join([i for i in str(message.content) if i in alphabet_list])
-    #print('eng alpha', len(eng_alpha), eng_alpha)
-"""
 
 """---------------------------------"""
 # Run
