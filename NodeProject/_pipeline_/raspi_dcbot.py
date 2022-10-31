@@ -567,7 +567,7 @@ async def dm_finance_document():
 
     file_storage_dir = production_manager.file_storage_dir
     project_id_list = os.listdir(file_storage_dir)
-    #print(project_id_list)
+    print(project_id_list)
     for project_id in project_id_list:
         project_sl = [i for i in project_rec if i['page_id'] == project_id][0]
         pdf_dir = file_storage_dir + os.sep + project_id
