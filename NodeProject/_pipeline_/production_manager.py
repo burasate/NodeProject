@@ -180,7 +180,6 @@ class finance:
                 data_new[i.strip().replace(' ','_').lower()] = data[i]
             pprint.pprint(data_new)
 
-            """
             nt_member_path = notiondb_dir + '/csv' + '/member.csv'
             member_df = pd.read_csv(nt_member_path)
             member_df = member_df[member_df['member_name'] == data['Member Name']]
@@ -238,14 +237,13 @@ class finance:
             with open(pdf_path, 'wb') as f:
                 f.write(res.content)
                 print('pdf exprted {}'.format(os.path.basename(pdf_path)))
-            """
 
             #'''
-            #if data['request_count'] != 1:
-                #gSheet.setValue('FlowAccount', findKey='Timestamp', findValue=data['Timestamp'],
-                                #key='request_count', value=1)
-            #elif data['request_count'] <= 1:
-                #continue
+            if data['request_count'] != 1:
+                gSheet.setValue('FlowAccount', findKey='Timestamp', findValue=data['Timestamp'],
+                                key='request_count', value=1)
+            elif data['request_count'] <= 1:
+                continue
             #'''
 
             #Update Financial Data
