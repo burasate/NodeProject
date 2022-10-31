@@ -888,12 +888,16 @@ async def finance(ctx, doc_type):
     finance_list = [i for i in finances if str(i['name']) == str(project_sl['title'])]
     if finance_list != []:
         finance_sl = finance_list[0]
+        for k in client_data:
+            client_data[k] = finance_sl[k]
+        '''
         client_data['client_name'] = finance_sl['client_name']
         client_data['client_address'] = finance_sl['client_address']
         client_data['client_tax_id'] = finance_sl['client_tax_id']
         client_data['client_contract_name'] = finance_sl['client_contract_name']
         client_data['client_phone'] = finance_sl['client_phone']
         client_data['client_email'] = finance_sl['client_email']
+        '''
 
     msg = f'''
 Project : {project_sl['title']}
