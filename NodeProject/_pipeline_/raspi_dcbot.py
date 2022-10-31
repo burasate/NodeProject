@@ -864,6 +864,7 @@ async def finance(ctx, doc_type):
     channel_id = ctx_data['channel']['id']
     mention = ctx_data['author']['mention']
     projects = bot_func.get_notino_db('project')
+    finances = bot_func.get_notino_db('project_finance')
 
     type_list = ['quotation', 'billing', 'invoice']
     if not doc_type in type_list:
@@ -876,11 +877,30 @@ async def finance(ctx, doc_type):
         return None
 
     project_sl = [i for i in projects if str(i['discord_channel_id']) == str(channel_id)][0]
+    client_data = {
+        'client_name': '',
+        'client_address': '',
+        'client_tax_id': '',
+        'client_contract_name': '',
+        'client_phone': '',
+        'client_email': ''
+    }
+    finance_list = [i for i in finances if str(i['name']) == str(project_sl['title'])]
+    if finance_list != []:
+        finance_sl = finance_list[0]
+        client_data['client_name'] = finance_sl['client_name']
+        client_data['client_address'] = finance_sl['client_address']
+        client_data['client_tax_id'] = finance_sl['client_tax_id']
+        client_data['client_contract_name'] = finance_sl['client_contract_name']
+        client_data['client_phone'] = finance_sl['client_phone']
+        client_data['client_email'] = finance_sl['client_email']
+
     msg = f'''
 Project : {project_sl['title']}
 Document Type : {doc_type.capitalize()}
 Please fill out the information for issuing financial documents.
 '''
+
     form_param = urllib.parse.urlencode({
         'usp': 'pp_url',
         'entry.1195174781': project_sl['page_id'],
@@ -890,13 +910,20 @@ Please fill out the information for issuing financial documents.
         'entry.1543450070' : 1,
         'entry.1362031786' : 'Baht',
         'entry.872234013' : 3,
-        'entry.1336336038' : doc_type
+        'entry.1336336038' : doc_type,
+        'entry.741791868' : client_data['client_name'],
+        'entry.1419364983' : client_data['client_address'],
+        'entry.1563554333' : client_data['client_tax_id'],
+        'entry.54552248' : client_data['client_contract_name'],
+        'entry.2111754486' : client_data['client_phone'],
+        'entry.1855558017' : client_data['client_email']
     })
     form_url = 'https://docs.google.com/forms/d/e/1FAIpQLSdoHb7WZKZWbJJTfPnwFgozGaiphzSOEjs0WimFVzqhTZAQ5w/viewform?' + form_param
     embed = discord.Embed(title=f'''{project_sl['title']} - {doc_type.capitalize()}''', url=form_url,
                           description='with Node Flow Account', color=0xfcba03)
     await ctx.author.send(msg, embed=embed)
 
+    """
     freelance_role = [i for i in ctx_data['guild']['roles'] if i['name'] == 'Node Freelancer'][0]
     msg2 = f'''
 {mention}'s working on financial documents.
@@ -907,6 +934,7 @@ Please check and update your account information.
 '''
     embed2 = discord.Embed(title='update account information', url='https://forms.gle/QrqycQV75o4xRJ4ZA')
     await ctx.send(msg2, embed=embed2)
+    """
 
 """---------------------------------"""
 # Discord Command Recruiter
