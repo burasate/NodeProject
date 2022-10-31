@@ -436,9 +436,10 @@ def loadNotionDatabase(dir_part):
         df.to_csv(csv_path, index=False)
 
 if __name__ == '__main__':
-    pprint.pprint(getPage('ccada1eb75724048a37442ab778e5d33'))
-    pprint.pprint(getPageProperty('ccada1eb75724048a37442ab778e5d33','rx%3B%7D'))
-    pprint.pprint(getPageProperty('dfcd88e1-f007-4d18-80ec-5c4280dd16e5', 'title')) #Reation
+    #pprint.pprint(getDatabase('6ed27678-c64b-46fa-bd8c-5a398c9aff57'))
+    #pprint.pprint(getPage('ccada1eb75724048a37442ab778e5d33'))
+    #pprint.pprint(getPageProperty('ccada1eb75724048a37442ab778e5d33','rx%3B%7D'))
+    #pprint.pprint(getPageProperty('dfcd88e1-f007-4d18-80ec-5c4280dd16e5', 'title')) #Reation
     #updatePageProperty('4c4aa72787e6487ca8bd7e01be74219b', 'team', ['dee9719d0bb64084ba84c06692c45031'])
     #updatePageProperty('4c4aa72787e6487ca8bd7e01be74219b', 'Invite', 0)
     #createPage('bc5ca11036ff4da9b723b250ad658807','project_name', 'new')

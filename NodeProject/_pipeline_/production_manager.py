@@ -168,6 +168,7 @@ class finance:
     @staticmethod
     def auto_generate_document():
         flow_account_rec = gSheet.getAllDataS('FlowAccount')
+        #pprint.pprint(flow_account_rec)
 
         for data in flow_account_rec:
             if data['request_count'] == 1:
@@ -177,13 +178,14 @@ class finance:
             data_new = {}
             for i in data:
                 data_new[i.strip().replace(' ','_').lower()] = data[i]
-            #pprint.pprint(data_new)
+            pprint.pprint(data_new)
 
+            """
             nt_member_path = notiondb_dir + '/csv' + '/member.csv'
             member_df = pd.read_csv(nt_member_path)
             member_df = member_df[member_df['member_name'] == data['Member Name']]
             if member_df.empty:
-                return None
+                raise Warning('Not found member name\nPlease check member name is correct')
             member_sl = member_df.loc[member_df.index.tolist()[0]]
             #print(member_sl)
             member_data = {
@@ -236,14 +238,43 @@ class finance:
             with open(pdf_path, 'wb') as f:
                 f.write(res.content)
                 print('pdf exprted {}'.format(os.path.basename(pdf_path)))
+            """
 
             #'''
-            if data['request_count'] != 1:
-                gSheet.setValue('FlowAccount', findKey='Timestamp', findValue=data['Timestamp'],
-                                key='request_count', value=1)
-            elif data['request_count'] <= 1:
-                continue
+            #if data['request_count'] != 1:
+                #gSheet.setValue('FlowAccount', findKey='Timestamp', findValue=data['Timestamp'],
+                                #key='request_count', value=1)
+            #elif data['request_count'] <= 1:
+                #continue
             #'''
+
+            #Update Financial Data
+            dst_db_id = [i['id'] for i in notionDatabase.database if i['name'] == 'project_finance'][0]
+            db_data = notionDatabase.getDatabase(dst_db_id)
+            #pprint.pprint(db_data['results'])
+            id_list = [i['id'] for i in db_data['results']]
+            title_list = []
+            print('reading title name')
+            for page_id in [i['id'] for i in db_data['results']]:
+                title = notionDatabase.getPageProperty(page_id, 'title')['results'][0]['title']['text']['content']
+                title_list.append(title)
+            #print(title_list)
+
+            if data_new['project_name'] in title_list:
+                index = title_list.index(data_new['project_name'])
+                new_page = notionDatabase.getPage(id_list[index])
+            else:
+                new_page = notionDatabase.createPage(dst_db_id, 'title', data_new['project_name'])
+
+            #pprint.pprint(new_page)
+            prop_list = [i for i in new_page['properties'] if i in data_new]
+            for prop_name in prop_list:
+                new_page_id = new_page['id'].replace('-', '')
+                try:
+                    notionDatabase.updatePageProperty(new_page_id, prop_name, data_new[prop_name])
+                except:pass
+            notionDatabase.updatePageProperty(new_page['id'], 'project_name',
+                                              [data_new['project_id']])
 
     def get_document_review():
         doc_data = gSheet.getAllDataS('Document')
@@ -556,11 +587,11 @@ if __name__ == '__main__':
     #load_worksheet('AnimationTracking', base_path + '/production_rec')
     #finance.get_finance_doc_link()
     #finance.get_document_review()
-    #finance.auto_generate_document()
+    finance.auto_generate_document()
     #print(project.get_member_workload('Ailynn AIS', 'Kaofang.B71'))
     #project.get_member_workload('Financial_test1', 'Kaofang.B71')
 
-    register.update_member()
+    #register.update_member()
     #task_queue.run()
     #project.update_invite()
     #project.add_member(346164580487004171, 'Project_Test', 20)

@@ -170,7 +170,6 @@ class bot_func:
 @bot.event
 async def on_ready():
     print('bot online now!')
-    project_channel_update.start()
 
     if not os.name == 'nt':
         channel = bot.get_channel(channel_dict['log'])
