@@ -935,8 +935,9 @@ async def all_member(ctx):
     regis_rec = bot_func.get_notino_db('member')
 
     #member_text_list = [ ',  {}  '.format(i['title']) for i in members ]
-    member_text_list = [ '{}  -ID {}  -  *{}*\n'.format(
+    member_text_list = [ '{}  -  ID {}  -  *{}*\n'.format(
         i['title'], i['discord_id'], i['hour_week_text']) for i in members ]
+    member_text_list = sorted(member_text_list)
 
     """
     for i in member_text_list:
