@@ -1025,6 +1025,7 @@ async def remove(ctx, member_name):
         await channel.set_permissions(member, read_messages=False, send_messages=False)
         await ctx.send(f'**{member_name}**   leave channel')
 
+"""
 @bot.event
 async def on_message(message):
     if not message.guild == bot_func.get_guild():
@@ -1052,6 +1053,7 @@ async def on_message(message):
                       f'risked to confidentiality of project\nplease re-check it again.'
             await message.author.send(dm_text)
             await log_channel.send('sent dm message to member already.')
+"""
 
 """---------------------------------"""
 # Run

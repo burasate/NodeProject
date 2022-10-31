@@ -323,11 +323,12 @@ class register:
             # Add New Member
             if not member_name in member_df['member_name'].tolist():
                 new_page = notionDatabase.createPage(dest_db_id,'member_name', member_name)
-                """
                 for prop_name in prop_dict:
                     new_page_id = new_page['id'].replace('-','')
-                    notionDatabase.updatePageProperty(new_page_id, prop_name, prop_dict[prop_name])
-                """
+                    try:
+                        notionDatabase.updatePageProperty(new_page_id, prop_name, prop_dict[prop_name])
+                    except:pass
+
             # Update Member
             if member_name in member_df['member_name'].tolist():
                 find_index = member_df[member_df['member_name'] == member_name].index.tolist()[0]
@@ -546,6 +547,12 @@ class task_queue:
 
 if __name__ == '__main__':
     base_path = os.sep.join(rootPath.split(os.sep)[:-1])
+
+    import system_manager
+    #system_manager.integration.init_notion_db()
+    #system_manager.integration.load_notion_db()
+    #system_manager.integration.notion_sheet()
+
     #load_worksheet('AnimationTracking', base_path + '/production_rec')
     #finance.get_finance_doc_link()
     #finance.get_document_review()
@@ -553,7 +560,7 @@ if __name__ == '__main__':
     #print(project.get_member_workload('Ailynn AIS', 'Kaofang.B71'))
     #project.get_member_workload('Financial_test1', 'Kaofang.B71')
 
-    #register.update_member()
+    register.update_member()
     #task_queue.run()
     #project.update_invite()
     #project.add_member(346164580487004171, 'Project_Test', 20)

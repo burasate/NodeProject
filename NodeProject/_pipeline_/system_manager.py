@@ -138,6 +138,7 @@ class data:
                 hist_file_path = os.path.join(
                     hist_dir_path, name.replace(ext, '_{}{}'.format(mtime_srtftime, ext)))
 
+                print(os.system('cls||clear'))
                 print('create history  ', hist_file_path.split(os.sep)[-1])
                 shutil.copyfile(file_path, hist_file_path)
 
@@ -245,7 +246,7 @@ class fika: #teletubbies files
         stat_json_dir = r'D:\GDrive\Temp\Fika\Stat\json'
 
         all_ma_path_list = []
-        ep_list = ['1009','1010','1011','1012','1014']
+        ep_list = ['1009','1010','1011','1013','1014']
         for ep in ep_list:
             ep_path = r'E:\Shots\Publish\{}'.format(ep)
             try:
