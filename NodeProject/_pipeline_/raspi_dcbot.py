@@ -770,7 +770,7 @@ async def my_id(ctx):
     ctx_data = bot_func.get_ctx_data(ctx)
     id = ctx_data['author']['id']
     mention = ctx_data['author']['mention']
-    await ctx.send(f'{mention}\nyour discord id is\n`{id}`', mention_author=True, delete_after=20)
+    await ctx.send(f'{mention}\nyour discord id is\n`{id}`', mention_author=True, delete_after=5*60)
     await ctx.message.delete(delay=0)
 
 @bot.command()
@@ -781,7 +781,9 @@ async def my_status(ctx):
     mention = ctx_data['author']['mention']
     id = ctx_data['author']['id']
     embed = embed=discord.Embed(
-        title='Member Register/Update', url='https://forms.gle/QrqycQV75o4xRJ4ZA',
+        #title='Member Register/Update', url='https://forms.gle/QrqycQV75o4xRJ4ZA',
+        title='Member Register/Update',
+        url='https://docs.google.com/forms/d/e/1FAIpQLSdFyzv8sUaNelC-IQuEEkQ0jc-oo9KgIoWP3q6qaF7OOFjruQ/viewform',
         description='You are not in \"Node Freelance\" Role, Please submit this form',
         color=0xFF5733)
     msg = f'{mention}\n' \
@@ -797,12 +799,15 @@ async def my_status(ctx):
 @bot.command()
 async def register(ctx):
     ctx_data = bot_func.get_ctx_data(ctx)
+    member = ctx.author
     mention = ctx_data['author']['mention']
+    name = ctx_data['author']['name']
     embed = embed = discord.Embed(
-        title='Member Register/Update', url='https://forms.gle/QrqycQV75o4xRJ4ZA',
+        #title='Member Register/Update', url='https://forms.gle/QrqycQV75o4xRJ4ZA',
+        title='Member Register/Update', url='https://docs.google.com/forms/d/e/1FAIpQLSdFyzv8sUaNelC-IQuEEkQ0jc-oo9KgIoWP3q6qaF7OOFjruQ/viewform',
         description='',
         color=0xFF5733)
-    await ctx.send(f'{mention}', mention_author=True, embed=embed, delete_after=15)
+    await ctx.send(f'{mention}', mention_author=True, embed=embed, delete_after=5*60)
     await ctx.message.delete(delay=0)
 
 @bot.command()
