@@ -29,7 +29,7 @@ def getDatabase(database_id, filter={}):
     global headers
     url = 'https://api.notion.com/v1/databases/{}/query'.format(database_id)
     payload = {
-        'page_size' : 25
+        'page_size' : 1000
     }
     if filter != {}:
         payload['filter'] = filter
