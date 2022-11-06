@@ -181,7 +181,7 @@ async def on_ready():
         role_update.start()
         project_channel_update.start()
         traceback_nortify.start()
-        auto_translate.start()
+        #auto_translate.start()
         dm_finance_document.start()
         dm_finance_review.start()
         auto_clear_all_dm_message.start()
