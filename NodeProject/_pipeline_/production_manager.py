@@ -313,6 +313,7 @@ class register:
         member_df = pd.read_csv(nt_member_path)
         #print(regis_df)
         #print(member_df.head(1))
+
         for i in regis_df.index.tolist():
             row = regis_df.loc[i]
             #print(row)
@@ -350,18 +351,31 @@ class register:
                 'bank_company_name': row['Bank Company Name'],
                 'tax_id': row['Tax Id']
             }
+            pprint.pprint(prop_dict)
+
+            # Load Notion Database
+            dst_db_id = [i['id'] for i in notionDatabase.database if i['name'] == 'member'][0]
+            db_data = notionDatabase.getDatabase(dst_db_id)
+            id_list = [i['id'] for i in db_data['results']]
+            title_list = []
+            for page_id in [i['id'] for i in db_data['results']]:
+                title = notionDatabase.getPageProperty(page_id, 'title')['results'][0]['title']['text']['content']
+                title_list.append(title)
+            print(id_list)
+            print(title_list)
 
             # Add New Member
-            if not member_name in member_df['member_name'].tolist():
+            #if not member_name in member_df['member_name'].tolist():
+            if not member_name in title_list:
                 new_page = notionDatabase.createPage(dest_db_id,'member_name', member_name)
                 for prop_name in prop_dict:
                     new_page_id = new_page['id'].replace('-','')
                     try:
                         notionDatabase.updatePageProperty(new_page_id, prop_name, prop_dict[prop_name])
                     except:pass
-
             # Update Member
-            if member_name in member_df['member_name'].tolist():
+            #if member_name in member_df['member_name'].tolist():
+            elif member_name in title_list:
                 find_index = member_df[member_df['member_name'] == member_name].index.tolist()[0]
                 find_row = member_df.loc[find_index]
                 for prop_name in prop_dict:
@@ -372,6 +386,8 @@ class register:
                         v = '-'
                     if prop_dict[prop_name] != find_row[prop_name]:
                         notionDatabase.updatePageProperty(find_row['page_id'], prop_name, v)
+
+            #break
 
 # Project System
 class project:
@@ -587,11 +603,11 @@ if __name__ == '__main__':
     #load_worksheet('AnimationTracking', base_path + '/production_rec')
     #finance.get_finance_doc_link()
     #finance.get_document_review()
-    finance.auto_generate_document()
+    #finance.auto_generate_document()
     #print(project.get_member_workload('Ailynn AIS', 'Kaofang.B71'))
     #project.get_member_workload('Financial_test1', 'Kaofang.B71')
 
-    #register.update_member()
+    register.update_member()
     #task_queue.run()
     #project.update_invite()
     #project.add_member(346164580487004171, 'Project_Test', 20)
