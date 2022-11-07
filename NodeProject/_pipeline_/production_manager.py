@@ -351,7 +351,7 @@ class register:
                 'bank_company_name': row['Bank Company Name'],
                 'tax_id': row['Tax Id']
             }
-            pprint.pprint(prop_dict)
+            #pprint.pprint(prop_dict)
 
             # Load Notion Database
             dst_db_id = [i['id'] for i in notionDatabase.database if i['name'] == 'member'][0]
