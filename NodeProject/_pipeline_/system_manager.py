@@ -246,7 +246,7 @@ class fika: #teletubbies files
         stat_json_dir = r'D:\GDrive\Temp\Fika\Stat\json'
 
         all_ma_path_list = []
-        ep_list = ['1009','1010','1011','1013','1014']
+        ep_list = ['1015','1016','1011','1013','1014']
         for ep in ep_list:
             ep_path = r'E:\Shots\Publish\{}'.format(ep)
             try:

@@ -355,15 +355,23 @@ class register:
 
             # Load Notion Database
             dst_db_id = [i['id'] for i in notionDatabase.database if i['name'] == 'member'][0]
-            db_data = notionDatabase.getDatabase(dst_db_id)
+            db_filter = {
+                'property' : 'title',
+                'rich_text' : {
+                    'contains' : member_name
+                }
+            }
+            db_data = notionDatabase.getDatabase(dst_db_id, filter=db_filter)
             id_list = [i['id'] for i in db_data['results']]
             title_list = []
             for page_id in [i['id'] for i in db_data['results']]:
                 title = notionDatabase.getPageProperty(page_id, 'title')['results'][0]['title']['text']['content']
                 title_list.append(title)
-            print(id_list)
-            print(title_list)
 
+            print('Find Exist Member in Database')
+            print(title_list, id_list)
+
+            #'''
             # Add New Member
             #if not member_name in member_df['member_name'].tolist():
             if not member_name in title_list:
@@ -385,9 +393,12 @@ class register:
                     if str(v) == '' and prop_name in ['demo_reel','linkedin']: #url format
                         v = '-'
                     if prop_dict[prop_name] != find_row[prop_name]:
-                        notionDatabase.updatePageProperty(find_row['page_id'], prop_name, v)
+                        try:
+                            notionDatabase.updatePageProperty(find_row['page_id'], prop_name, v)
+                        except:pass
+            #'''
 
-            #break
+            break
 
 # Project System
 class project:
