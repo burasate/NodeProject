@@ -221,7 +221,8 @@ async def role_update():
             user_name = member_sl['title']
             if not is_role_found:
                 await member.add_roles(apply_role)
-                await member.edit(nick=user_name)
+                try:await member.edit(nick=user_name)
+                except:print('canot change nickname')
 
                 msg = f'added {user_name} ({member.display_name}) to \"{apply_role.name}\" role'
                 if not msg in content_list:
