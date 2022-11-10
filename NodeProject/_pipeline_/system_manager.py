@@ -217,6 +217,7 @@ class error:
             return []
 
 class fika: #teletubbies files
+    @staticmethod
     def cache_layout_file():
         dir_path = r'C:\Fika\Projects\Dug\Shots\Publish'
         dest_dir_path = r'D:\GDrive\Temp\Fika\Works\Layout'
@@ -269,6 +270,7 @@ class fika: #teletubbies files
                     ma_path_list = [i for i in ma_path_list if os.path.exists(i)]
                     #print(ma_path_list)
                     all_ma_path_list += ma_path_list
+                    print(os.system('cls||clear'))
                     print('ma files ', len(all_ma_path_list), ' - ', end='')
                     for i in range(len(all_ma_path_list)):
                         if i % 15 == 0:
@@ -315,6 +317,7 @@ class fika: #teletubbies files
 
             print('    finished!')
 
+    @staticmethod
     def stat_upload():
         df = pd.DataFrame()
         stat_json_dir = r'D:\GDrive\Temp\Fika\Stat\json'
@@ -332,6 +335,22 @@ class fika: #teletubbies files
         time.sleep(5)
         gSheet.updateFromCSV(csv_path, 'ma_stat', newline='', sheet_name='Fika_TTF_Stat')
         print('update fika sheet')
+
+    @staticmethod
+    def studio_library():
+        src_path = r'E:\Maya\AnimationTools\StudioLibrary'
+        dst_path = r'X:\Server\StudioLibrary\Teletubies'
+        for root, dirs, files in os.walk(src_path, topdown=False):
+            for name in files:
+                file_path = os.path.join(root, name)
+                dst_copy_path = os.path.dirname(file_path).replace(src_path,dst_path) + os.sep + os.path.basename(file_path)
+                dst_folder_path = os.path.dirname(dst_copy_path)
+
+                if not os.path.exists(dst_folder_path):
+                    os.makedirs(dst_folder_path)
+                if not os.path.exists(dst_copy_path):
+                    print(dst_copy_path)
+                    shutil.copy(file_path, dst_copy_path)
 
     """
     def cache_audio_file():
@@ -360,9 +379,9 @@ if __name__ == '__main__':
     #base_path = os.sep.join(root_path.split(os.sep)[:-1])
     #workspaceSetup()
     #versionBackup('.ma', base_path)
-    integration.init_notion_db()
-    integration.load_notion_db()
-    integration.notion_sheet()
+    #integration.init_notion_db()
+    #integration.load_notion_db()
+    #integration.notion_sheet()
     #data.create_history()
     #data.clear_past_history()
     #print(data.get_history_path_list(r"D:\GDrive\Documents\2022\BRSAnimPipeline\work\NodeProject\NodeProject\production_rec\notionDatabase\csv\project.csv"))
@@ -371,4 +390,5 @@ if __name__ == '__main__':
     #fika.cache_audio_file()
     #fika.ttf_ma_stat()
     #fika.stat_upload()
+    fika.studio_library()
     pass

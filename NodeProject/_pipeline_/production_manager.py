@@ -318,7 +318,22 @@ class register:
             row = regis_df.loc[i]
             #print(row)
             discord_id = row['Discord ID']
-            member_name = '.'.join([ row['Nick Name'].capitalize(), row['First Name'][0].upper() + str(discord_id)[-2:]])
+            nick = str(row['Nick Name']).capitalize()
+            if ' ' in row['Nick Name']:
+                for i in range(3):
+                    nick = nick.replace(' ','')
+
+                gSheet.setValue(
+                    regis_sheet, findKey='Discord ID', findValue=discord_id,
+                    key='Nick Name', value=nick
+                )
+
+            #member_name = '.'.join([ nick.capitalize(), row['First Name'][0].upper() + str(discord_id)[-2:]])
+            member_name = '{}.{}{}'.format(
+                nick.capitalize(),
+                str(row['First Name'][0]).upper(),
+                str(discord_id)[-2:]
+            )
             #print(member_name, row['Discord ID'])
 
             hour_per_week = ''.join([i for i in str(row['Availability']) if i.isdigit() or i == '-' or i == '.'])
@@ -368,7 +383,7 @@ class register:
                 title = notionDatabase.getPageProperty(page_id, 'title')['results'][0]['title']['text']['content']
                 title_list.append(title)
 
-            print('Find Exist Member in Database')
+            #print('Find Exist Member in Database')
             print(title_list, id_list)
 
             #'''
