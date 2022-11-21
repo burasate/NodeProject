@@ -164,6 +164,8 @@ class bot_func:
         #print(result)
         return result
 
+
+
 """---------------------------------"""
 # Discord Start
 """---------------------------------"""
@@ -185,6 +187,7 @@ async def on_ready():
         dm_finance_document.start()
         dm_finance_review.start()
         auto_clear_all_dm_message.start()
+        members_stat_record.start()
 
 """---------------------------------"""
 # Discord Sync
@@ -666,6 +669,65 @@ async def auto_clear_all_dm_message():
         #print(create_at, days)
         if days >= 15:
             await message.delete()
+
+@tasks.loop(hours=1)
+async def members_stat_record():
+    prev_dir = os.sep.join(base_path.split(os.sep)[:-1])
+    rec_dir = prev_dir + '/discord_rec'
+    date_time = dt.datetime.now()
+    isoweekday, hour = (date_time.isoweekday(),date_time.hour)
+    member_stat_csv = rec_dir + '/dc_members_stat_{}_{}.csv'.format(isoweekday,hour)
+    message_stat_csv = rec_dir + '/dc_messages_stat_{}_{}.csv'.format(isoweekday,hour)
+    if not os.path.exists(rec_dir):
+        os.makedirs(rec_dir)
+
+    guild = bot_func.get_guild()
+    text_channels = [i for i in guild.channels if str(i.type) == 'text']
+    members = guild.members
+
+    df_msg = pd.DataFrame()
+    message_list = []
+    for channel in text_channels:
+        channel_id = channel.id
+        messages = [message async for message in channel.history(limit=100)]
+        message_list += messages
+
+    for message in message_list:
+        create_at = message.created_at
+        days = (dt.datetime.now() - create_at).days
+        if days > 1 or message.author.bot:
+            continue
+        df_msg = df_msg.append([{
+            'create_at' : create_at,
+            'iso_weekday' : create_at.isoweekday(),
+            'hour' : create_at.hour,
+            'member_name' : message.author.display_name,
+            'msg_len' : len(message.clean_content)
+        }])
+    df_msg.reset_index(inplace=True, drop=True)
+    #print(df_msg)
+    print('record messages stat')
+    df_msg.to_csv(message_stat_csv, index=False)
+
+    df_mb = pd.DataFrame()
+    for member in members:
+        now = dt.datetime.now()
+        df_mb = df_mb.append([{
+            'date_time' : now,
+            'iso_weekday': now.isoweekday(),
+            'hour': now.hour,
+            'member_name': member.display_name,
+            'is_on_mobile': int(member.is_on_mobile()),
+            'raw_status': member.raw_status,
+            'is_online': int(member.raw_status == 'online'),
+            'is_idle': int(member.raw_status == 'idle'),
+            'is_dnd': int(member.raw_status == 'dnd'),
+        }])
+    df_mb.reset_index(inplace=True, drop=True)
+    #print(df_mb)
+    print('record members stat')
+    df_mb.to_csv(member_stat_csv, index=False)
+
 
 """---------------------------------"""
 # Discord Command
