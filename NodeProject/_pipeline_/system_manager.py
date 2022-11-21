@@ -247,7 +247,7 @@ class fika: #teletubbies files
         stat_json_dir = r'D:\GDrive\Temp\Fika\Stat\json'
 
         all_ma_path_list = []
-        ep_list = ['1015','1016','1011','1013','1014']
+        ep_list = ['1015','1016','1017','1013','1014']
         for ep in ep_list:
             ep_path = r'E:\Shots\Publish\{}'.format(ep)
             try:
@@ -345,11 +345,11 @@ class fika: #teletubbies files
                 file_path = os.path.join(root, name)
                 dst_copy_path = os.path.dirname(file_path).replace(src_path,dst_path) + os.sep + os.path.basename(file_path)
                 dst_folder_path = os.path.dirname(dst_copy_path)
+                print(dst_copy_path)
 
                 if not os.path.exists(dst_folder_path):
                     os.makedirs(dst_folder_path)
                 if not os.path.exists(dst_copy_path):
-                    print(dst_copy_path)
                     shutil.copy(file_path, dst_copy_path)
 
     """

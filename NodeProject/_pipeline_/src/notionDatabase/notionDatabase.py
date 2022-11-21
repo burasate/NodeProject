@@ -260,7 +260,12 @@ def notionJsonParser(database_id, dir_path, replace_name = '', force_update = Fa
         ]).split('.')[0]
         page_id = row['id'].replace('-','')
         prop_list = [i for i in row['properties']]
-        title = getPageProperty(page_id, 'title')
+
+        try:
+            title = getPageProperty(page_id, 'title')
+        except:
+            continue
+
         if title['results'] != []:
             title = title['results'][0]['title']['plain_text']
         else:
