@@ -173,6 +173,8 @@ class bot_func:
 async def on_ready():
     print('bot online now!')
 
+    members_stat_report.start()
+
     if not os.name == 'nt':
         channel = bot.get_channel(channel_dict['log'])
         await channel.send(f'`{dt.datetime.now()}`\nHello, I just woke up\n(Runnig on os \"{os.name}\")')
@@ -728,6 +730,123 @@ async def members_stat_record():
     print('record members stat')
     df_mb.to_csv(member_stat_csv, index=False)
 
+@tasks.loop(hours=24)
+async def members_stat_report():
+    prev_dir = os.sep.join(base_path.split(os.sep)[:-1])
+    rec_dir = prev_dir + '/discord_rec'
+    date_time = dt.datetime.now()
+    isoweekday, hour = (date_time.isoweekday(),date_time.hour)
+
+    path_list = [rec_dir + os.sep + i for i in os.listdir(rec_dir) if '.csv' in i]
+
+    df = pd.DataFrame()
+    for f in path_list:
+        df = df.append(pd.read_csv(f))
+    df.reset_index(inplace=True, drop=True)
+    print(df.head(5))
+    print(df.tail(5))
+
+    group_list = ['member_name']
+    day_list = ['','Monday','Tuesday','Wednesday','Tuesday','Friday','Saturday','Sunday']
+    hour_period_dict = {
+        'Night1' : [i for i in range(21,23+1)],
+        'Night2' : [i for i in range(0,4+1)],
+        'Morning' : [i for i in range(5,11+1)],
+        'Afternoon' : [i for i in range(12,16+1)],
+        'Evening' : [i for i in range(17,20+1)]
+    }
+    day_period_dict = {
+        'Weekdays1' : day_list[1:3+1],
+        'Weekdays2' : day_list[4:5+1],
+        'Weekends' : day_list[6:7+1]
+    }
+
+    # New Col
+    for i in range(len(day_list)):
+        df.loc[df['iso_weekday'] == i, 'day_of_week'] = day_list[i]
+    for i in day_period_dict:
+        df.loc[df['day_of_week'].isin(day_period_dict[i]), 'period_day'] = i
+    for i in hour_period_dict:
+        df.loc[df['hour'].isin(hour_period_dict[i]), 'period_hour'] = i
+
+    # Summarise
+    df['day_of_week'] = df.dropna(subset=['create_at']).groupby(group_list + ['create_at'])['day_of_week'].transform('max')
+    df['period_day'] = df.dropna(subset=['create_at']).groupby(group_list + ['create_at'])['period_day'].transform('max')
+    df['period_hour'] = df.dropna(subset=['create_at']).groupby(group_list + ['create_at'])['period_hour'].transform('max')
+    df['day_of_week'] = df.groupby(group_list)['day_of_week'].transform('first')
+    df['period_day'] = df.groupby(group_list)['period_day'].transform('first')
+    df['period_hour'] = df.groupby(group_list)['period_hour'].transform('first')
+    df['msg_count'] = df.dropna(subset=['create_at']).groupby(group_list + ['create_at'])['create_at'].transform('count')
+    df['msg_count'] = df.groupby(group_list)['msg_count'].transform('mean')
+    df['msg_count'] = df['msg_count'].fillna(0.0).round(0)
+    df['is_online'] = df.groupby(group_list)['is_online'].transform('sum')
+    df['is_idle'] = df.groupby(group_list)['is_idle'].transform('sum')
+    df['is_dnd'] = df.groupby(group_list)['is_dnd'].transform('sum')
+    df['is_on_mobile'] = df.groupby(group_list)['is_on_mobile'].transform('sum')
+    df['msg_len'] = df.groupby(group_list)['msg_len'].transform('sum')
+    df['date_time'] = df.groupby(group_list)['date_time'].transform('last')
+
+    # Drop Dup
+    df.drop_duplicates(subset=group_list, inplace=True)
+
+    # Calculate
+    total_online_count = (df['is_online'] + df['is_idle'] - df['is_on_mobile'])
+    df['fulltime_ratio'] = (total_online_count / 40.0).round(2)
+    df.loc[df['fulltime_ratio'] > 1.0, 'fulltime_ratio'] = 1.0
+    df['parttime_ratio'] = (1 - df['fulltime_ratio']).round(2)
+    #df['active_ratio'] = df['msg_len'] / df['msg_len'].drop(0.0).mean()
+    df['msg_per_day'] = (df['msg_len'] / df['msg_count']).fillna(0.0) / 7.0
+    df['msg_per_day'] = df['msg_per_day'].round(0)
+    df['online_ratio'] = (total_online_count / (24 * 7)).round(2)
+    df['offline_ratio'] = (1 - df['online_ratio']).round(2)
+
+    # Bar & Fix Row
+    ratio_bar_total = 10
+    abc = list('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890.')
+
+    for i in df['member_name'].index.tolist():
+        df.loc[df.index == i, 'member_name'] = ''.join([i for i in list(df.iloc[i]['member_name']) if i in abc])
+        df.loc[df.index == i, 'online_bar'] = '▓' * int(round(df.iloc[i]['online_ratio'] * ratio_bar_total,0)) + \
+                                                '░' * int(round(df.iloc[i]['offline_ratio'] * ratio_bar_total,0))
+        df.loc[df.index == i, 'fulltime_bar'] = '▓' * int(round(df.iloc[i]['fulltime_ratio'] * ratio_bar_total,0)) + \
+                                                '░' * int(round(df.iloc[i]['parttime_ratio'] * ratio_bar_total,0))
+
+
+    df.sort_values(by=['msg_per_day','online_ratio','fulltime_ratio'], ascending=[False,False,False], inplace=True)
+    df.reset_index(inplace=True, drop=True)
+
+    print(df)
+    df = df[df['offline_ratio'] <= 0.95]
+    df = df[['member_name','period_day','period_hour','online_bar','fulltime_bar','msg_per_day']]
+    df.reset_index(inplace=True, drop=True)
+    print(df)
+
+    hour_emoji = {
+        'Night1' : ':clock10:',
+        'Night2' : ':clock130:',
+        'Morning' : ':clock7:',
+        'Afternoon' : ':clock3:',
+        'Evening' : ':clock430:',
+        None : ':clock630:'
+    }
+
+    text_list = []
+    for i in df['member_name'].index.tolist():
+        row = df.iloc[i]
+        text_list += ['[ {} ]'.format(row['member_name'])]
+        text_list += ['  Message : {}'.format(row['msg_per_day'])]
+        text_list += ['  {} {} {}'.format(hour_emoji[row['period_hour']],row['period_day'],row['period_hour'])]
+        text_list += ['  M T W T F S S']
+        text_list += ['  Online : {}'.format(row['online_bar'])]
+        text_list += ['  Fulltime : {}'.format(row['fulltime_bar'])]
+
+    text_join = '\n'.join(text_list)
+
+    print(text_join)
+    print(len(text_join))
+
+    channel = bot.get_channel(channel_dict['log'])
+    await channel.send(text_join)
 
 """---------------------------------"""
 # Discord Command
