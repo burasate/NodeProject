@@ -805,9 +805,11 @@ async def members_stat_report():
     abc = list('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890.')
 
     for i in df['member_name'].index.tolist():
+        '''
         str_name_list = [i for i in list(df.iloc[i]['member_name']) if i in abc]
         if str_name_list == []:
             continue
+        '''
         df.loc[df.index == i, 'member_name'] = ''.join(str_name_list)
         df.loc[df.index == i, 'online_bar'] = '▓' * int(round(df.iloc[i]['online_ratio'] * ratio_bar_total,0)) + \
                                                 '░' * int(round(df.iloc[i]['offline_ratio'] * ratio_bar_total,0))
