@@ -851,8 +851,8 @@ async def members_stat_report():
     print(text_join)
     print(len(text_join))
 
-    #channel = bot.get_channel(channel_dict['log'])
-    #await channel.send(text_join[:2000])
+    channel = bot.get_channel(channel_dict['log'])
+    await channel.send(text_join[:2000])
 
 """---------------------------------"""
 # Discord Command
