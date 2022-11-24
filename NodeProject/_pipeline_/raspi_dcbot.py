@@ -790,8 +790,9 @@ async def members_stat_report():
     for i in col_msg_day_list:
         df[i] = df.dropna(subset=['create_at']).groupby(group_list + ['create_at'])[i].transform('sum')
         df[i] = df.groupby(group_list)[i].transform('last')
-        df[i] = (df[i] / df[i].max()).round(2)
         df[i].fillna(.0, inplace=True)
+        if df[i].max() == 0.0:continue;
+        df[i] = (df[i] / df[i].max()).round(2)
 
     # Drop Dup
     df.drop_duplicates(subset=group_list, inplace=True)
