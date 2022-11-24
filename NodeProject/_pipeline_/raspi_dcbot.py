@@ -804,13 +804,12 @@ async def members_stat_report():
     ratio_bar_total = 10
     abc = list('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890.')
 
+    df.reset_index(inplace=True, drop=True)
     for i in df['member_name'].index.tolist():
-        '''
         str_name_list = [i for i in list(df.iloc[i]['member_name']) if i in abc]
         if str_name_list == []:
             continue
         df.loc[df.index == i, 'member_name'] = ''.join(str_name_list)
-        '''
         df.loc[df.index == i, 'online_bar'] = '▓' * int(round(df.iloc[i]['online_ratio'] * ratio_bar_total,0)) + \
                                                 '░' * int(round(df.iloc[i]['offline_ratio'] * ratio_bar_total,0))
         df.loc[df.index == i, 'fulltime_bar'] = '▓' * int(round(df.iloc[i]['fulltime_ratio'] * ratio_bar_total,0)) + \
@@ -836,6 +835,7 @@ async def members_stat_report():
     }
 
     text_list = []
+    df.reset_index(inplace=True, drop=True)
     for i in df['member_name'].index.tolist():
         row = df.iloc[i]
         text_list += ['[ {} ]'.format(row['member_name'])]
@@ -844,14 +844,15 @@ async def members_stat_report():
         text_list += ['  M T W T F S S']
         text_list += ['  Online : {}'.format(row['online_bar'])]
         text_list += ['  Fulltime : {}'.format(row['fulltime_bar'])]
+        text_list += ['_'*30]
 
     text_join = '\n'.join(text_list)
 
     print(text_join)
     print(len(text_join))
 
-    channel = bot.get_channel(channel_dict['log'])
-    await channel.send(text_join)
+    #channel = bot.get_channel(channel_dict['log'])
+    #await channel.send(text_join[:2000])
 
 """---------------------------------"""
 # Discord Command
