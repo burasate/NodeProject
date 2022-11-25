@@ -810,6 +810,7 @@ async def members_stat_report():
     df['active_ratio'] = (df['online_ratio']/df['online_ratio'].max()) * (df['msg_per_day']/df['msg_per_day'].max())
     df['active_ratio'] = df['active_ratio'].round(2)
     df['inactive_ratio'] = (1 - df['active_ratio']).round(2)
+
     df.reset_index(inplace=True, drop=True)
     for i in df['member_name'].index.tolist():
         row = df.iloc[i]
@@ -819,6 +820,8 @@ async def members_stat_report():
             row = df.iloc[i]
             if row[col] >= 0.5:
                 d_list[index] = '**{}**'.format(d_list[index])
+            else:
+                d_list[index] = '*{}*'.format(d_list[index])
             #print(d_list)
         df.loc[df.index == i, 'day_active'] = ' '.join(d_list)
 
