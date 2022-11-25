@@ -43,7 +43,8 @@ if os.name == 'nt':
 channel_dict = {
     'log' : 1011320896063021147,
     'member_welcome' : 1012248546050846720,
-    'welcome' : 920741438516523051
+    'welcome' : 920741438516523051,
+    'report' : 1012257225726771281
 }
 
 class bot_func:
@@ -189,6 +190,7 @@ async def on_ready():
         auto_clear_all_dm_message.start()
         members_stat_record.start()
         members_stat_report.start()
+
 
 """---------------------------------"""
 # Discord Sync
@@ -729,40 +731,53 @@ async def members_stat_record():
     print('record members stat')
     df_mb.to_csv(member_stat_csv, index=False)
 
-@tasks.loop(hours=24)
+@tasks.loop(minutes=5)
 async def members_stat_report():
     prev_dir = os.sep.join(base_path.split(os.sep)[:-1])
     rec_dir = prev_dir + '/discord_rec'
     date_time = dt.datetime.now()
     isoweekday, hour = (date_time.isoweekday(),date_time.hour)
+    week_num = date_time.isocalendar()[1]
+
+    report_time_h = [20]
+    report_time_m = [i for i in range(7,17+1)]
+
+    is_report_time = int(date_time.hour) in report_time_h and\
+                     int(date_time.minute) in report_time_m and\
+                     int(isoweekday) == 1
+    if not is_report_time:
+        return
 
     path_list = [rec_dir + os.sep + i for i in os.listdir(rec_dir) if '.csv' in i]
 
     df = pd.DataFrame()
     for f in path_list:
         df = df.append(pd.read_csv(f))
-    df.reset_index(inplace=True, drop=True)
-    print(df.head(5))
-    print(df.tail(5))
+    #print(df.head(5))
+    #print(df.tail(5))
 
     group_list = ['member_name']
     day_list = ['','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
     hour_period_dict = {
-        'Nig' : [i for i in range(21,23+1)] + [i for i in range(0,4+1)],
-        'Mor' : [i for i in range(5,11+1)],
-        'Aft' : [i for i in range(12,16+1)],
-        'Eve' : [i for i in range(17,20+1)]
+        'night' : [i for i in range(21,23+1)] + [i for i in range(0,4+1)],
+        'morning' : [i for i in range(5,11+1)],
+        'afternoon' : [i for i in range(12,16+1)],
+        'evening' : [i for i in range(17,20+1)]
     }
     day_period_dict = {
-        'Wd' : day_list[1:5+1],
-        'We' : day_list[6:7+1]
+        'weekDays' : day_list[1:5+1],
+        'weekEnds' : day_list[6:7+1]
     }
     col_msg_day_list = []
+
+    # Drop Dup First
+    df.drop_duplicates(subset=group_list + ['date_time', 'create_at'], inplace=True)
+    df.reset_index(inplace=True, drop=True)
 
     # New Col
     for i in range(len(day_list)):
         if i == 0:continue;
-        msg_col = 'count_'+day_list[i][:3].lower()
+        msg_col = 'msg_'+day_list[i][:3].lower()+'_percentile'
         df.loc[df['iso_weekday'] == i, 'day_of_week'] = day_list[i]
         df.loc[df['iso_weekday'] == i, msg_col] = 1
         col_msg_day_list.append(msg_col)
@@ -779,7 +794,7 @@ async def members_stat_report():
     df['period_day'] = df.groupby(group_list)['period_day'].transform('first')
     df['period_hour'] = df.groupby(group_list)['period_hour'].transform('first')
     df['msg_count'] = df.dropna(subset=['create_at']).groupby(group_list + ['create_at'])['create_at'].transform('count')
-    df['msg_count'] = df.groupby(group_list)['msg_count'].transform('mean')
+    df['msg_count'] = df.groupby(group_list)['msg_count'].transform('sum')
     df['msg_count'] = df['msg_count'].fillna(0.0).round(0)
     df['is_online'] = df.groupby(group_list)['is_online'].transform('sum')
     df['is_idle'] = df.groupby(group_list)['is_idle'].transform('sum')
@@ -788,11 +803,12 @@ async def members_stat_report():
     df['msg_len'] = df.groupby(group_list)['msg_len'].transform('sum')
     df['date_time'] = df.groupby(group_list)['date_time'].transform('last')
     for i in col_msg_day_list:
-        df[i] = df.dropna(subset=['create_at']).groupby(group_list + ['create_at'])[i].transform('sum')
-        df[i] = df.groupby(group_list)[i].transform('last')
-        df[i].fillna(.0, inplace=True)
-        if df[i].max() == 0.0:continue;
-        df[i] = (df[i] / df[i].max()).round(2)
+        df[i] = df.dropna(subset=['create_at']).groupby(group_list + ['create_at'])[i].transform('count')
+        df[i] = df.groupby(group_list)[i].transform('sum')
+        #if df[i].max() == 0.0:continue;
+        #df[i] = (df[i] / df[i].max()).round(2)
+        df[i] = (df[i] / df['msg_count']).round(2)
+        #df[i].fillna(.0, inplace=True)
 
     # Drop Dup
     df.drop_duplicates(subset=group_list, inplace=True)
@@ -818,10 +834,10 @@ async def members_stat_report():
         for col in col_msg_day_list:
             index = col_msg_day_list.index(col)
             row = df.iloc[i]
-            if row[col] >= 0.5:
-                d_list[index] = '**{}**'.format(d_list[index])
+            if row[col] >= 0.15:
+                d_list[index] = '**{}**'.format(d_list[index].lower())
             else:
-                d_list[index] = '*{}*'.format(d_list[index])
+                d_list[index] = '*{}*'.format(d_list[index].lower())
             #print(d_list)
         df.loc[df.index == i, 'day_active'] = ' '.join(d_list)
 
@@ -848,7 +864,7 @@ async def members_stat_report():
     #df.reset_index(inplace=True, drop=True)
     #print(df)
 
-    text1_list = ['=================\nTOTAL TIME ONLINE ( WEEKLY )\n=================']
+    text1_list = [f'=================\nTOTAL TIME ONLINE ( WEEK-{week_num} )\n=================']
     df.sort_values(by=['online_ratio'], ascending=[False], inplace=True)
     df.reset_index(inplace=True, drop=True)
     for i in df['member_name'].index.tolist():
@@ -863,7 +879,7 @@ async def members_stat_report():
     text1_join = '\n'.join(text1_list)
     print(text1_join,'\n', len(text1_join))
 
-    text2_list = ['=================\nON SERVER ACTIVITY ( WEEKLY )\n=================']
+    text2_list = [f'=================\nON SERVER ACTIVITY ( WEEK-{week_num} )\n=================']
     df.sort_values(by=['active_ratio'], ascending=[False], inplace=True)
     df.reset_index(inplace=True, drop=True)
     for i in df['member_name'].index.tolist():
@@ -872,17 +888,18 @@ async def members_stat_report():
     text2_join = '\n'.join(text2_list)
     print(text2_join,'\n', len(text2_join))
 
-    text3_list = ['=================\nPRIME TIME ( WEEKLY )\n=================']
+    text3_list = [f'=================\nPRIME TIME ( WEEK-{week_num} )\n=================']
     df.sort_values(by=['active_ratio'], ascending=[False], inplace=True)
     df.reset_index(inplace=True, drop=True)
     for i in df['member_name'].index.tolist():
         row = df.iloc[i]
-        text3_list += ['{}, [ {} ], {} - {}'.format(row['period_day'], row['day_active'], row['period_hour'], row['member_name'])]
+        text3_list += ['{}---------------'.format(row['member_name'])]
+        text3_list += ['{} ({}), {}'.format(row['period_day'], row['day_active'], row['period_hour'])]
         #text3_list += ['( {} )'.format(row['day_active'])]
     text3_join = '\n'.join(text3_list)
     print(text3_join, '\n', len(text3_join))
 
-    channel = bot.get_channel(channel_dict['log'])
+    channel = bot.get_channel(channel_dict['report'])
     await channel.send(text1_join[:2000])
     await channel.send(text2_join[:2000])
     await channel.send(text3_join[:2000])
