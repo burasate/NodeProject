@@ -740,11 +740,12 @@ async def members_stat_report():
     week_num = date_time.isocalendar()[1]
 
     report_time_h = [20]
-    report_time_m = [i for i in range(7,20+1)]
+    report_time_m = [i for i in range(10,30+1)]
 
     is_report_time = int(date_time.hour) in report_time_h and\
                      int(date_time.minute) in report_time_m and\
                      int(isoweekday) == 5
+    print('is_report_time', is_report_time)
     if not is_report_time:
         return
 
