@@ -748,14 +748,14 @@ async def members_stat_report():
     group_list = ['member_name']
     day_list = ['','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
     hour_period_dict = {
-        'NIG' : [i for i in range(21,23+1)] + [i for i in range(0,4+1)],
-        'MOR' : [i for i in range(5,11+1)],
-        'AFT' : [i for i in range(12,16+1)],
-        'EVE' : [i for i in range(17,20+1)]
+        'Nig' : [i for i in range(21,23+1)] + [i for i in range(0,4+1)],
+        'Mor' : [i for i in range(5,11+1)],
+        'Aft' : [i for i in range(12,16+1)],
+        'Eve' : [i for i in range(17,20+1)]
     }
     day_period_dict = {
-        'WD' : day_list[1:5+1],
-        'WE' : day_list[6:7+1]
+        'Wd' : day_list[1:5+1],
+        'We' : day_list[6:7+1]
     }
     col_msg_day_list = []
 
@@ -835,8 +835,6 @@ async def members_stat_report():
         df.loc[df.index == i, 'active_bar'] = '▓' * int(round(df.iloc[i]['active_ratio'] * ratio_bar_total,0)) + \
                                                 '░' * int(round(df.iloc[i]['inactive_ratio'] * ratio_bar_total,0))
 
-
-
     df.sort_values(by=['active_ratio','online_ratio'], ascending=[False,False], inplace=True)
     df.reset_index(inplace=True, drop=True)
 
@@ -876,7 +874,7 @@ async def members_stat_report():
     df.reset_index(inplace=True, drop=True)
     for i in df['member_name'].index.tolist():
         row = df.iloc[i]
-        text3_list += ['{} , [ {} ] , {} - {}'.format(row['period_day'], row['day_active'], row['period_hour'], row['member_name'])]
+        text3_list += ['{}, [ {} ], {} - {}'.format(row['period_day'], row['day_active'], row['period_hour'], row['member_name'])]
         #text3_list += ['( {} )'.format(row['day_active'])]
     text3_join = '\n'.join(text3_list)
     print(text3_join, '\n', len(text3_join))
