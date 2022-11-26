@@ -843,7 +843,7 @@ async def members_stat_report():
         df.loc[df.index == i, 'day_active'] = ' '.join(d_list)
 
     # Bar & Fix Row
-    ratio_bar_total = 10
+    ratio_bar_total = 14
     abc = list('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890.')
 
     df.reset_index(inplace=True, drop=True)
