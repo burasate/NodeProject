@@ -247,7 +247,8 @@ class fika: #teletubbies files
         stat_json_dir = r'D:\GDrive\Temp\Fika\Stat\json'
 
         all_ma_path_list = []
-        ep_list = ['1015','1016','1017','1013','1014']
+        #ep_list = ['1015','1016','1017','1013','1014']
+        ep_list = [i for i in os.listdir('E:\Shots\Publish') if i.isdigit()]
         for ep in ep_list:
             ep_path = r'E:\Shots\Publish\{}'.format(ep)
             try:
@@ -390,5 +391,5 @@ if __name__ == '__main__':
     #fika.cache_audio_file()
     #fika.ttf_ma_stat()
     #fika.stat_upload()
-    fika.studio_library()
+    #fika.studio_library()
     pass

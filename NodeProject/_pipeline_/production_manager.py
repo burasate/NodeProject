@@ -173,7 +173,7 @@ class finance:
         for data in flow_account_rec:
             if data['request_count'] == 1:
                 continue
-            if data['timestamp'] == '':
+            if data['Timestamp'] == '':
                 continue
 
             #pprint.pprint(data)
