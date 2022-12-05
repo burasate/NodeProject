@@ -731,7 +731,7 @@ async def members_stat_record():
     print('record members stat')
     df_mb.to_csv(member_stat_csv, index=False)
 
-@tasks.loop(minutes=15)
+@tasks.loop(minutes=8)
 async def members_stat_report():
     prev_dir = os.sep.join(base_path.split(os.sep)[:-1])
     rec_dir = prev_dir + '/discord_rec'
@@ -744,7 +744,7 @@ async def members_stat_report():
 
     is_report_time = int(date_time.hour) in report_time_h and\
                      int(date_time.minute) in report_time_m and\
-                     int(isoweekday) == 1
+                     int(isoweekday) in [2]
     #print('is_report_time', is_report_time)
     if not is_report_time:
         return
