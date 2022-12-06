@@ -753,6 +753,10 @@ async def members_stat_report():
 
     df = pd.DataFrame()
     for f in path_list:
+        try:
+            pd.read_csv(f)
+        except:
+            pass
         df = df.append(pd.read_csv(f))
     #print(df.head(5))
     #print(df.tail(5))
