@@ -729,6 +729,9 @@ async def members_stat_record():
     df_mb.reset_index(inplace=True, drop=True)
     #print(df_mb)
     print('record members stat')
+    if df_mb.empty and os.path.exists(member_stat_csv):
+        os.remove(member_stat_csv)
+        return None
     df_mb.to_csv(member_stat_csv, index=False)
 
 @tasks.loop(minutes=8)
@@ -740,7 +743,7 @@ async def members_stat_report():
     week_num = date_time.isocalendar()[1]
 
     report_time_h = [12]
-    report_time_m = [i for i in range(0,20+1)]
+    report_time_m = [i for i in range(35,40+1)]
 
     is_report_time = int(date_time.hour) in report_time_h and\
                      int(date_time.minute) in report_time_m and\
@@ -753,10 +756,8 @@ async def members_stat_report():
 
     df = pd.DataFrame()
     for f in path_list:
-        try:
-            pd.read_csv(f)
-        except:
-            pass
+        if pd.read_csv(f).empty:
+            continue
         df = df.append(pd.read_csv(f))
     #print(df.head(5))
     #print(df.tail(5))
