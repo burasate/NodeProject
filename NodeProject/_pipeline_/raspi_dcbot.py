@@ -743,7 +743,7 @@ async def members_stat_report():
     week_num = date_time.isocalendar()[1]
 
     report_time_h = [12]
-    report_time_m = [i for i in range(35,40+1)]
+    report_time_m = [i for i in range(35,50+1)]
 
     is_report_time = int(date_time.hour) in report_time_h and\
                      int(date_time.minute) in report_time_m and\
@@ -756,7 +756,9 @@ async def members_stat_report():
 
     df = pd.DataFrame()
     for f in path_list:
-        if pd.read_csv(f).empty:
+        try:
+            pd.read_csv(f)
+        except:
             continue
         df = df.append(pd.read_csv(f))
     #print(df.head(5))
