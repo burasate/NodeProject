@@ -670,7 +670,7 @@ async def auto_clear_all_dm_message():
         create_at = message.created_at
         days = (dt.datetime.now() - create_at).days
         #print(create_at, days)
-        if days >= 15:
+        if days >= 45:
             await message.delete()
 
 @tasks.loop(minutes=30)
@@ -734,7 +734,7 @@ async def members_stat_record():
         return None
     df_mb.to_csv(member_stat_csv, index=False)
 
-@tasks.loop(minutes=8)
+@tasks.loop(minutes=9)
 async def members_stat_report():
     prev_dir = os.sep.join(base_path.split(os.sep)[:-1])
     rec_dir = prev_dir + '/discord_rec'
