@@ -247,9 +247,13 @@ class fika: #teletubbies files
         stat_json_dir = r'D:\GDrive\Temp\Fika\Stat\json'
 
         all_ma_path_list = []
-        #ep_list = ['1015','1016','1017','1013','1014']
-        ep_list = [i for i in os.listdir('E:\Shots\Publish') if i.isdigit()]
+        if not os.path.exists('E:/Shots/Publish'):
+            return None
+
+        ep_list = [i for i in os.listdir('E:/Audio') if i.isdigit()]
         for ep in ep_list:
+            if int(ep) < 1026:
+                continue
             ep_path = r'E:\Shots\Publish\{}'.format(ep)
             try:
                 seq_list = os.listdir(ep_path)
