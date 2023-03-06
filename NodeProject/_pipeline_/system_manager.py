@@ -238,6 +238,7 @@ class fika: #teletubbies files
 
     @staticmethod
     def ttf_ma_stat(limit_count = 15):
+        import random
 
         vpn_log = open(r"C:\Users\DEX3D_I7\OpenVPN\log\GPLpfSenseA-UDP4-1196-fika_guest_3-config.log").readlines()
         #if not 'Initialization Sequence Completed' in vpn_log[-1]:
@@ -251,8 +252,9 @@ class fika: #teletubbies files
             return None
 
         ep_list = [i for i in os.listdir('E:/Audio') if i.isdigit()]
+        ep_list = random.sample(ep_list, len(ep_list))
         for ep in ep_list:
-            if int(ep) < 1026:
+            if int(ep) < 1025:
                 continue
             ep_path = r'E:\Shots\Publish\{}'.format(ep)
             try:
@@ -285,6 +287,7 @@ class fika: #teletubbies files
             #break
 
         load_count = 0
+        all_ma_path_list = random.sample(all_ma_path_list, len(all_ma_path_list))
         for ma_path in all_ma_path_list:
             dir_path = os.path.dirname(ma_path).replace('.ma','')
             name = os.path.basename(ma_path)

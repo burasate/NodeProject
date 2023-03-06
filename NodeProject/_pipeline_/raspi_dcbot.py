@@ -1325,7 +1325,7 @@ async def on_message(message):
     is_attachment = message.attachments != []
     is_project_channel = 'proj-' in message.channel.name
     media_ext_list = ['jpg', 'jpeg', 'png', 'gif', 'mov', 'mp4']
-    #print(message)
+    print(message)
     #print(message.channel.name)
     #print(is_attachment and is_project_channel)
     if not is_project_channel and is_attachment:
@@ -1341,6 +1341,12 @@ async def on_message(message):
                       f'risked to confidentiality of project\nplease re-check it again.'
             await message.author.send(dm_text)
             await log_channel.send('sent dm message to member already.')
+
+    # No Command -------------------------------------
+    if message.content.startswith('! ') or message.content.startswith('/ '):
+        msg = 'Please ensure use ! exclamation mark and command without whitespace.'
+        channel = bot.get_channel(message.channel.id)
+        await channel.send(msg)
 
     # Accept Command
     await bot.process_commands(message)
