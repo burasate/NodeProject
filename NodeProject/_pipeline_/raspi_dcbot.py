@@ -943,7 +943,7 @@ async def node(ctx, question):
     ctx_data = bot_func.get_ctx_data(ctx)
     mention = ctx_data['author']['mention']
 
-    content = ctx.message.content.replace('!','/').replace('/gpt ','')
+    content = ctx.message.content.replace('!','/').replace('/node ','')
     print(content)
 
     c = chat_gpt().get_answer(content)
