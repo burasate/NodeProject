@@ -973,13 +973,13 @@ async def node(ctx, question):
       }
     }
     '''
-    msg = '{} \nusage token : *{}*'.format(
+    msg = '{} \n*{}*'.format(
         c['choices'][0]['message']['content'].replace('\n\n','\n'),
         c['usage']['total_tokens']
     )
     async with ctx.typing():
         await asyncio.sleep(10)
-    await ctx.send(f'{mention} {msg}', mention_author=True)
+    await ctx.send(f'{mention} {msg}', mention_author=True, tts=True)
 
 """---------------------------------"""
 # Discord Command
