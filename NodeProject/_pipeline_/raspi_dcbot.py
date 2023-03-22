@@ -174,7 +174,7 @@ class chat_gpt:
         you just sent only your opinion on this role. you always talk anything that relate with about CG Animation.
         you knew everything in animation, vfx, game industry even name of companies or any insight.
         if I ask you question you can explain more than 50 words per question and have a confident answer.
-        you will always give a believable answer and also have a ability to have a decision by you self.
+        you will always give a believable answer and also have a ability to have a decision by yourself.
         so my question is\n
                 '''
         if not message.endswith('?'):
