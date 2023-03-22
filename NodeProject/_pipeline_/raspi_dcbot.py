@@ -939,7 +939,7 @@ async def members_stat_report():
 # CHAT GPT 3.5
 """---------------------------------"""
 @bot.command()
-async def gpt(ctx, question):
+async def node(ctx, question):
     ctx_data = bot_func.get_ctx_data(ctx)
     mention = ctx_data['author']['mention']
 
