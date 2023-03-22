@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from discord.ext import commands, tasks
-import discord, urllib
+import discord, urllib, asyncio
 import requests, os, csv, os, json, time, pprint, sys, shutil
 import datetime as dt
 import pandas as pd
@@ -170,10 +170,11 @@ class chat_gpt:
         import openai
         openai.api_key = config_j['open_ai_gpt']['api_key']
         self.role_msg = '''
-        right now you are a prefessional of 3d animation Q&A topic. you just sent only your opinion on this role.
+        right now your name is \"Node\" you are a prefessional of 3d animation Q&A topic. 
+        you just sent only your opinion on this role. you always talk anything that relate with about CG Animation.
         you knew everything in animation, vfx, game industry even name of companies or any insight.
         if I ask you question you can explain more than 50 words per question and have a confident answer.
-        you will always give a believable answer. you also have a ability to have a decision.
+        you will always give a believable answer and also have a ability to have a decision by you self.
         so my question is\n
                 '''
         if not message.endswith('?'):
@@ -972,11 +973,12 @@ async def node(ctx, question):
       }
     }
     '''
-    msg = '[{}/{}]  {}'.format(
-        c['usage']['completion_tokens'],
-        c['usage']['total_tokens'],
-        c['choices'][0]['message']['content'].replace('\n\n','\n')
+    msg = '{} \nusage token : *{}*'.format(
+        c['choices'][0]['message']['content'].replace('\n\n','\n'),
+        c['usage']['total_tokens']
     )
+    async with ctx.typing():
+        await asyncio.sleep(10)
     await ctx.send(f'{mention} {msg}', mention_author=True)
 
 """---------------------------------"""
