@@ -165,6 +165,29 @@ class bot_func:
         #print(result)
         return result
 
+class chat_gpt:
+    def get_answer(self, message):
+        import openai
+        openai.api_key = config_j['open_ai_gpt']['api_key']
+        self.role_msg = '''
+        right now you are a prefessional of 3d animation Q&A topic. you just sent only your opinion on this role.
+        you knew everything in animation, vfx, game industry even name of companies or any insight.
+        if I ask you question you can explain more than 50 words per question and have a confident answer.
+        you will always give a believable answer. you also have a ability to have a decision.
+        so my question is\n
+                '''
+        if not message.endswith('?'):
+            return None
+        g = gpt()
+        completion = openai.ChatCompletion.create(
+            model=config_j['open_ai_gpt']['model'],
+            messages=[
+                {"role": "user", "content": self.role_msg + message}
+            ]
+        )
+        #print(completion)
+        return completion
+        #print(completion.choices[0].message)
 
 
 """---------------------------------"""
@@ -913,6 +936,51 @@ async def members_stat_report():
     await channel.send(text3_join[:2000])
 
 """---------------------------------"""
+# CHAT GPT 3.5
+"""---------------------------------"""
+@bot.command()
+async def gpt(ctx, question):
+    ctx_data = bot_func.get_ctx_data(ctx)
+    mention = ctx_data['author']['mention']
+
+    content = ctx.message.content.replace('!','/').replace('/gpt ','')
+    print(content)
+
+    c = chat_gpt().get_answer(content)
+    #print(c)
+    if c == None:
+        return None
+    '''
+    {
+      "choices": [
+        {
+          "finish_reason": "stop",
+          "index": 0,
+          "message": {
+            "content": "\n\nAs an AI language model, I do not have the ability to make a definitive statement about the entire world. However, it can be argued that there is a trend towards stylized and exaggerated animation in modern popular media. This can be seen in the prevalence of shows like Rick and Morty, Steven Universe, and Avatar: The Last Airbender, among others, which feature distinct and stylized character designs. However, there are still many examples of realistic animation in both film and television. Ultimately, the choice of style depends on the vision of the creators and the needs of the story they are telling.",
+            "role": "assistant"
+          }
+        }
+      ],
+      "created": 1679465028,
+      "id": "chatcmpl-6wlrYbzhnSx6UeVy6swd0XDGrNTPN",
+      "model": "gpt-3.5-turbo-0301",
+      "object": "chat.completion",
+      "usage": {
+        "completion_tokens": 123,
+        "prompt_tokens": 22,
+        "total_tokens": 145
+      }
+    }
+    '''
+    msg = '[{}/{}]  {}'.format(
+        c['usage']['completion_tokens'],
+        c['usage']['total_tokens'],
+        c['choices'][0]['message']['content'].replace('\n\n','\n')
+    )
+    await ctx.send(f'{mention} {msg}', mention_author=True)
+
+"""---------------------------------"""
 # Discord Command
 """---------------------------------"""
 @bot.command()
@@ -1075,6 +1143,7 @@ async def join(ctx, project_name, hour_week):
         'hour_week': float(hour_week)
     }
     bot_func.add_queue_task(task_name, task_data)
+
 
 """
 @bot.command()

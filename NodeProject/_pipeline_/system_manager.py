@@ -382,7 +382,6 @@ class fika: #teletubbies files
 
     """
 
-
 if __name__ == '__main__':
     #base_path = os.sep.join(root_path.split(os.sep)[:-1])
     #workspaceSetup()
