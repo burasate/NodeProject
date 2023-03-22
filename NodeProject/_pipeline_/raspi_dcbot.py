@@ -1405,7 +1405,7 @@ async def on_message(message):
             log_channel = bot.get_channel(channel_dict['log'])
             await log_channel.send(log_text)
 
-            dm_text = f'**Just notice to you**\nbecause you just shared some media outside ' \
+            dm_text = f'**This message was sent to you**\nbecause you just shared some media outside ' \
                       f'(\"{message.channel.name}\") that isn\'t a project channel \nand might be ' \
                       f'risked to confidentiality of project\nplease re-check it again.'
             await message.author.send(dm_text)
