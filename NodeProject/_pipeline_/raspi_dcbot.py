@@ -178,7 +178,6 @@ class chat_gpt:
                 '''
         if not message.endswith('?'):
             return None
-        g = gpt()
         completion = openai.ChatCompletion.create(
             model=config_j['open_ai_gpt']['model'],
             messages=[
