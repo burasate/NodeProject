@@ -946,6 +946,9 @@ async def node(ctx, question):
     content = ctx.message.content.replace('!','/').replace('/node ','')
     print(content)
 
+    async with ctx.typing():
+        await asyncio.sleep(10)
+
     c = chat_gpt().get_answer(content)
     #print(c)
     if c == None:
@@ -977,9 +980,7 @@ async def node(ctx, question):
         c['choices'][0]['message']['content'].replace('\n\n','\n'),
         c['usage']['total_tokens']
     )
-    async with ctx.typing():
-        await asyncio.sleep(10)
-    await ctx.send(f'{mention} {msg}', mention_author=True, tts=True)
+    await ctx.send(f'{mention} {msg}', mention_author=True, tts=False)
 
 """---------------------------------"""
 # Discord Command
