@@ -173,3 +173,4 @@ maReader/
 *.pickle
 *file_storage/
 *.pdf
+*.lnk
