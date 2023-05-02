@@ -63,7 +63,7 @@ if not os.name == 'nt':
     dcbot_path = rootPath + '/raspi_dcbot.py'
     try:
         print('Open {}'.format(dcbot_path))
-        subprocess.call(['lxterminal', '-e','python3.10 {}'.format(dcbot_path)])
+        subprocess.call(['lxterminal', '-e','python3.10', dcbot_path])
     except Exception as e:
         import traceback
         print(str(traceback.format_exc()))
@@ -86,6 +86,7 @@ while True:
         importlib.reload(system_manager)
         # Fika Project
         if os.name == 'nt':
+            print('\nFika\n')
             system_manager.fika.cache_layout_file()
             # system_manager.versionBackup('.ma', r'C:\Fika\Projects\Dug\Shots', dateFormat='%Y%m%d_%H%M')
             # system_manager.versionBackup('.ma', r"D:\GDrive\Temp\Fika\Works", dateFormat='%Y%m%d_%H%M')

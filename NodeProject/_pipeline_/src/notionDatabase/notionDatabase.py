@@ -334,6 +334,7 @@ def update_page_properties(page_id, properties_dict):
         print('properties ({})  : {}  updated'.format(prop_id, properties_dict))
         return res_j
 
+#version 1
 def notionJsonParser(database_id, dir_path, replace_name = '', force_update = False):
     j_path = dir_path + '/' + database_id + '.json'
     if replace_name != '':
@@ -516,6 +517,108 @@ def notionJsonParser(database_id, dir_path, replace_name = '', force_update = Fa
 
     with open(j_path, 'w') as f:
         json.dump(data, f, indent=4)
+#version 2
+def json_parser(database_id, dir_path, replace_name = ''):
+    j_path = dir_path + '/' + database_id + '.json'
+    if replace_name != '':
+        j_path = dir_path + '/' + replace_name + '.json'
+    print(j_path)
+    rec = get_json_rec(database_id, page_size=5000)
+    with open(j_path, 'w') as f:
+        json.dump(rec, f, indent=4)
+
+def get_json_rec(database_id, page_size=100, filter={}):
+    print(database_id)
+    def get_page_record(data):
+        ls_mrk, tp_mrk = ['$list', '$type']
+        type_dict = {
+            'multi_select': ['multi_select', ls_mrk, 'name'],
+            'checkbox': ['checkbox'],
+            'rich_text': ['rich_text', ls_mrk, 'text', 'content'],
+            'select': ['select'],
+            'created_time': ['created_time'],
+            'status': ['status', 'name'],
+            'formula': ['formula', tp_mrk],
+            'number': ['number'],
+            'title': ['title', ls_mrk, 'text', 'content'],
+            'relation': ['relation', ls_mrk, 'id'],
+            'rollup': ['rollup', tp_mrk],
+            'url': ['url'],
+            'email': ['email'],
+            'date': ['date'],
+            'created_by': ['created_by'],
+        }
+
+        properties = list(data['results'][0]['properties'])
+        #print(properties)
+        records = []
+        for item in data['results']:
+            rec_data = {
+                'title' : '',
+                'page_id' : item['id'],
+                'last_edited_time' : item['last_edited_time'],
+                'created_time' : item['created_time'],
+            }
+            for prop in properties:
+                result = item['properties'][prop]
+                type = item['properties'][prop]['type']
+                sub_ls = []
+                print('\n{}'.format(result))
+                for path in type_dict[type]:
+                    if path == tp_mrk:
+                        sub_type = result['type']
+                        result = result[sub_type]
+                        #print(result)
+                        break
+                    if path == ls_mrk:
+                        idx = type_dict[type].index(path)
+                        sub_ls = type_dict[type][idx+1:]
+                        #print(sub_ls)
+                        continue
+                    elif sub_ls != []:
+                        for sub_path in sub_ls:
+                            result = [i[sub_path] for i in result]
+                        result = ', '.join(result)
+                        #print(result)
+                        break
+                    else:
+                        result = result[path]
+                        #print(result)
+                print([result])
+                if type == 'title':
+                    rec_data['title'] = result
+                rec_data[prop] = result
+            #append data
+            records.append(rec_data)
+        print(records)
+        return records
+
+    page_size_remain = page_size
+    payload = {
+        'page_size': page_size,
+    }
+    if filter != {}:
+        payload['filter'] = filter
+    url = 'https://api.notion.com/v1/databases/{}/query'.format(database_id)
+
+    all_rec = []
+    while page_size_remain > 0:
+        response = requests.post(url, headers=headers, json=payload)
+        if response.status_code != 200:
+            raise Warning('Internet connection issue or get error response')
+        data = response.json()
+        all_rec += get_page_record(data)
+
+        page_size_remain -= len(data['results'])
+        if not data['has_more']:
+            break
+        elif data['has_more']:
+            payload['start_cursor'] = data['next_cursor']
+
+    os.system('cls||clear')
+    #pprint.pprint(all_rec[0])
+    print(len(all_rec), database_id)
+    return all_rec
 
 def loadNotionDatabase(dir_part):
     global database
@@ -523,7 +626,7 @@ def loadNotionDatabase(dir_part):
 
     for i in database:
         os.system('cls||clear')
-        notionJsonParser(i['id'], dir_part, replace_name=i['name'])
+        json_parser(i['id'], dir_part, replace_name=i['name'])
 
         #json to csv
         j_part = dir_part + '/{}.json'.format(i['name'])
@@ -543,7 +646,10 @@ def loadNotionDatabase(dir_part):
             except:
                 pass
 
-        df = pd.DataFrame()
+        df = pd.DataFrame().from_records(data_j)
+        if df.empty:
+            raise Warning('the database need to add some page for works')
+        '''
         for row_id in data_j:
             properties = data_j[row_id]['properties']
             data = {
@@ -557,11 +663,13 @@ def loadNotionDatabase(dir_part):
 
         if df.empty:
             raise Warning('the database need to add some page for works')
-        df = df[['page_id', 'title', 'last_edited_time'] + sorted(list(properties), reverse=False)]
+        '''
+        df = df[['page_id', 'title'] + sorted([
+            i for i in df.columns.tolist() if not i in ['page_id', 'title']], reverse=False)]
         df.reset_index(inplace=True, drop=True)
         df = df.convert_dtypes('str')
         df.dropna(subset=['title'], inplace=True)
-        df.to_csv(csv_path, index=False)
+        df.to_csv(csv_path, index=False, encoding='utf-8')
 
 if __name__ == '__main__':
     #pprint.pprint(getDatabase('6ed27678-c64b-46fa-bd8c-5a398c9aff57'))
@@ -576,4 +684,7 @@ if __name__ == '__main__':
     #updatePage('bc5ca11036ff4da9b723b250ad658807', 'row title name', icon_emoji='🎉') #change icon
     #updatePage('bc5ca11036ff4da9b723b250ad658807', 'row title name', cover_link='http://') #change cover
     #update_page_properties('1c98c4f6d31a409a9c90280f47daac73',{'first_name' : 'Burased','last_name' : 'Uttha','hour_per_week' : 20,})
+    #get_json_rec('c29a633124b94bfc88633f6da1f9ba71')
+    #get_json_rec('6f7393d8cb6445b0b9908036637626c6')
+    #json_parser('c29a633124b94bfc88633f6da1f9ba71', r'C:\Users\DEX3D_I7\Desktop\Periodic Autoencoder Code', 'all_data')
     pass

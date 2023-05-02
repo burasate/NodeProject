@@ -632,6 +632,7 @@ class quote_daily:
         import openai
         self.openai = openai
         self.text_path_cache = []
+        self.ntdb_id = 'c29a633124b94bfc88633f6da1f9ba71'
         #print(self.transcription_dir)
         #print(self.dc_cfg)
         #self.rec_dir
@@ -755,14 +756,13 @@ Massage : \"{1}\" '''.format(transcript['title2'], transcript['content'])
         title_key = transcript['file_name'].split('.')[0] + '_{:0>3d}'.format(transcript['line_number'])
         title_key = title_key.replace('__','_')
         transcript['title'] = title_key
-        ntdb_id = 'c29a633124b94bfc88633f6da1f9ba71'
         db_filter = {
             'property': 'title',
             'rich_text': {
                 'contains': title_key
             }
         }
-        db_data = notionDatabase.getDatabase(ntdb_id, filter=db_filter)
+        db_data = notionDatabase.getDatabase(self.ntdb_id, filter=db_filter)
         if db_data['results'] != []:
             print('passed page exists [{}]'.format(db_data['results'][0]['id']))
             return None
