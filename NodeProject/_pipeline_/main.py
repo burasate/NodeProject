@@ -63,7 +63,7 @@ if not os.name == 'nt':
     dcbot_path = rootPath + '/raspi_dcbot.py'
     try:
         print('Open {}'.format(dcbot_path))
-        subprocess.call(['lxterminal', '-e','python3.10', dcbot_path])
+        subprocess.call(['lxterminal', '-e','python3', dcbot_path])
     except Exception as e:
         import traceback
         print(str(traceback.format_exc()))
