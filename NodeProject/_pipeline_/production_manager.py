@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import json,os,pprint,sys,time,shutil,requests
+import json,os,pprint,sys,time,shutil,requests, random
 import datetime as dt
 
 """
@@ -310,9 +310,9 @@ class register:
         # Compare 2 Dataframes
         regis_json = json.load(open(regis_path))
         regis_df = pd.DataFrame().from_records(regis_json)
+        regis_df = regis_df.sample(frac=1.0)
+        regis_df.reset_index(drop=True, inplace=True)
         member_df = pd.read_csv(nt_member_path)
-        #print(regis_df)
-        #print(member_df.head(1))
 
         for i in regis_df.index.tolist():
             row = regis_df.loc[i]
@@ -618,10 +618,229 @@ class task_queue:
                     key='date_time', value=now
                 )
 
-if __name__ == '__main__':
-    base_path = os.sep.join(rootPath.split(os.sep)[:-1])
+class quote_daily:
+    '''
+    CG Quote Generator
+    '''
+    def __init__(self):
+        from podcastListener import podcastListener
+        self.pl = podcastListener.plistener(podcastListener.podcast_rss)
+        self.transcription_dir = podcastListener.transcription_dir
+        self.dc_cfg_path = rootPath + '/raspi_dcbot.json'
+        self.dc_cfg = json.load(open(self.dc_cfg_path))
+        self.dc_cfg['open_ai_gpt']['model'] = 'gpt-3.5-turbo'
+        import openai
+        self.openai = openai
+        self.text_path_cache = []
+        #print(self.transcription_dir)
+        #print(self.dc_cfg)
+        #self.rec_dir
 
-    import system_manager
+    def load_podcast_transcript(self):
+        self.pl.cache_transcription_from_podcast_rss(count_limit=3)
+
+    def get_rand_transcript_line(self):
+        txt_path_ls = [self.transcription_dir + os.sep + i for i in os.listdir(self.transcription_dir)]
+        files_total = len(txt_path_ls)
+        if len(self.text_path_cache) == len(txt_path_ls):  # clear cache
+            self.text_path_cache = []
+
+        # select random latest
+        txt_ctime_ls = [os.stat(i).st_ctime for i in txt_path_ls]
+        txt_path_ls = [i[-1] for i in sorted(zip(txt_ctime_ls, txt_path_ls), reverse=True)]
+        txt_path_ls = [i for i in txt_path_ls if not i in self.text_path_cache]
+        #print(txt_ctime_ls)
+        #print(json.dumps(txt_path_ls, indent=4))
+        idx_sl = random.randint(0,len(txt_path_ls)-1)
+        if idx_sl > 4:
+            idx_sl = 4
+        text_sl_path = txt_path_ls[idx_sl]
+
+        self.text_path_cache.append(text_sl_path) #add to cache
+        self.text_path_cache = self.text_path_cache[-1 * int(round(files_total * 0.75)):]
+
+        # data
+        file_name = os.path.basename(text_sl_path)
+        title = file_name.replace('.txt','').replace('_',' ').replace('  ',' ').capitalize()
+        with open(text_sl_path) as f:
+            f_read = f.readlines()
+            f_read = [i.replace('\n','') for i in f_read]
+        #print(text_sl_path)
+        #print(file_name)
+        #print(title)
+        #print(len(f_read))
+        line_idx = random.randint(0,max(range(len(f_read))))
+        line_num =  line_idx + 1
+
+        print(round(len(self.text_path_cache)/files_total,1),
+              [title.upper()], '{} / {}'.format(line_num,len(f_read)))
+
+        data = {
+            'title' : title,
+            'file_name' : file_name,
+            'line_number' : line_num,
+            'content' : f_read[line_idx],
+        }
+        #pprint.pprint(data)
+        return data
+
+    def get_completion_response(self, message):
+        system_prompt = '''
+I want you summarize the viewport, perspective and attitude for a career of VFX, Game, Animation (need to be mention all about as Animation) from podcast transcription. Every time when i send a message,  your answer must being this format below with no need to change it. and if you didn't know in line just answer "-".
+
+{"content" : 1 paragraph short message of a viewpoint or attitude summarization, but don't answer like "VFX, Game, Animation". these should be useful for cg artist.
+"content_improve" : length of string target is 90. impovement/summarize and make more shorter as much as possible from "content" in a shortest paragraph (3-5 phrases and 12-20 words and 3 sentences).
+"topic" : Target words count is 3-4. What is a topic from "content", give me that topic. and should be relate to work, animation, industry, pro tips, career. as a string format for this answer.
+"topic_th" : Thai language translated utf-8 of "topic".
+"content_th" : shortest massage Thai language translated utf-8 from "content_improve".
+"credit" : If you found who are saying which you summaried, give their name but should be not main speaker. "Unknown" if you aren't sure.
+"audience_tag" : tag of the audience saperate by department e.g. Animator, Producer, Pipeline, Rigger, Modeller, Etc. as a python list square bucket format for this answer.
+"main_speaker" : If you found who are a main speaker. "Unknown" if you aren't sure.}
+
+must be json string format and must be readable by using json.loads() in python.
+        '''
+        for i in range(3):
+            system_prompt = system_prompt.replace('  ', ' ')
+
+        self.openai.api_key = self.dc_cfg['open_ai_gpt']['api_key']
+        try:
+            completion = self.openai.ChatCompletion.create(
+                model=self.dc_cfg['open_ai_gpt']['model'],
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": message + '\nreply me as json string format only'}
+                ],
+                temperature=0.25,
+            )
+            return completion
+        except Exception as e:
+            import traceback
+            print(str(traceback.format_exc()))
+            print('      GPT Completion error following all above ^      \n')
+            time.sleep(5)
+            return None
+        '''
+        Example completion
+        {'choices': [{'finish_reason': 'stop',
+                      'index': 0,
+                      'message': {'content': '{"topic": "Career in Animation", \n'
+                                             '"content": "In animation, it\'s '
+                                             'important to create natural movement and '
+                                             'avoid repetitive actions, such as '
+                                             'characters always talking with the same '
+                                             'gestures. Finding ways to innovate in '
+                                             'animation leads to a successful '
+                                             'career.", \n'
+                                             '"credit": "Unknown", \n'
+                                             '"main_speaker": "Unknown"}',
+                                  'role': 'assistant'}}],
+         'created': 1682613247,
+         'id': 'chatcmpl-79yrH4oOjhwgc6qVehw2Dx5SbU0ia',
+         'model': 'gpt-3.5-turbo-0301',
+         'object': 'chat.completion',
+         'usage': {'completion_tokens': 66,
+                   'prompt_tokens': 281,
+                   'total_tokens': 347}}
+        '''
+
+    def add_new_quote(self):
+        transcript = self.get_rand_transcript_line()
+        transcript['title2'] = transcript['title']
+        #print(transcript)
+        message = '''
+Title : {0}
+Massage : \"{1}\" '''.format(transcript['title2'], transcript['content'])
+
+        # Notion init check
+        title_key = transcript['file_name'].split('.')[0] + '_{:0>3d}'.format(transcript['line_number'])
+        title_key = title_key.replace('__','_')
+        transcript['title'] = title_key
+        ntdb_id = 'c29a633124b94bfc88633f6da1f9ba71'
+        db_filter = {
+            'property': 'title',
+            'rich_text': {
+                'contains': title_key
+            }
+        }
+        db_data = notionDatabase.getDatabase(ntdb_id, filter=db_filter)
+        if db_data['results'] != []:
+            print('passed page exists [{}]'.format(db_data['results'][0]['id']))
+            return None
+
+        # Chat GPT
+        completion = self.get_completion_response(message)
+        if completion == None: return None
+        try:
+            gpt_content = json.loads(completion['choices'][0]['message']['content'])
+        except Exception as e:
+            import traceback
+            print('\n============ GPT ERROR ===============')
+            pprint.pprint(completion)
+            print(str(traceback.format_exc()))
+            gpt_content = completion['choices'][0]['message']['content']
+
+        if type(gpt_content) == dict:
+            # print(completion)
+            print('\n============ READ GPT JSON STR ===============')
+            pprint.pprint(gpt_content)
+            if len(gpt_content['content_improve']) < len(gpt_content['content']):
+                transcript['content'] = gpt_content['content_improve']
+            else:
+                transcript['content'] = gpt_content['content']
+            transcript['credit'] = gpt_content['credit']
+            transcript['topic'] = gpt_content['topic']
+            transcript['content_th'] = gpt_content['content_th']
+            transcript['topic_th'] = gpt_content['topic_th']
+            transcript['main_speaker'] = gpt_content['main_speaker']
+            transcript['audience_tag'] = random.sample(gpt_content['audience_tag'], len(gpt_content['audience_tag']))
+            # transcript['topic'] = gpt_content['topic']
+        elif type(gpt_content) == str:
+            transcript['content'] = ''
+            transcript['gpt_content'] = gpt_content
+
+        # new page
+        if db_data['results'] == []:
+            page = notionDatabase.createPage(ntdb_id, 'title', title_key)
+            properties = [i for i in list(page['properties'])]
+            #print(properties)
+            for col in transcript:
+                if not col in properties:
+                    del transcript[col]
+            notionDatabase.update_page_properties(page['id'],transcript)
+            '''
+            for col in transcript:
+                if col in properties:
+                    #print([col], [transcript[col]], [transcript[col]])
+                    notionDatabase.updatePageProperty(page['id'], col, transcript[col])
+            '''
+        else:
+            page = db_data['results'][0]
+        print('\n===========================\n')
+
+if __name__ == '__main__':
+    qd = quote_daily()
+    #qd.load_podcast_transcript()
+    '''
+    for i in range(1000):
+        qd.get_rand_transcript_line()
+        print(len(qd.text_path_cache))
+    '''
+    #print(qd.get_rand_transcript_line())
+
+    #'''
+    while True:
+        for i in range(15):
+            qd.add_new_quote()
+            #try: qd.add_new_quote()
+            #except: pass
+            #time.sleep(2)
+        time.sleep(18)
+    #'''
+
+
+    #base_path = os.sep.join(rootPath.split(os.sep)[:-1])
+
+    #import system_manager
     #system_manager.integration.init_notion_db()
     #system_manager.integration.load_notion_db()
     #system_manager.integration.notion_sheet()
@@ -633,7 +852,7 @@ if __name__ == '__main__':
     #print(project.get_member_workload('Ailynn AIS', 'Kaofang.B71'))
     #project.get_member_workload('Financial_test1', 'Kaofang.B71')
 
-    register.update_member()
+    #register.update_member()
     #task_queue.run()
     #project.update_invite()
     #project.add_member(346164580487004171, 'Project_Test', 20)

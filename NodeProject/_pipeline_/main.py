@@ -54,27 +54,22 @@ while not has_internet():
     print('{}   no internet connection!'.format(now))
     time.sleep(10)
 
+"""-----------------------"""
 # Discord Bot
+"""-----------------------"""
 if not os.name == 'nt':
     os.system('cls||clear')
     raspi_update.update()
     dcbot_path = rootPath + '/raspi_dcbot.py'
     try:
         print('Open {}'.format(dcbot_path))
-        subprocess.call(['lxterminal', '-e','python3 {}'.format(dcbot_path)])
+        subprocess.call(['lxterminal', '-e','python3.10 {}'.format(dcbot_path)])
     except Exception as e:
         import traceback
         print(str(traceback.format_exc()))
 
 while True:
     try:
-        """
-        if not os.name == 'nt':
-            importlib.reload(raspi_update)
-            raspi_update.update()
-            time.sleep(3)
-        """
-
         while not has_internet():
             os.system('cls||clear')
             print('{}   no internet connection!')
@@ -89,6 +84,17 @@ while True:
         """
         print('========\nSystem Manager\n========')
         importlib.reload(system_manager)
+        # Fika Project
+        if os.name == 'nt':
+            system_manager.fika.cache_layout_file()
+            # system_manager.versionBackup('.ma', r'C:\Fika\Projects\Dug\Shots', dateFormat='%Y%m%d_%H%M')
+            # system_manager.versionBackup('.ma', r"D:\GDrive\Temp\Fika\Works", dateFormat='%Y%m%d_%H%M')
+            # system_manager.versionBackup('.mov', r"D:\GDrive\Temp\Fika\Works", dateFormat='%Y%m%d_%H%M')
+            system_manager.fika.ttf_ma_stat()
+            system_manager.fika.stat_upload()
+            # system_manager.fika.studio_library()
+
+        importlib.reload(system_manager)
         system_manager.workspaceSetup()
         system_manager.integration.init_notion_db()
         system_manager.integration.load_notion_db()
@@ -99,16 +105,6 @@ while True:
         #system_manager.versionBackup('.ma', projectPath + '/animation_wrk', dateFormat='%Y%m%d_%H%M')
         #system_manager.versionBackup('.mov', projectPath + '/animation_xpt', dateFormat='%Y%m%d_%H%M')
 
-        #Fika Project
-        if os.name == 'nt':
-            system_manager.fika.cache_layout_file()
-            #system_manager.versionBackup('.ma', r'C:\Fika\Projects\Dug\Shots', dateFormat='%Y%m%d_%H%M')
-            #system_manager.versionBackup('.ma', r"D:\GDrive\Temp\Fika\Works", dateFormat='%Y%m%d_%H%M')
-            #system_manager.versionBackup('.mov', r"D:\GDrive\Temp\Fika\Works", dateFormat='%Y%m%d_%H%M')
-            system_manager.fika.ttf_ma_stat()
-            system_manager.fika.stat_upload()
-            #system_manager.fika.studio_library()
-
         """
         Production Manager (update, record and cleanup data of production)
         """
@@ -118,6 +114,13 @@ while True:
         production_manager.register.update_member()
         production_manager.finance.auto_generate_document()
         production_manager.task_queue.run()
+
+        # Quote Daily Task
+        if os.name == 'nt':
+            qd = production_manager.quote_daily()
+            qd.load_podcast_transcript()
+            for i in range(100):
+                qd.add_new_quote()
 
         """
         Data Analytic (data analysis and report)

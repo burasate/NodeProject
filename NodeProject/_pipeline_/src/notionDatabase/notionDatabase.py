@@ -22,18 +22,20 @@ headers = {
         'Authorization': 'Bearer ' + token
     }
 
-#-------------------------------------
+"""-------------------------------------"""
 # Func
-#-------------------------------------
-def getDatabase(database_id, filter={}):
+"""-------------------------------------"""
+def getDatabase(database_id, filter={}, page_size=5000):
     global headers
     url = 'https://api.notion.com/v1/databases/{}/query'.format(database_id)
     payload = {
-        'page_size' : 1000
+        'page_size' : page_size
     }
     if filter != {}:
         payload['filter'] = filter
     response = requests.post(url, json=payload, headers=headers)
+    if response.status_code != 200:
+        raise Warning('Internet connection issue or get error response')
     #pprint.pprint(response.json())
     return response.json()
 
@@ -41,6 +43,8 @@ def getPage(page_id):
     global headers
     url = 'https://api.notion.com/v1/pages/{}'.format(page_id)
     response = requests.get(url, headers=headers)
+    if response.status_code != 200:
+        raise Warning('Internet connection issue or get error response')
     #pprint.pprint(response.json())
     return response.json()
 
@@ -48,6 +52,8 @@ def getPageProperty(page_id, property_id):
     global headers
     url = 'https://api.notion.com/v1/pages/{}/properties/{}'.format(page_id, property_id)
     response = requests.get(url, headers=headers)
+    if response.status_code != 200:
+        raise Warning('Internet connection issue or get error response')
     #pprint.pprint(response.json())
     return response.json()
 
@@ -63,6 +69,8 @@ def createPage(database_id, title_name, name): #add row to database
         }
     }
     response = requests.post(url, json=payload, headers=headers)
+    if response.status_code != 200:
+        raise Warning('Internet connection issue or get error response')
     res_j = response.json()
     #pprint.pprint(res_j)
     if res_j['object'] == 'error':
@@ -117,6 +125,8 @@ def updatePage(database_id, find_name, delete = False, icon_emoji = '' , cover_l
             'external': {'url': cover_link}
         }
     response = requests.patch(url, json=payload, headers=headers)
+    if response.status_code != 200:
+        raise Warning('Internet connection issue or get error response')
     res_j = response.json()
     if res_j['object'] == 'error':
         raise Warning(res_j['message'])
@@ -144,7 +154,7 @@ def updatePageProperty(page_id, property, value):
     else :
         v_type = prop_data['type']
 
-    print('found ', v_type)
+    #print('found ', v_type)
     type_dict = {
         'title' : [{ # 'title'
             'type' : 'text',
@@ -200,6 +210,8 @@ def updatePageProperty(page_id, property, value):
         'archived': False
     }
     response = requests.patch(url, json=payload, headers=headers)
+    if response.status_code != 200:
+        raise Warning('Internet connection issue or get error response')
     res_j = response.json()
     #pprint.pprint(res_j)
     if res_j['object'] == 'error':
@@ -208,6 +220,118 @@ def updatePageProperty(page_id, property, value):
     elif res_j['object'] == 'page':
         prop_id = res_j['properties'][property]['id']
         print('property ({}) \'{}\' : {}  updated'.format(prop_id, property, value))
+        return res_j
+
+def update_page_properties(page_id, properties_dict):
+    """
+    :param page_id: row id in notion database
+    :param properties:
+        properties_dict = {
+            "Title": "New Title",
+            "Description": "New Description",
+            "Category": {"select": {"name": "New Category",
+            "Priority": 3,
+            "Status": ["New Status"}]
+        }
+        new_properties = {
+            "Title": {"title": [{"text": {"content": "New Title"}}]},
+            "Description": {"rich_text": [{"text": {"content": "New Description"}}]},
+            "Category": {"select": {"name": "New Category"}},
+            "Priority": {"number": 3},
+            "Status": {"multi_select": [{"name": "New Status"}]}
+        }
+    :return: update notion database
+    """
+    page_data = getPage(page_id)
+    for p in list(properties_dict):
+        if not p in page_data['properties']:
+            raise Warning('property \'{}\' was not found in page'.format(p))
+    #pprint.pprint(page_data)
+
+    v_type_dict = {}
+    for p in list(properties_dict):
+        prop_data = page_data['properties'][p]
+        #pprint.pprint(prop_data)
+
+        v_type = None
+        if 'property_item' in prop_data:
+            v_type = prop_data['property_item']['type']
+        else :
+            v_type = prop_data['type']
+        v_type_dict[p] = v_type
+    #pprint.pprint(v_type_dict)
+
+    new_properties = {}
+    for p in list(properties_dict):
+        value = properties_dict[p]
+        v_type = v_type_dict[p]
+
+        type_dict = {
+            'title' : [{ # 'title'
+                'type' : 'text',
+                'text' : {'content' : str(value)}
+            }],
+            'rich_text' : [{ # 'some text'
+                'type' : 'text',
+                'text' : {'content' : str(value)}
+            }],
+            'select' : { # 'some text'
+                'select' : {'name': str(value)}
+            },
+            'date' : { # '2010-01-01'
+                    'date': {
+                        'start': str(value),
+                        'end': None, 'time_zone': None,
+                    },
+                    'type': 'date'
+            },
+            'number': value,  # 1
+            'email' : str(value),
+            'phone_number' : str(value),
+            'url' : str(value),
+            'checkbox' : bool(value),
+            'relation': [ # 'relation page id'
+                {'id': str(value)}
+            ],
+            'multi_select': [  # 'select name'
+                {'name': str(value)}
+            ],
+            'status' : {'name': str(value)},
+        }
+
+        if not v_type in type_dict:
+            print('type ', list(type_dict))
+            raise Warning('type \'{}\' was not found in dict\nso can\'t update to this property type.'.format(v_type))
+
+        value_is_list = (type(value) == type(list()))
+        if value_is_list:
+            print('input value is list type..')
+            if v_type == 'relation':
+                type_dict[v_type] = [{'id': i} for i in value]
+            if v_type == 'multi_select':
+                type_dict[v_type] = [{'name': i} for i in value]
+
+        new_properties[p] = type_dict[v_type]
+
+    #pprint.pprint(new_properties)
+
+    global headers
+    url = 'https://api.notion.com/v1/pages/{}'.format(page_id)
+    payload = {
+        'properties': new_properties,
+        'archived': False
+    }
+    response = requests.patch(url, json=payload, headers=headers)
+    if response.status_code != 200:
+        raise Warning('Internet connection issue or get error response')
+    res_j = response.json()
+    #pprint.pprint(res_j)
+    if res_j['object'] == 'error':
+        print ('status', res_j['status'], 'https://developers.notion.com/reference/errors')
+        raise Warning(res_j['message'])
+    elif res_j['object'] == 'page':
+        prop_id = res_j['properties'][p]['id']
+        print('properties ({})  : {}  updated'.format(prop_id, properties_dict))
         return res_j
 
 def notionJsonParser(database_id, dir_path, replace_name = '', force_update = False):
@@ -260,7 +384,6 @@ def notionJsonParser(database_id, dir_path, replace_name = '', force_update = Fa
         ]).split('.')[0]
         page_id = row['id'].replace('-','')
         prop_list = [i for i in row['properties']]
-
         try:
             title = getPageProperty(page_id, 'title')
         except:
@@ -452,4 +575,5 @@ if __name__ == '__main__':
     #updatePage('bc5ca11036ff4da9b723b250ad658807', 'row title name') #do nothing
     #updatePage('bc5ca11036ff4da9b723b250ad658807', 'row title name', icon_emoji='🎉') #change icon
     #updatePage('bc5ca11036ff4da9b723b250ad658807', 'row title name', cover_link='http://') #change cover
+    #update_page_properties('1c98c4f6d31a409a9c90280f47daac73',{'first_name' : 'Burased','last_name' : 'Uttha','hour_per_week' : 20,})
     pass

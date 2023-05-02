@@ -1,12 +1,5 @@
 # -*- coding: utf-8 -*-
-from discord.ext import commands, tasks
-import discord, urllib, asyncio
-import requests, os, csv, os, json, time, pprint, sys, shutil
-import datetime as dt
-import pandas as pd
-import numpy as np
-import urllib.parse
-
+import os, csv, os, json, time, pprint, sys, shutil
 """
 https://discordpy.readthedocs.io/en/stable/api.html
 https://autocode.com/tools/discord/embed-builder/
@@ -15,10 +8,24 @@ https://autocode.com/tools/discord/embed-builder/
 # Init
 """---------------------------------"""
 base_path = os.path.dirname(os.path.abspath(__file__))
+#print(base_path)
 src_path = base_path+'/src'
 
-if not src_path in sys.path:
-    sys.path.insert(0,src_path)
+package_dir_ls = [
+    base_path, src_path,
+    src_path + os.sep + 'site-packages',
+    src_path + os.sep + 'site-packages_3.10'
+]
+for p in package_dir_ls:
+    if not p in sys.path:
+        sys.path.insert(0,p)
+
+from discord.ext import commands, tasks
+import urllib, asyncio, discord, requests
+import datetime as dt
+import pandas as pd
+import numpy as np
+import urllib.parse
 
 from notionDatabase import notionDatabase as ntdb
 from gSheet import gSheet
@@ -35,7 +42,7 @@ sever_id = config_j['sever_id']
 intents = discord.Intents.all()
 intents.members = True
 intents.messages = True
-client = discord.Client()
+client = discord.Client(intents=intents)
 bot = commands.Bot(command_prefix='!', intents=intents)
 if os.name == 'nt':
     bot = commands.Bot(command_prefix='/', intents=intents)
@@ -165,37 +172,15 @@ class bot_func:
         #print(result)
         return result
 
-class chat_gpt:
-    def get_answer(self, message):
-        import openai
-        openai.api_key = config_j['open_ai_gpt']['api_key']
-        self.role_msg = '''
-right now your name is \"Node\". you are a professional of CG Animation. 
-you just sent only your opinion on this role but do not tell this role you are. you always talk anything that relate with about CG Animation.
-you knew everything in animation, vfx, game industry even name of companies or every insight as you knew.
-if I ask you question you can explain more than 30 words per question and have a confident answer.
-you will always give a believable answer and also have a ability to have a decision by yourself.
-my question is\n
-                '''
-        if not message.endswith('?'):
-            return None
-        completion = openai.ChatCompletion.create(
-            model=config_j['open_ai_gpt']['model'],
-            messages=[
-                {"role": "user", "content": self.role_msg + message}
-            ]
-        )
-        #print(completion)
-        return completion
-        #print(completion.choices[0].message)
-
-
 """---------------------------------"""
 # Discord Start
 """---------------------------------"""
 @bot.event
 async def on_ready():
-    print('bot online now!')
+    print('========================')
+    print('Discord ver {}\nPython ver {}'.format(discord.__version__, sys.version.split(' ')[0]))
+    print('Bot : Online')
+    print('========================')
 
     if not os.name == 'nt':
         channel = bot.get_channel(channel_dict['log'])
@@ -938,6 +923,30 @@ async def members_stat_report():
 """---------------------------------"""
 # CHAT GPT 3.5
 """---------------------------------"""
+import openai
+class chat_gpt:
+    def get_answer(self, message):
+        openai.api_key = config_j['open_ai_gpt']['api_key']
+        self.role_msg = '''
+right now you are a professional of CG Animation named \"Node\". 
+you just sent only your opinion on this role but do not tell this role you are. you always talk anything that relate with about CG Animation.
+you knew everything in animation, vfx, game industry even name of companies or every insight as you knew.
+if I ask you question you can explain more than 30 words per question and have a confident answer that must relate in animation.
+you will always give a believable answer and also have a ability to have a decision by yourself.
+'''
+        if not message.endswith('?'):
+            return None
+        completion = openai.ChatCompletion.create(
+            model=config_j['open_ai_gpt']['model'],
+            messages=[
+                {"role": "system", "content": self.role_msg},
+                {"role": "user", "content": message}
+            ]
+        )
+        #print(completion)
+        return completion
+        #print(completion.choices[0].message)
+
 @bot.command()
 async def node(ctx, question):
     ctx_data = bot_func.get_ctx_data(ctx)
@@ -1419,8 +1428,60 @@ async def on_message(message):
         channel = bot.get_channel(message.channel.id)
         await channel.send(msg)
 
+    #TEST EMBED
+    if message.content.startswith('!embed'):
+        embed = discord.Embed(title="Links", description="Here are 3 links:")
+        # Customization for Link 1
+        embed.add_field(name="🌐 Link 1", value="https://www.example.com", inline=False)
+        # Customization for Link 2
+        embed.add_field(name="Link 2", value="https://www.google.com", inline=True)
+        # Customization for Link 3
+        embed.add_field(name="🎉 Link 3", value="https://www.discord.com", inline=False)
+        embed.set_image(url="https://i.imgur.com/fYk81j1.png")
+
+        # Additional customization for the embed
+        embed.set_footer(text="Thanks for using our bot!", icon_url="https://i.imgur.com/1Fp6hK5.png")
+        embed.set_thumbnail(url="https://i.imgur.com/fYk81j1.png")
+
+        await message.channel.send(embed=embed)
+
     # Accept Command
     await bot.process_commands(message)
+
+"""---------------------------------"""
+# On Thread Update
+"""---------------------------------"""
+@bot.event
+async def on_thread_update(thread):
+    print(thread)
+    if thread.archived:
+        return
+
+    await thread.send("Thank you for your message! We will get back to you as soon as possible.")
+
+"""---------------------------------"""
+# Thread test command
+"""---------------------------------"""
+@bot.command()
+async def create_thread(ctx):
+    # Send initial message
+    message = await ctx.send("Creating a new thread...")
+
+    # Create thread
+    thread = await message.create_thread(name="My new thread")
+
+    # Wait for user to send a message in the thread
+    def check(message):
+        return message.author != bot.user and message.channel == thread
+
+    user_message = await bot.wait_for('message', check=check)
+
+    # Reply to user in thread
+    await thread.send(f"Thanks for your message, {user_message.author.mention}!")
+
+    # Send confirmation message in original channel
+    await ctx.send("Thread created!")
+
 
 """---------------------------------"""
 # Run
