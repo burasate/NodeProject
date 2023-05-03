@@ -63,12 +63,13 @@ if not os.name == 'nt':
     dcbot_path = rootPath + '/raspi_dcbot.py'
     try:
         print('Open {}'.format(dcbot_path))
-        subprocess.call(['lxterminal', '-t', 'Discord Node'
+        subprocess.call(['lxterminal', '-t', 'Discord Node',
                          '-e','python3', dcbot_path,
                          '|| read -p \'An error occurred. Press any key to exit.\' -n1'])
     except Exception as e:
         import traceback
         print(str(traceback.format_exc()))
+        time.sleep(10)
 
 while True:
     try:
