@@ -62,10 +62,9 @@ if not os.name == 'nt':
     raspi_update.update()
     dcbot_path = rootPath + '/raspi_dcbot.py'
     try:
-        print('Open {}'.format(dcbot_path))
-        subprocess.call(['lxterminal', '-t', 'Discord Node',
-                         '-e','python3', dcbot_path,
-                         '||', 'read', '-p', '-n1'])
+        print('Open {}'.format(os.path.basename(dcbot_path)))
+        time.sleep(1.5)
+        subprocess.call(['lxterminal', '-t', 'Discord Node', '-e','python3 {}'.format(dcbot_path))
     except Exception as e:
         import traceback
         print(str(traceback.format_exc()))
