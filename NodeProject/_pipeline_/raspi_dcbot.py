@@ -12,10 +12,7 @@ base_path = os.path.dirname(os.path.abspath(__file__))
 src_path = base_path+'/src'
 print(sys.version)
 
-package_dir_ls = [
-    base_path, src_path,
-    src_path + os.sep + 'site-packages'
-]
+package_dir_ls = [base_path, src_path]
 if sys.version.split('.')[1] == '10':
     package_dir_ls += [src_path + os.sep + 'site-packages_3.10']
 for p in package_dir_ls:
