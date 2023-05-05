@@ -64,7 +64,8 @@ if not os.name == 'nt':
     try:
         print('Open {}'.format(os.path.basename(dcbot_path)))
         time.sleep(1.5)
-        subprocess.call( ['lxterminal', '-t', 'Discord Node', '-e','python3 {}'.format(dcbot_path)] )
+        #subprocess.call( ['lxterminal', '-t', 'Discord Node', '-e','python3 {}'.format(dcbot_path)] ) #python 3.7
+        subprocess.call( ['lxterminal', '-t', 'Discord Node', '-e','python3.10 {}'.format(dcbot_path)] ) #python 3.10
     except Exception as e:
         import traceback
         print(str(traceback.format_exc()))
