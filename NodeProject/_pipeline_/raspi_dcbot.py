@@ -1495,6 +1495,4 @@ for dp in [src_path + os.sep + i for i in os.listdir(src_path + os.sep + 'site-p
     if '.' in bname: continue
     if not bname in loaded:
         print(bname, bname in loaded)
-    #if os.path.isdir(dp):
-
 bot.run(token)
