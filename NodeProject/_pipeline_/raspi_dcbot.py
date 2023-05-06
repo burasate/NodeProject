@@ -17,8 +17,10 @@ if sys.version.split('.')[1] == '10':
     package_dir_ls += [src_path + os.sep + 'site-packages_3.10']
 for p in package_dir_ls:
     if not p in sys.path:
-        print('init package dir     {}'.format(p))
-        sys.path.insert(0,p)
+        #print('init package dir     {}'.format(p))
+        sys.path.insert(1,p)
+print(sorted(sys.builtin_module_names))
+print(json.dumps([i.replace('\\','/') for i in sys.path], indent=4))
 
 from discord.ext import commands, tasks
 import urllib, asyncio, discord, requests
@@ -1486,4 +1488,13 @@ async def create_thread(ctx):
 """---------------------------------"""
 # Run
 """---------------------------------"""
+loaded = [i.split(':')[0] for i in sys.modules]
+for dp in [src_path + os.sep + i for i in os.listdir(src_path + os.sep + 'site-packages_3.10')]:
+    #print(dp)
+    bname = os.path.basename(dp)
+    if '.' in bname: continue
+    if not bname in loaded:
+        print(bname, bname in loaded)
+    #if os.path.isdir(dp):
+
 bot.run(token)
