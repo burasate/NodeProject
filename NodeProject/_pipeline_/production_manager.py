@@ -541,19 +541,14 @@ class task_queue:
         self.data = {}
         self.func_rec = [
             {
-                'task_name': 'sent_invite_to_project',
-                'task_func': project.update_invite,
-                'wait': 30.0
-            },
-            {
                 'task_name': 'set_project_channel_id',
                 'task_func': self.set_project_channel_id,
-                'wait': 30.0
+                'wait': 0.0
             },
             {
                 'task_name': 'join_project',
                 'task_func': project.add_project_member,
-                'wait': 30.0
+                'wait': 0.0
             },
             {
                 'task_name': 'generate_financial_document',
