@@ -560,6 +560,7 @@ def get_json_rec(database_id, page_size=100, filter={}):
             'email': ['email'],
             'date': ['date'],
             'created_by': ['created_by'],
+            'last_edited_time': ['last_edited_time'],
         }
 
         properties = list(data['results'][0]['properties'])
