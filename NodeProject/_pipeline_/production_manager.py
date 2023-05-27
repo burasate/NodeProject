@@ -535,35 +535,95 @@ class project:
         else:
             return sec_dur
 
-# Task System
+    @staticmethod
+    def set_project_channel_id():
+        notionDatabase.updatePageProperty(task_queue.data['project_id'], 'discord_channel_id',
+                                          task_queue.data['channel_id'])
+
+# Gumraod Data Pipline
+class gumroad_script_tools:
+    @staticmethod
+    def test():
+        ntdb = notionDatabase
+        ntdb_id = 'fbca8d791aa54ac5b0d73a0766992295'
+        data = task_queue.data
+        pprint.pprint(data)
+        db_filter = {
+            'and': [
+                {
+                    'property': 'name',
+                    'rich_text': {'equals': data['user_last']}
+                },
+                {
+                    'property': 'ip',
+                    'rich_text': {'equals': data['ip']}
+                },
+                {
+                    'property': 'script_name',
+                    'rich_text': {'equals': data['script_name']}
+                },
+            ]
+        }
+        db_data = ntdb.getDatabase(ntdb_id, filter=db_filter)
+        is_page_empty = db_data['results'] == []
+        print(db_data['results'])
+
+        # Notion delete duplicated pages
+        if len(db_data['results']) > 1:
+            print('ununique   : {}'.format(len(db_data['results'])))
+            for p in db_data['results'][1:]:
+                ntdb.del_page_id(p['id'])
+
+        # Notion page define
+        if is_page_empty:  # New page
+            page = ntdb.createPage(ntdb_id, 'name', data['user_last'])
+        else:  # Update page
+            page = db_data['results'][0]
+
+        #properties used
+        prop_ls = list(page['properties'])
+        for p in list(data):
+            if not p in prop_ls:
+                del data[p]
+        print('prepared data  ', data)
+
+        # Notion page organise
+        ntdb.update_page_properties(page['id'], data)
+        #if is_page_empty:
+            #pass
+        #else:
+            #pass
+
+# Task System (Lastest decoration)
 class task_queue:
-    def __init__(self):
-        self.data = {}
-        self.func_rec = [
-            {
-                'task_name': 'set_project_channel_id',
-                'task_func': self.set_project_channel_id,
-                'wait': 0.0
-            },
-            {
-                'task_name': 'join_project',
-                'task_func': project.add_project_member,
-                'wait': 0.0
-            },
-            {
-                'task_name': 'generate_financial_document',
-                'task_func': finance.generate_document,
-                'wait': 30.0
-            },
-        ]
+    data = {}
+    func_rec = [
+        {
+            'task_name': 'set_project_channel_id',
+            'task_func': project.set_project_channel_id,
+            'wait': 0.0
+        },
+        {
+            'task_name': 'join_project',
+            'task_func': project.add_project_member,
+            'wait': 0.0
+        },
+        {
+            'task_name': 'generate_financial_document',
+            'task_func': finance.generate_document,
+            'wait': 30.0
+        },
+        {
+            'task_name': 'script_tool_check_in',
+            'task_func': gumroad_script_tools.test,
+            'wait': 0.0
+        },
+    ]
 
+    @staticmethod
+    def run(dev_mode=False):
 
-    def set_project_channel_id(self):
-        notionDatabase.updatePageProperty(self.data['project_id'], 'discord_channel_id', self.data['channel_id'])
-
-    def run(self):
-
-        if os.name == 'nt':
+        if os.name == 'nt' and not dev_mode:
             return None
 
         request_sheet = 'Request'
@@ -575,22 +635,26 @@ class task_queue:
         request_df.sort_values(by=['date_time'], ascending=[True], inplace=True)
         for i in request_df.index.tolist():
             row = request_df.loc[i]
-            print('Get Task  ', row.to_dict())
-            self.data = json.loads(str(row['data']).replace('\'','\"'))
+            print('\nGet Task  ', row.to_dict())
+            task_queue.data = json.loads(str(row['data']).replace('\'','\"'))
 
-            if 'error' in self.data:
-                self.data['error'] == ''
-            #print(self.data)
+            if 'error' in task_queue.data:
+                task_queue.data['error'] == ''
+            #print(task_queue.data)
 
             clear = False
-            if not row['name'] in [i['task_name'] for i in self.func_rec]:
+            if not row['name'] in [i['task_name'] for i in task_queue.func_rec]:
                 continue
-            func_idx = [i['task_name'] for i in self.func_rec].index()
+            func_idx = [i['task_name'] for i in task_queue.func_rec].index(row['name'])
 
             try:
+                #Data
+                print('Get Data  ', task_queue.data)
+
                 #Excute
-                self.func_rec[func_idx]['task_func']()
-                clear = True
+                task_queue.func_rec[func_idx]['task_func']()
+                clear = True if not dev_mode else False
+
                 '''
                 if row['name'] == '':
                     pass
@@ -831,7 +895,7 @@ Massage : \"{1}\" '''.format(transcript['title2'], transcript['content'])
         print('\n===========================\n')
 
 if __name__ == '__main__':
-    qd = quote_daily()
+    #qd = quote_daily()
     #qd.load_podcast_transcript()
     '''
     for i in range(1000):
@@ -840,7 +904,7 @@ if __name__ == '__main__':
     '''
     #print(qd.get_rand_transcript_line())
 
-    #'''
+    '''
     while True:
         for i in range(15):
             qd.add_new_quote()
@@ -848,8 +912,7 @@ if __name__ == '__main__':
             #except: pass
             #time.sleep(2)
         time.sleep(18)
-    #'''
-
+    '''
 
     #base_path = os.sep.join(rootPath.split(os.sep)[:-1])
 
@@ -866,7 +929,7 @@ if __name__ == '__main__':
     #project.get_member_workload('Financial_test1', 'Kaofang.B71')
 
     #register.update_member()
-    #task_queue.run()
+    task_queue.run(dev_mode=True)
     #project.update_invite()
     #project.add_member(346164580487004171, 'Project_Test', 20)
     pass
