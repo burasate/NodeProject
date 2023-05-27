@@ -1484,6 +1484,29 @@ async def create_thread(ctx):
     # Send confirmation message in original channel
     await ctx.send("Thread created!")
 
+@bot.command()
+async def record(ctx):
+    voice_channel = ctx.author.voice.channel
+    if voice_channel is None:
+        await ctx.send('You need to be in a voice channel to use this command.')
+        return
+
+    voice_client = await voice_channel.connect()
+    """
+    while voice_client.is_connected():
+        try:
+            audio = voice_client.listen()
+            print('Voice recorded and saved.')
+
+            # Do something with the recording here, if desired
+
+            await asyncio.sleep(30)
+        except discord.errors.ClientException:
+            break
+    """
+    await asyncio.sleep(30)
+    await voice_client.disconnect()
+
 
 """---------------------------------"""
 # Run
@@ -1495,4 +1518,7 @@ for dp in [src_path + os.sep + i for i in os.listdir(src_path + os.sep + 'site-p
     if '.' in bname: continue
     if not bname in loaded:
         print(bname, bname in loaded)
+import _ctypes
+print(_ctypes.__file__)
+import nacl.secret
 bot.run(token)

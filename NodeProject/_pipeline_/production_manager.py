@@ -537,31 +537,40 @@ class project:
 
 # Task System
 class task_queue:
-    data = {}
-    def set_project_channel_id():
-        task_queue.data
-        notionDatabase.updatePageProperty(
-            task_queue.data['project_id'],
-            'discord_channel_id',
-            task_queue.data['channel_id']
-        )
+    def __init__(self):
+        self.data = {}
+        self.func_rec = [
+            {
+                'task_name': 'sent_invite_to_project',
+                'task_func': project.update_invite,
+                'wait': 30.0
+            },
+            {
+                'task_name': 'set_project_channel_id',
+                'task_func': self.set_project_channel_id,
+                'wait': 30.0
+            },
+            {
+                'task_name': 'join_project',
+                'task_func': project.add_project_member,
+                'wait': 30.0
+            },
+            {
+                'task_name': 'generate_financial_document',
+                'task_func': finance.generate_document,
+                'wait': 30.0
+            },
+        ]
 
-    '''
-    def sent_role_welcome_update(data):
-        #task_queue.data['id_list']
-        nt_member_path = notiondb_dir + '/csv' + '/member.csv'
-        member_df = pd.read_csv(nt_member_path)
-        #print(member_df)
 
-        for i in member_df.index.tolist():
-            row = member_df.loc[i]
-            if row['discord_id'] in data['id_list']:
-                notionDatabase.updatePageProperty(row['page_id'], 'sent_role_welcome', True)
-    '''
+    def set_project_channel_id(self):
+        notionDatabase.updatePageProperty(self.data['project_id'], 'discord_channel_id', self.data['channel_id'])
 
-    def run(*_):
+    def run(self):
+
         if os.name == 'nt':
             return None
+
         request_sheet = 'Request'
         request_path = '{}/{}.json'.format(rec_dir,request_sheet)
         load_worksheet(request_sheet, rec_dir)
@@ -572,14 +581,22 @@ class task_queue:
         for i in request_df.index.tolist():
             row = request_df.loc[i]
             print('Get Task  ', row.to_dict())
-            task_queue.data = json.loads(str(row['data']).replace('\'','\"'))
+            self.data = json.loads(str(row['data']).replace('\'','\"'))
 
-            if 'error' in task_queue.data:
-                task_queue.data['error'] == ''
-            #print(task_queue.data)
+            if 'error' in self.data:
+                self.data['error'] == ''
+            #print(self.data)
 
-            clear = True
+            clear = False
+            if not row['name'] in [i['task_name'] for i in self.func_rec]:
+                continue
+            func_idx = [i['task_name'] for i in self.func_rec].index()
+
             try:
+                #Excute
+                self.func_rec[func_idx]['task_func']()
+                clear = True
+                '''
                 if row['name'] == '':
                     pass
 
@@ -596,9 +613,10 @@ class task_queue:
                     print('financial document - clear request quota...')
                     time.sleep(30)
                     finance.generate_document()
+                '''
 
-                else:
-                    clear = False
+                #else:
+                    #clear = False
 
                 # Clear Task
                 if clear:

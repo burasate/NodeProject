@@ -35,7 +35,7 @@ def getDatabase(database_id, filter={}, page_size=5000):
         payload['filter'] = filter
     response = requests.post(url, json=payload, headers=headers)
     if response.status_code != 200:
-        raise Warning('Internet connection issue or get error response')
+        raise Warning('Internet connection issue or get error response\n{}'.format(response.text))
     #pprint.pprint(response.json())
     return response.json()
 
@@ -44,7 +44,7 @@ def getPage(page_id):
     url = 'https://api.notion.com/v1/pages/{}'.format(page_id)
     response = requests.get(url, headers=headers)
     if response.status_code != 200:
-        raise Warning('Internet connection issue or get error response')
+        raise Warning('Internet connection issue or get error response\n{}'.format(response.text))
     #pprint.pprint(response.json())
     return response.json()
 
@@ -53,7 +53,7 @@ def getPageProperty(page_id, property_id):
     url = 'https://api.notion.com/v1/pages/{}/properties/{}'.format(page_id, property_id)
     response = requests.get(url, headers=headers)
     if response.status_code != 200:
-        raise Warning('Internet connection issue or get error response')
+        raise Warning('Internet connection issue or get error response\n{}'.format(response.text))
     #pprint.pprint(response.json())
     return response.json()
 
@@ -70,7 +70,7 @@ def createPage(database_id, title_name, name): #add row to database
     }
     response = requests.post(url, json=payload, headers=headers)
     if response.status_code != 200:
-        raise Warning('Internet connection issue or get error response')
+        raise Warning('Internet connection issue or get error response\n{}'.format(response.text))
     res_j = response.json()
     #pprint.pprint(res_j)
     if res_j['object'] == 'error':
@@ -126,7 +126,7 @@ def updatePage(database_id, find_name, delete = False, icon_emoji = '' , cover_l
         }
     response = requests.patch(url, json=payload, headers=headers)
     if response.status_code != 200:
-        raise Warning('Internet connection issue or get error response')
+        raise Warning('Internet connection issue or get error response\n{}'.format(response.text))
     res_j = response.json()
     if res_j['object'] == 'error':
         raise Warning(res_j['message'])
@@ -211,7 +211,7 @@ def updatePageProperty(page_id, property, value):
     }
     response = requests.patch(url, json=payload, headers=headers)
     if response.status_code != 200:
-        raise Warning('Internet connection issue or get error response')
+        raise Warning('Internet connection issue or get error response\n{}'.format(response.text))
     res_j = response.json()
     #pprint.pprint(res_j)
     if res_j['object'] == 'error':
@@ -323,7 +323,7 @@ def update_page_properties(page_id, properties_dict):
     }
     response = requests.patch(url, json=payload, headers=headers)
     if response.status_code != 200:
-        raise Warning('Internet connection issue or get error response')
+        raise Warning('Internet connection issue or get error response\n{}'.format(response.text))
     res_j = response.json()
     #pprint.pprint(res_j)
     if res_j['object'] == 'error':
@@ -333,6 +333,19 @@ def update_page_properties(page_id, properties_dict):
         prop_id = res_j['properties'][p]['id']
         print('properties ({})  : {}  updated'.format(prop_id, properties_dict))
         return res_j
+
+def del_page_id(page_id):
+    global headers
+    url = 'https://api.notion.com/v1/pages/{}'.format(page_id)
+    payload = {
+        'archived': True
+    }
+    response = requests.patch(url, json=payload, headers=headers)
+    if response.status_code != 200:
+        raise Warning('Internet connection issue or get error response\n{}'.format(response.text))
+    print('deleted/archived  : {}'.format(page_id))
+    # pprint.pprint(response.json())
+    #return response.json()
 
 #version 1
 def notionJsonParser(database_id, dir_path, replace_name = '', force_update = False):
@@ -590,7 +603,7 @@ def get_json_rec(database_id, page_size=100, filter={}):
                 rec_data[prop] = result
             #append data
             records.append(rec_data)
-        print(records)
+        #print(records)
         return records
 
     page_size_remain = page_size
@@ -605,7 +618,7 @@ def get_json_rec(database_id, page_size=100, filter={}):
     while page_size_remain > 0:
         response = requests.post(url, headers=headers, json=payload)
         if response.status_code != 200:
-            raise Warning('Internet connection issue or get error response')
+            raise Warning('Internet connection issue or get error response\n{}'.format(response.text))
         data = response.json()
         all_rec += get_page_record(data)
 

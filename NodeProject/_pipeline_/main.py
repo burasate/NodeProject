@@ -117,7 +117,7 @@ while True:
         #production_manager.loadNotionDatabase(projectPath + '/production_rec/notionDatabase')
         production_manager.register.update_member()
         production_manager.finance.auto_generate_document()
-        production_manager.task_queue.run()
+        production_manager.task_queue().run()
 
         # Quote Daily Task
         if os.name == 'nt':
