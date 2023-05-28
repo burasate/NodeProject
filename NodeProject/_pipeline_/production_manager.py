@@ -623,8 +623,8 @@ class task_queue:
     @staticmethod
     def run(dev_mode=False):
 
-        if os.name == 'nt' and not dev_mode:
-            return None
+        if os.name == 'nt': return None
+        elif os.name == 'nt' and not dev_mode: return None
 
         request_sheet = 'Request'
         request_path = '{}/{}.json'.format(rec_dir,request_sheet)
