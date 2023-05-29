@@ -623,8 +623,8 @@ class task_queue:
     @staticmethod
     def run(dev_mode=False):
 
-        if os.name == 'nt': return None
-        elif os.name == 'nt' and not dev_mode: return None
+        if os.name == 'nt' and not dev_mode:return None
+        elif os.name == 'nt' and not __name__ == '__main__': return None
 
         request_sheet = 'Request'
         request_path = '{}/{}.json'.format(rec_dir,request_sheet)
@@ -635,8 +635,9 @@ class task_queue:
         request_df.sort_values(by=['date_time'], ascending=[True], inplace=True)
         for i in request_df.index.tolist():
             row = request_df.loc[i]
-            print('\nGet Task  ', row.to_dict())
-            task_queue.data = json.loads(str(row['data']).replace('\'','\"'))
+            s_data = str(row['data']).replace('\'','\\\"')
+            print('\nGet Task  {}'.format(i+1), s_data)
+            task_queue.data = json.loads(s_data)
 
             if 'error' in task_queue.data:
                 task_queue.data['error'] == ''
