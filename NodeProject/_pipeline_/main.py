@@ -73,14 +73,13 @@ if not os.name == 'nt':
 
 while True:
     try:
-        while not has_internet():
-            os.system('cls||clear')
-            print('{}   no internet connection!')
-            time.sleep(30)
-
         print(os.system('cls||clear'))
         dateTime = dt.datetime.now().strftime('%Y/%m/%d %H:%M:%S')
         print(dateTime)
+        while not has_internet():
+            os.system('cls||clear')
+            print(' - no internet connection!')
+            time.sleep(30)
 
         """
         System Manager (backup any important file in pipeline)

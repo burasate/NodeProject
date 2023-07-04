@@ -895,9 +895,25 @@ Massage : \"{1}\" '''.format(transcript['title2'], transcript['content'])
             page = db_data['results'][0]
         print('\n===========================\n')
 
+    def get_random_quote_data(self):
+        db_filter = {
+              "property": "is_requested",
+              "checkbox": {
+                "equals": 'false'
+              }
+        }
+        j_rec = notionDatabase.get_json_rec(self.ntdb_id, page_size=100, filter={})
+        rand_idx = random.randint(0, len(j_rec)-1)
+        data = j_rec[rand_idx]
+        #pprint.pprint(data)
+        notionDatabase.update_page_properties(data['page_id'], {'is_requested' : True})
+        return data
+
 if __name__ == '__main__':
-    #qd = quote_daily()
+
+    qd = quote_daily()
     #qd.load_podcast_transcript()
+    #qd.get_random_quote_data()
     '''
     for i in range(1000):
         qd.get_rand_transcript_line()
@@ -930,7 +946,7 @@ if __name__ == '__main__':
     #project.get_member_workload('Financial_test1', 'Kaofang.B71')
 
     #register.update_member()
-    task_queue.run(dev_mode=True)
+    #task_queue.run(dev_mode=True)
     #project.update_invite()
     #project.add_member(346164580487004171, 'Project_Test', 20)
     pass

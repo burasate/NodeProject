@@ -925,6 +925,7 @@ async def members_stat_report():
 """---------------------------------"""
 # CHAT GPT 3.5
 """---------------------------------"""
+"""
 import openai
 class chat_gpt:
     def get_answer(self, message):
@@ -992,6 +993,12 @@ async def node(ctx, question):
         c['usage']['total_tokens']
     )
     await ctx.send(f'{mention} {msg}', mention_author=True, tts=False)
+"""
+
+"""---------------------------------"""
+# CG QUOTE GENERATOR
+"""---------------------------------"""
+from quoteGenerator import quotegen
 
 """---------------------------------"""
 # Discord Command
@@ -1449,41 +1456,6 @@ async def on_message(message):
 
     # Accept Command
     await bot.process_commands(message)
-
-"""---------------------------------"""
-# On Thread Update
-"""---------------------------------"""
-@bot.event
-async def on_thread_update(thread):
-    print(thread)
-    if thread.archived:
-        return
-
-    await thread.send("Thank you for your message! We will get back to you as soon as possible.")
-
-"""---------------------------------"""
-# Thread test command
-"""---------------------------------"""
-@bot.command()
-async def create_thread(ctx):
-    # Send initial message
-    message = await ctx.send("Creating a new thread...")
-
-    # Create thread
-    thread = await message.create_thread(name="My new thread")
-
-    # Wait for user to send a message in the thread
-    def check(message):
-        return message.author != bot.user and message.channel == thread
-
-    user_message = await bot.wait_for('message', check=check)
-
-    # Reply to user in thread
-    await thread.send(f"Thanks for your message, {user_message.author.mention}!")
-
-    # Send confirmation message in original channel
-    await ctx.send("Thread created!")
-
 
 
 """---------------------------------"""
