@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import os, csv, os, json, time, pprint, sys, shutil
+import os, csv, os, json, time, pprint, sys, shutil, random
 """
 https://discordpy.readthedocs.io/en/stable/api.html
 https://autocode.com/tools/discord/embed-builder/
@@ -183,6 +183,8 @@ async def on_ready():
     print('Discord ver {}\nPython ver {}'.format(discord.__version__, sys.version.split(' ')[0]))
     print('Bot : Online')
     print('========================')
+
+    cg_quotegen_review.start()
 
     if not os.name == 'nt':
         channel = bot.get_channel(channel_dict['log'])
@@ -410,6 +412,7 @@ async def project_channel_update():
     for v_channel in del_v_channels:
         await v_channel.delete()
 
+"""
 @tasks.loop(hours=6)
 async def traceback_nortify():
     rec = system_manager.error.get_nortify()
@@ -421,6 +424,7 @@ f'''
 '''
         channel = bot.get_channel(channel_dict['log'])
         await channel.send(f'{msg}')
+"""
 
 @tasks.loop(minutes=1)
 async def auto_translate(alphabet_count=190):
@@ -532,7 +536,7 @@ async def vote_report():
             vote_ref = int(vote_ref.split('-')[-1])
             #print(vote_ref,content)
 
-            ref_id_list = [message.id async for message in channel.history(limit=100)]
+            ref_id_list = [message.id async for message in channel.history(limit=15)]
             if not vote_ref in ref_id_list:
                 await bot_message.delete()
                 continue
@@ -878,9 +882,6 @@ async def members_stat_report():
     # DF Filter
     print(df)
     df = df[df['active_ratio'] != 0.00]
-    #df = df[['member_name','period_day','period_hour','online_bar','msg_per_day']]
-    #df.reset_index(inplace=True, drop=True)
-    #print(df)
 
     text1_list = [f'=================\nTOTAL TIME ONLINE ( WEEK-{week_num} )\n=================']
     df.sort_values(by=['online_ratio'], ascending=[False], inplace=True)
@@ -888,12 +889,6 @@ async def members_stat_report():
     for i in df['member_name'].index.tolist():
         row = df.iloc[i]
         text1_list += ['{} {}'.format(row['online_bar'], row['member_name'])]
-        # text1_list += ['[ {} ]'.format(row['member_name'])]
-        # text1_list += ['  Online : {}'.format(row['online_bar'])]
-        # text1_list += ['  M T W T F S S']
-        # text1_list += ['  {} {}'.format(row['period_day'],row['period_hour'])]
-        # text1_list += ['  Text : {}'.format(row['msg_per_day'])]
-        # text1_list += ['=================']
     text1_join = '\n'.join(text1_list)
     print(text1_join,'\n', len(text1_join))
 
@@ -913,7 +908,6 @@ async def members_stat_report():
         row = df.iloc[i]
         text3_list += ['{}---------------'.format(row['member_name'])]
         text3_list += ['{} ({}), {}'.format(row['period_day'], row['day_active'], row['period_hour'])]
-        #text3_list += ['( {} )'.format(row['day_active'])]
     text3_join = '\n'.join(text3_list)
     print(text3_join, '\n', len(text3_join))
 
@@ -999,6 +993,68 @@ async def node(ctx, question):
 # CG QUOTE GENERATOR
 """---------------------------------"""
 from quoteGenerator import quotegen
+
+@tasks.loop(hours=6)
+async def cg_quotegen_review():
+    print('cg_quotegen_review')
+    qd = production_manager.quote_daily()
+    quote_data = qd.get_random_quote_data()
+    pprint.pprint(quote_data)
+    print(quote_data['content'])
+
+    def separate_string(input_string, len_limit=40):
+        words = input_string.split()
+        lines, idx = ([''], 0)
+        for i in range(len(words)):
+            if len(lines[idx]) + len(words[i]) > len_limit:
+                idx += 1
+                lines.append('')
+            lines[idx] = lines[idx] + ' ' + words[i]
+        #lines = [' '.join(words[i:i + word_n]) for i in range(0, len(words), word_n)]
+        return lines
+
+    quote_data['content'] = '\n'.join( separate_string(quote_data['content']) )
+    quote_data['content_th'] = '\n'.join( separate_string(quote_data['content_th']) )
+    #print(quote_data['content'])
+    #print(quote_data['content_th'])
+
+    emoji_ls = [':bulb:', ':wink:', ':smiley:', ':partying_face:']
+    quote_dict = {'en':{'topic':'topic','content':'content'},#}
+                  'th':{'topic':'topic_th','content':'content_th'}}
+    for k in quote_dict:
+        img_path = quotegen.run(head_text=quote_data[quote_dict[k]['topic']],
+                                content_text=quote_data[quote_dict[k]['content']],
+                                credit_text=quote_data['force_credit'])
+        #print(img_path)
+
+        guild = bot_func.get_guild()
+        rev_channel = [i for i in guild.channels if i.name.startswith('cg-quotegen') and
+                       i.name.endswith('rev')][0]
+        #print(rev_channel)
+
+        img_attach = discord.File(img_path)
+        hastag_ls = ' '.join(['#'+i.lower().replace(' ','') for i in quote_data['audience_tag'].split(',')][:5])
+        msg = f'''
+----------------
+{emoji_ls[random.randint(0,len(emoji_ls)-1)]}  {quote_data[quote_dict[k]['topic']]}
+----------------
+:headphones:  **{quote_data['title2']}**  :headphones:
+
+{hastag_ls}
+*this quote generated by ChatGPT*
+        '''
+        massage = await rev_channel.send(msg, file=img_attach)
+        react_ls = ['\u2705', '\u274E', '\U0001F4E1']
+        await massage.add_reaction(react_ls[0])
+        await massage.add_reaction(react_ls[1])
+        await massage.edit(content=massage.content + f'\n\nid_{massage.id}')
+
+@tasks.loop(seconds=60)
+async def cg_quotegen_sync():
+    pass
+    #partial_message = channel.get_partial_message(message_id)
+    #message = await partial_message.fetch()
+
 
 """---------------------------------"""
 # Discord Command
@@ -1411,13 +1467,14 @@ async def on_message(message):
     member_name = message.author.display_name
 
     #Image attachment outside from project channel -------------------------------------
+    is_bot_self = message.author == bot.user
     is_attachment = message.attachments != []
     is_project_channel = 'proj-' in message.channel.name
     media_ext_list = ['jpg', 'jpeg', 'png', 'gif', 'mov', 'mp4']
     print(message)
     #print(message.channel.name)
     #print(is_attachment and is_project_channel)
-    if not is_project_channel and is_attachment:
+    if not is_project_channel and is_attachment and not is_bot_self:
         attach_sl = (message.attachments)[0]
         is_media = attach_sl.url.split('.')[-1] in media_ext_list
         if is_media:
