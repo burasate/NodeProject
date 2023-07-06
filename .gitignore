@@ -174,4 +174,7 @@ maReader/
 *file_storage/
 *.pdf
 *.lnk
-src/
+src/site-packages/
+src/site-packages_3.10/
+src/podcastListener/cache/
+src/podcastListener/__pycache__/
