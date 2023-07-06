@@ -6,4 +6,5 @@ https://raw.githubusercontent.com/burasate/NodeProject/main/NodeProject/_pipelin
 https://raw.githubusercontent.com/burasate/NodeProject/main/NodeProject/_pipeline_/__Init__.py
 https://raw.githubusercontent.com/burasate/NodeProject/main/NodeProject/_pipeline_/src/notionDatabase/notionDatabase.py
 https://raw.githubusercontent.com/burasate/NodeProject/main/NodeProject/_pipeline_/src/gSheet/gSheet.py
-https://raw.githubusercontent.com/burasate/NodeProject/main/NodeProject/_pipeline_/src/gDrive/gDrive.py
+https://raw.githubusercontent.com/burasate/NodeProject/main/NodeProject/_pipeline_/src/podcastListener/podcastListener.py
+https://raw.githubusercontent.com/burasate/NodeProject/main/NodeProject/_pipeline_/src/quoteGenerator/quotegen.py
