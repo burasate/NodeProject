@@ -1,10 +1,11 @@
 import os, random, sys
 base_dir = os.path.dirname(os.path.abspath(__file__))
-
+'''
 src_dir = os.sep.join(base_dir.split(os.sep)[:-1])
 site_package_dir = src_dir + os.sep + 'site-packages'
 if not site_package_dir in sys.path:
     sys.path.insert(0, site_package_dir)
+'''
 from PIL import Image, ImageDraw, ImageFont
 
 element_dir = base_dir + os.sep + 'elements'

@@ -992,11 +992,10 @@ async def node(ctx, question):
 """---------------------------------"""
 # CG QUOTE GENERATOR
 """---------------------------------"""
-from quoteGenerator import quotegen
-
 @tasks.loop(hours=6)
 async def cg_quotegen_review():
-    print('cg_quotegen_review')
+    from quoteGenerator import quotegen
+
     qd = production_manager.quote_daily()
     quote_data = qd.get_random_quote_data()
     pprint.pprint(quote_data)
