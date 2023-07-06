@@ -178,3 +178,10 @@ src/site-packages/
 src/site-packages_3.10/
 src/podcastListener/cache/
 src/podcastListener/__pycache__/
+src/ffmpeg/
+src/cvFlowMotion/
+src/quoteGenerator/__pycache__/
+src/quoteGenerator/elements/
+src/quoteGenerator/example/
+src/quoteGenerator/fonts/
+src/quoteGenerator/output/
