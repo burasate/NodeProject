@@ -12,6 +12,59 @@ element_dir = base_dir + os.sep + 'elements'
 font_dir = base_dir + os.sep + 'fonts'
 
 class imgen:
+    @staticmethod # Raspi Version
+    def render_text(text, font_path, text_color, bg_color, img_width, img_height, bg_alpha, line_spacing, al='center',
+                    save_path=None, max_size=120, shadow_offset=7, border_pecentile=0.025):
+        text_split = text.split('\n')
+        text_split = [i + '\n' for i in text_split if not i == '']
+        text = ''.join(text_split)
+        if text[0] == ' ': text = text[0:]
+        if text[-1] == '\n': text = text[:-1]
+
+        # Create image with alpha channel
+        img = Image.new("RGBA", (img_width, img_height), (0, 0, 0, 0))
+
+        # Init orig position
+        pos_x, pos_y = (img_width / 2, img_height / 2)
+
+        # Draw text on image
+        draw = ImageDraw.Draw(img)
+        font_size = 0
+        font = ImageFont.truetype(font_path, font_size)
+        for i in range(max_size):
+            text_width, text_height = draw.textsize(text, font=font)
+            if text_width > (img_width - (img_width * border_pecentile)) or text_height > (
+                    img_height - (img_height * border_pecentile)):
+                break
+            else:
+                font_size += 1
+                font = ImageFont.truetype(font_path, font_size)
+
+        # Offset position
+        if al == 'center':
+            pos_x, pos_y = (img_width / 2, img_height / 2)
+        elif al == 'left':
+            pos_x -= abs((img_width * border_pecentile) - text_width)
+        elif al == 'right':
+            pos_x += abs((img_width * border_pecentile) - text_width)
+
+        if shadow_offset != 0:
+            draw.text((pos_x + shadow_offset, pos_y + shadow_offset), text, font=font, fill=(0, 0, 0, 70), align=al,
+                      anchor='mm', spacing=line_spacing)
+        draw.text((pos_x, pos_y), text, font=font, fill=text_color, align=al, anchor='mm', spacing=line_spacing)
+
+        # Apply background color and alpha
+        if bg_alpha < 255:
+            bg_color += (int(bg_alpha),)
+        img = img.rotate(0, expand=True)
+        bg = Image.new("RGBA", img.size, bg_color)
+        img = Image.alpha_composite(bg, img)
+
+        # Save image
+        if save_path:
+            img.save(save_path, format='png')
+        return img
+    '''
     @staticmethod
     def render_text(text, font_path, text_color, bg_color, img_width, img_height, bg_alpha, line_spacing, al='center', save_path=None, max_size=120, shadow_offset=7, border_pecentile=0.025):
         text_split = text.split('\n')
@@ -19,10 +72,7 @@ class imgen:
         text = ''.join(text_split)
         if text[0] == ' ': text = text[0:];
         if text[-1] == '\n': text = text[:-1];
-        #print(1,[text])
-        print(text)
-        #print(2,text)
-        #print(3,[text])
+
         # Create image with alpha channel
         img = Image.new("RGBA", (img_width, img_height), (0, 0, 0, 0))
 
@@ -40,8 +90,8 @@ class imgen:
             else:
                 font_size += 1
                 font = ImageFont.truetype(font_path, font_size)
-        print(tb, img_width, img_height)
-        print(font_size)
+        #print(tb, img_width, img_height)
+        #print(font_size)
 
         # Offset position
         if al == 'center':
@@ -55,10 +105,6 @@ class imgen:
             draw.text((pos_x+shadow_offset, pos_y+shadow_offset), text, font=font, fill=(0,0,0,70), align=al, anchor='mm', spacing=line_spacing)
         draw.text((pos_x,pos_y), text, font=font, fill=text_color, align=al, anchor='mm', spacing=line_spacing)
 
-        #for line in text.split("\n"):
-            #draw.text((x_pos, y_pos), line, font=font, fill=text_color, spacing=letter_spacing, align='center', anchor='mm')
-            #y_pos += ((bt-tp)/len(text_split)) * line_spacing
-
         # Apply background color and alpha
         if bg_alpha < 255:
             bg_color += (int(bg_alpha),)
@@ -69,9 +115,9 @@ class imgen:
         # Save image
         if save_path:
             img.save(save_path, format='png')
-        print(al)
-
+        #print(al)
         return img
+    '''
 
     @staticmethod
     def get_bg_path():
