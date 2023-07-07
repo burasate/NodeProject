@@ -7,7 +7,7 @@ if not site_package_dir in sys.path:
     sys.path.insert(0, site_package_dir)
 '''
 from PIL import Image, ImageDraw, ImageFont
-print(Image.__file__, ImageDraw.__file__, ImageFont.__file__)
+
 
 element_dir = base_dir + os.sep + 'elements'
 font_dir = base_dir + os.sep + 'fonts'
@@ -227,8 +227,12 @@ def run(head_text='head', content_text='content', credit_text='credit'):
             'save_path': element_dir + '/text_credit.png',
         },
     ]
+
+    import PIL
+    print('Pillow version ', PIL.__version__)
+    pil_version = float(PIL.__version__[0])
     for data in render_text_rec:
-        if os.name == 'nt':
+        if pil_version > 8:
             imgen.render_text(data['text'], data['font_path'], data['text_color'], data['bg_color'],
                               data['img_width'], data['img_height'], data['bg_alpha'], data['line_spacing'],
                               data['align'],
