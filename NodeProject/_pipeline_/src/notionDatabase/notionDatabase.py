@@ -577,7 +577,7 @@ def get_json_rec(database_id, page_size=100, filter={}):
                 result = item['properties'][prop]
                 type = item['properties'][prop]['type']
                 sub_ls = []
-                print('\n{}'.format(result))
+                #print('\n{}'.format(result))
                 for path in type_dict[type]:
                     if path == tp_mrk:
                         sub_type = result['type']
@@ -598,7 +598,7 @@ def get_json_rec(database_id, page_size=100, filter={}):
                     else:
                         result = result[path]
                         #print(result)
-                print([result])
+                #print([result])
                 if type == 'title':
                     rec_data['title'] = result
                 rec_data[prop] = result
@@ -629,7 +629,7 @@ def get_json_rec(database_id, page_size=100, filter={}):
         elif data['has_more']:
             payload['start_cursor'] = data['next_cursor']
 
-    os.system('cls||clear')
+    #os.system('cls||clear')
     #pprint.pprint(all_rec[0])
     print(len(all_rec), database_id)
     return all_rec
