@@ -1020,7 +1020,7 @@ async def cg_quotegen_review():
         hastag_ls = ' '.join(['#'+i.lower().replace(' ','') for i in quote_data['audience_tag'].split(',')][:5])
         msg = f'''
 ----------------
-{cg_quotegen.emoji_ls[random.randint(0,len(emoji_ls)-1)]}  {quote_data[quote_dict[k]['topic']]}
+{cg_quotegen.emoji_ls[random.randint(0,len(cg_quotegen.emoji_ls)-1)]}  {quote_data[quote_dict[k]['topic']]}
 ----------------
 :headphones:  **{quote_data['title2']}**  :headphones:
 
