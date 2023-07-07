@@ -229,7 +229,7 @@ def run(head_text='head', content_text='content', credit_text='credit'):
 
     import PIL
     print('Pillow version ', PIL.__version__)
-    pil_version = float(PIL.__version__[0])
+    pil_version = int(PIL.__version__[0])
     for data in render_text_rec:
         if pil_version > 8:
             imgen.render_text(data['text'], data['font_path'], data['text_color'], data['bg_color'],
