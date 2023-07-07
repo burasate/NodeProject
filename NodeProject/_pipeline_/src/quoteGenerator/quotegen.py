@@ -38,19 +38,38 @@ class imgen:
                 font_size += 1
                 font = ImageFont.truetype(font_path, font_size)
 
-        # Calculate the position to center the text
-        pos_x = (img_width - text_width) / 2
-        pos_y = (img_height - text_height) / 2
+        # Calculate the position to center the text box
+        text_box_width = img_width * (1 - 2 * border_pecentile)
+        text_box_height = img_height * (1 - 2 * border_pecentile)
+        pos_x = (img_width - text_box_width) / 2
+        pos_y = (img_height - text_box_height) / 2
 
         # Offset position for alignment
         if al == 'left':
-            pos_x -= abs((img_width * border_pecentile) - text_width) / 2
+            pos_x += text_box_width / 2 - text_width / 2
         elif al == 'right':
-            pos_x += abs((img_width * border_pecentile) - text_width) / 2
+            pos_x -= text_box_width / 2 - text_width / 2
 
+        # Calculate the maximum number of characters per line based on the text box width
+        max_chars_per_line = int(text_box_width / font_size)
+
+        # Split the text into lines that fit within the text box
+        lines = []
+        words = text.split()
+        current_line = words[0]
+        for word in words[1:]:
+            if len(current_line) + len(word) + 1 <= max_chars_per_line:
+                current_line += ' ' + word
+            else:
+                lines.append(current_line)
+                current_line = word
+        lines.append(current_line)
+
+        # Draw wrapped text on image
         if shadow_offset != 0:
-            draw.text((pos_x + shadow_offset, pos_y + shadow_offset), text, font=font, fill=(0, 0, 0, 70))
-        draw.text((pos_x, pos_y), text, font=font, fill=text_color)
+            draw.text((pos_x + shadow_offset, pos_y + shadow_offset), '\n'.join(lines), font=font, fill=(0, 0, 0, 70),
+                      align='center', spacing=line_spacing)
+        draw.text((pos_x, pos_y), '\n'.join(lines), font=font, fill=text_color, align='center', spacing=line_spacing)
 
         # Apply background color and alpha
         if bg_alpha < 255:
