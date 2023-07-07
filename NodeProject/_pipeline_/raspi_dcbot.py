@@ -181,8 +181,6 @@ async def on_ready():
     print('Bot : Online')
     print('========================')
 
-    cg_quotegen_review.start()
-
     if not os.name == 'nt':
         channel = bot.get_channel(channel_dict['log'])
         await channel.send(f'`{dt.datetime.now()}`\nHello, I just woke up\n(Runnig on os \"{os.name}\")')
@@ -192,14 +190,14 @@ async def on_ready():
         vote_report.start()
         role_update.start()
         project_channel_update.start()
-        traceback_nortify.start()
+        #traceback_nortify.start()
         #auto_translate.start()
         dm_finance_document.start()
         dm_finance_review.start()
         auto_clear_all_dm_message.start()
         members_stat_record.start()
         members_stat_report.start()
-
+        cg_quotegen_review.start()
 
 """---------------------------------"""
 # Discord Sync
