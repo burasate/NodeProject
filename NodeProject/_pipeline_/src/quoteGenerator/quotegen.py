@@ -38,9 +38,14 @@ class imgen:
                 font_size += 1
                 font = ImageFont.truetype(font_path, font_size)
 
-        # Calculate the position to center the text
-        pos_x = (img_width - text_width) / 2
-        pos_y = (img_height - text_height) / 2
+        # Calculate the position to align the text
+        if al == 'left':
+            pos_x = 0
+        elif al == 'right':
+            pos_x = img_width - text_width
+        else:  # Center alignment
+            pos_x = (img_width - text_width) // 2
+        pos_y = (img_height - text_height) // 2
 
         if shadow_offset != 0:
             draw.text((pos_x + shadow_offset, pos_y + shadow_offset), text, font=font, fill=(0, 0, 0, 70),
