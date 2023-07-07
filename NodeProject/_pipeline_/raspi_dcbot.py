@@ -180,7 +180,6 @@ async def on_ready():
     print('Discord ver {}\nPython ver {}'.format(discord.__version__, sys.version.split(' ')[0]))
     print('Bot : Online')
     print('========================')
-    cg_quotegen_sync.start()
 
     if not os.name == 'nt':
         channel = bot.get_channel(channel_dict['log'])
@@ -199,6 +198,7 @@ async def on_ready():
         members_stat_record.start()
         members_stat_report.start()
         cg_quotegen_review.start()
+        cg_quotegen_sync.start()
 
 """---------------------------------"""
 # Discord Sync
