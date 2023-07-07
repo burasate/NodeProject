@@ -994,23 +994,7 @@ async def cg_quotegen_review():
     qd = production_manager.quote_daily()
     quote_data = qd.get_random_quote_data()
     pprint.pprint(quote_data)
-    print(quote_data['content'])
-
-    def separate_string(input_string, len_limit=40):
-        words = input_string.split()
-        lines, idx = ([''], 0)
-        for i in range(len(words)):
-            if len(lines[idx]) + len(words[i]) > len_limit:
-                idx += 1
-                lines.append('')
-            lines[idx] = lines[idx] + ' ' + words[i]
-        #lines = [' '.join(words[i:i + word_n]) for i in range(0, len(words), word_n)]
-        return lines
-
-    quote_data['content'] = '\n'.join( separate_string(quote_data['content']) )
-    quote_data['content_th'] = '\n'.join( separate_string(quote_data['content_th']) )
     #print(quote_data['content'])
-    #print(quote_data['content_th'])
 
     emoji_ls = [':bulb:', ':wink:', ':smiley:', ':partying_face:']
     quote_dict = {'en':{'topic':'topic','content':'content'},#}

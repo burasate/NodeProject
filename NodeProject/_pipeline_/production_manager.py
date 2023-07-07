@@ -907,13 +907,26 @@ Massage : \"{1}\" '''.format(transcript['title2'], transcript['content'])
         data = j_rec[rand_idx]
         #pprint.pprint(data)
         notionDatabase.update_page_properties(data['page_id'], {'is_requested' : True})
+
+        def separate_string(input_string, len_limit=40):
+            words = input_string.split()
+            lines, idx = ([''], 0)
+            for i in range(len(words)):
+                if len(lines[idx]) + len(words[i]) > len_limit:
+                    idx += 1
+                    lines.append('')
+                lines[idx] = lines[idx] + ' ' + words[i]
+            return lines
+
+        for i in ['content']+['content_th']:
+            data[i] = '\n'.join(separate_string(quote_data[i]))
         return data
 
 if __name__ == '__main__':
 
     qd = quote_daily()
     #qd.load_podcast_transcript()
-    #qd.get_random_quote_data()
+    qd.get_random_quote_data()
     '''
     for i in range(1000):
         qd.get_rand_transcript_line()
