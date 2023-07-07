@@ -13,7 +13,7 @@ element_dir = base_dir + os.sep + 'elements'
 font_dir = base_dir + os.sep + 'fonts'
 
 class imgen:
-    @staticmethod # Raspi Version
+    @staticmethod # PIL Version 5
     def render_text_legacy(text, font_path, text_color, bg_color, img_width, img_height, bg_alpha, line_spacing, al='center',
                     save_path=None, max_size=120, shadow_offset=7, border_pecentile=0.025):
         text_split = text.split('\n')
@@ -24,9 +24,6 @@ class imgen:
 
         # Create image with alpha channel
         img = Image.new("RGBA", (img_width, img_height), (0, 0, 0, 0))
-
-        # Init orig position
-        pos_x, pos_y = (img_width / 2, img_height / 2)
 
         # Draw text on image
         draw = ImageDraw.Draw(img)
@@ -41,13 +38,15 @@ class imgen:
                 font_size += 1
                 font = ImageFont.truetype(font_path, font_size)
 
-        # Offset position
-        if al == 'center':
-            pos_x, pos_y = (img_width / 2, img_height / 2)
-        elif al == 'left':
-            pos_x -= abs((img_width * border_pecentile) - text_width)
+        # Calculate the position to center the text
+        pos_x = (img_width - text_width) / 2
+        pos_y = (img_height - text_height) / 2
+
+        # Offset position for alignment
+        if al == 'left':
+            pos_x -= abs((img_width * border_pecentile) - text_width) / 2
         elif al == 'right':
-            pos_x += abs((img_width * border_pecentile) - text_width)
+            pos_x += abs((img_width * border_pecentile) - text_width) / 2
 
         if shadow_offset != 0:
             draw.text((pos_x + shadow_offset, pos_y + shadow_offset), text, font=font, fill=(0, 0, 0, 70))
