@@ -771,7 +771,7 @@ I want you summarize the viewport, perspective and attitude for a career of VFX,
 "content_improve" : length of string target is 90. impovement/summarize and make more shorter as much as possible from "content" in a shortest paragraph (3-5 phrases and 12-20 words and 3 sentences).
 "topic" : Target words count is 3-4. What is a topic from "content", give me that topic. and should be relate to work, animation, industry, pro tips, career. as a string format for this answer.
 "topic_th" : Thai language translated utf-8 of "topic".
-"content_th" : shortest massage Thai language translated utf-8 from "content_improve".
+"content_th" : shortest massage Thai language translated utf-8 from "content_improve". separate this message into many lines and 15-25 words each line. if it too long for 4 lines. please fit it inti 4 or 5 lines.
 "credit" : If you found who are saying which you summaried, give their name but should be not main speaker. "Unknown" if you aren't sure.
 "audience_tag" : tag of the audience saperate by department e.g. Animator, Producer, Pipeline, Rigger, Modeller, Etc. as a python list square bucket format for this answer.
 "main_speaker" : If you found who are a main speaker. "Unknown" if you aren't sure.}
