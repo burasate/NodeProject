@@ -991,6 +991,7 @@ async def node(ctx, question):
 class cg_quotegen:
     react_ls = ['\u2705', '\u274E', '\U0001F4E1']
     emoji_ls = [':bulb:', ':wink:', ':smiley:', ':partying_face:']
+    network_name = 'cg-quotegen'
 
 
 @tasks.loop(minutes=86)
@@ -1002,7 +1003,6 @@ async def cg_quotegen_review():
     pprint.pprint(quote_data)
     #print(quote_data['content'])
 
-
     quote_dict = {'en':{'topic':'topic','content':'content'},#}
                   'th':{'topic':'topic_th','content':'content_th'}}
     for k in quote_dict:
@@ -1012,7 +1012,7 @@ async def cg_quotegen_review():
         #print(img_path)
 
         guild = bot_func.get_guild()
-        rev_channel = [i for i in guild.channels if i.name.startswith('cg-quotegen') and
+        rev_channel = [i for i in guild.channels if cg_quotegen.network_name in i.name and
                        i.name.endswith('rev')][0]
         #print(rev_channel)
 
@@ -1032,11 +1032,11 @@ async def cg_quotegen_review():
         await massage.add_reaction(cg_quotegen.react_ls[1])
         await massage.edit(content=massage.content + f'\n\nid_{massage.id}')
 
-@tasks.loop(hours=1)
+@tasks.loop(minutes=20)
 async def cg_quotegen_sync():
     utcnow = dt.datetime.utcnow()
     rev_guild = bot_func.get_guild()
-    rev_channel = [i for i in rev_guild.channels if i.name.startswith('cg-quotegen') and
+    rev_channel = [i for i in rev_guild.channels if cg_quotegen.network_name in i.name and
                    i.name.endswith('rev')][0]
     rev_messages = [i async for i in rev_channel.history(limit=100) if i.author.bot]
     #print(rev_channel.name, rev_messages)
@@ -1061,7 +1061,7 @@ async def cg_quotegen_sync():
     #print(guild_ls)
     for guild in guild_ls:
         text_channels = [i for i in guild.channels if str(i.type) == 'text' and
-                         i.name.startswith('cg-quotegen') and i.name.endswith('sync')]
+                         cg_quotegen.relate_channel_name in i.name and i.name.endswith('sync')]
         for channel in text_channels:
             messages = [i async for i in channel.history(limit=100)]
             #print(channel.name, messages)
