@@ -7,13 +7,14 @@ if not site_package_dir in sys.path:
     sys.path.insert(0, site_package_dir)
 '''
 from PIL import Image, ImageDraw, ImageFont
+print(Image.__file__, ImageDraw.__file__, ImageFont.__file__)
 
 element_dir = base_dir + os.sep + 'elements'
 font_dir = base_dir + os.sep + 'fonts'
 
 class imgen:
     @staticmethod # Raspi Version
-    def render_text(text, font_path, text_color, bg_color, img_width, img_height, bg_alpha, line_spacing, al='center',
+    def render_text_legacy(text, font_path, text_color, bg_color, img_width, img_height, bg_alpha, line_spacing, al='center',
                     save_path=None, max_size=120, shadow_offset=7, border_pecentile=0.025):
         text_split = text.split('\n')
         text_split = [i + '\n' for i in text_split if not i == '']
@@ -64,7 +65,7 @@ class imgen:
         if save_path:
             img.save(save_path, format='png')
         return img
-    '''
+
     @staticmethod
     def render_text(text, font_path, text_color, bg_color, img_width, img_height, bg_alpha, line_spacing, al='center', save_path=None, max_size=120, shadow_offset=7, border_pecentile=0.025):
         text_split = text.split('\n')
@@ -117,7 +118,6 @@ class imgen:
             img.save(save_path, format='png')
         #print(al)
         return img
-    '''
 
     @staticmethod
     def get_bg_path():
@@ -230,9 +230,16 @@ def run(head_text='head', content_text='content', credit_text='credit'):
         },
     ]
     for data in render_text_rec:
-        imgen.render_text(data['text'], data['font_path'], data['text_color'], data['bg_color'],
-                          data['img_width'], data['img_height'], data['bg_alpha'], data['line_spacing'], data['align'],
-                          save_path=data['save_path'], max_size=data['font_size'], shadow_offset=data['shadow'])
+        if os.name == 'nt':
+            imgen.render_text(data['text'], data['font_path'], data['text_color'], data['bg_color'],
+                              data['img_width'], data['img_height'], data['bg_alpha'], data['line_spacing'],
+                              data['align'],
+                              save_path=data['save_path'], max_size=data['font_size'], shadow_offset=data['shadow'])
+        else:
+            imgen.render_text_legacy(data['text'], data['font_path'], data['text_color'], data['bg_color'],
+                              data['img_width'], data['img_height'], data['bg_alpha'], data['line_spacing'],
+                              data['align'],
+                              save_path=data['save_path'], max_size=data['font_size'], shadow_offset=data['shadow'])
     out_path = imgen.create_quote_image()
     return out_path
 
