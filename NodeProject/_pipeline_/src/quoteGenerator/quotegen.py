@@ -50,14 +50,12 @@ class imgen:
             pos_x += abs((img_width * border_pecentile) - text_width)
 
         if shadow_offset != 0:
-            draw.text((pos_x + shadow_offset, pos_y + shadow_offset), text, font=font, fill=(0, 0, 0, 70), align=al,
-                      anchor='mm', spacing=line_spacing)
-        draw.text((pos_x, pos_y), text, font=font, fill=text_color, align=al, anchor='mm', spacing=line_spacing)
+            draw.text((pos_x + shadow_offset, pos_y + shadow_offset), text, font=font, fill=(0, 0, 0, 70))
+        draw.text((pos_x, pos_y), text, font=font, fill=text_color)
 
         # Apply background color and alpha
         if bg_alpha < 255:
             bg_color += (int(bg_alpha),)
-        img = img.rotate(0, expand=True)
         bg = Image.new("RGBA", img.size, bg_color)
         img = Image.alpha_composite(bg, img)
 

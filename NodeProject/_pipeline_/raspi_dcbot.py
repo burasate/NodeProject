@@ -65,12 +65,9 @@ class bot_func:
             'name': task_name,
             'data': data_dict
         }
-        data['data'] = str(data['data']).replace('\'','\"')
-        response = requests.post(
-            'https://script.google.com/macros/s/'
-            'AKfycbyyW4jhOl-KC-pyqF8qIrnx3x3GiohyJj'
-            'j2gX1oCMKuGm7fj_GnEQ1OHtLrpRzvIS4CYQ/exec',
-            params=data)
+        data['data'] = json.dumps(data['data'], indent=4, sort_keys=True)
+        url = 'https://script.google.com/macros/s/AKfycbyyW4jhOl-KC-pyqF8qIrnx3x3GiohyJjj2gX1oCMKuGm7fj_GnEQ1OHtLrpRzvIS4CYQ/exec'
+        response = requests.post(url, params=data)
         print(response.text)
         print(data)
 
