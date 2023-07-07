@@ -993,7 +993,7 @@ class cg_quotegen:
     emoji_ls = [':bulb:', ':wink:', ':smiley:', ':partying_face:']
 
 
-@tasks.loop(hours=6)
+@tasks.loop(minutes=86)
 async def cg_quotegen_review():
     from quoteGenerator import quotegen
 
