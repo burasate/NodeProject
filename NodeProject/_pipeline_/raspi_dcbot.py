@@ -1061,7 +1061,7 @@ async def cg_quotegen_sync():
     #print(guild_ls)
     for guild in guild_ls:
         text_channels = [i for i in guild.channels if str(i.type) == 'text' and
-                         cg_quotegen.relate_channel_name in i.name and i.name.endswith('sync')]
+                         cg_quotegen.network_name in i.name and i.name.endswith('sync')]
         for channel in text_channels:
             messages = [i async for i in channel.history(limit=100)]
             #print(channel.name, messages)
