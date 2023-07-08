@@ -47,10 +47,28 @@ class imgen:
             pos_x = (img_width - text_width) // 2
         pos_y = (img_height - text_height) // 2
 
+        # Split text into lines
+        lines = text.split('\n')
+
+        # Calculate the total height of the text with line spacing
+        total_height = text_height + line_spacing * (len(lines) - 1)
+
+        # Calculate the starting position for each line
+        current_y = pos_y + (img_height - total_height) // 2
+
         if shadow_offset != 0:
-            draw.text((pos_x + shadow_offset, pos_y + shadow_offset), text, font=font, fill=(0, 0, 0, 70),
-                      align=al)
-        draw.text((pos_x, pos_y), text, font=font, fill=text_color, align=al)
+            for line in lines:
+                line_width, line_height = draw.textsize(line, font=font)
+                draw.text((pos_x + shadow_offset, current_y + shadow_offset), line, font=font, fill=(0, 0, 0, 70),
+                          align=al)
+                current_y += line_height + line_spacing
+
+        current_y = pos_y + (img_height - total_height) // 2
+
+        for line in lines:
+            line_width, line_height = draw.textsize(line, font=font)
+            draw.text((pos_x, current_y), line, font=font, fill=text_color, align=al)
+            current_y += line_height + line_spacing
 
         # Apply background color and alpha
         if bg_alpha < 255:
