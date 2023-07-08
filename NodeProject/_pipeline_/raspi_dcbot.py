@@ -1033,7 +1033,7 @@ async def cg_quotegen_review():
 
 @tasks.loop(minutes=20)
 async def cg_quotegen_sync():
-    print('cg_quotegen_sync')
+    print('cg_quotegen_sync - update')
     utcnow = dt.datetime.utcnow()
     rev_guild = bot_func.get_guild()
     rev_channel = [i for i in rev_guild.channels if cg_quotegen.network_name in i.name and
