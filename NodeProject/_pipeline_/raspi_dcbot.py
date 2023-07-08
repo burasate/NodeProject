@@ -228,7 +228,7 @@ async def role_update():
         is_role_found = True in [ find_role_name in i for i in member_roles ]
         is_id_found = member_id in regis_id_list
         #'''
-        print(member.display_name , member_id, is_id_found) #show all member sync
+        #print(member.display_name , member_id, is_id_found) #show all member sync
         #'''
         if is_id_found:
             member_sl = [i for i in regis_rec if int(i['discord_id']) == member_id][0]
