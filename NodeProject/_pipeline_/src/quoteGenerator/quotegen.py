@@ -48,9 +48,8 @@ class imgen:
         pos_y = (img_height - text_height) // 2
 
         if shadow_offset != 0:
-            draw.text((pos_x + shadow_offset, pos_y + shadow_offset), text, font=font, fill=(0, 0, 0, 70),
-                      align=al)
-        draw.text((pos_x, pos_y), text, font=font, fill=text_color, align=al)
+            draw.text((pos_x + shadow_offset, pos_y + shadow_offset), text, font=font, fill=(0, 0, 0, 70), align=al, spacing=line_spacing)
+        draw.text((pos_x, pos_y), text, font=font, fill=text_color, align=al, spacing=line_spacing)
 
         # Apply background color and alpha
         if bg_alpha < 255:
