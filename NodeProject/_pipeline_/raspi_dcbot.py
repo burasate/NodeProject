@@ -1042,7 +1042,7 @@ async def cg_quotegen_sync():
     #print(rev_channel.name, rev_messages)
     approve_ls, reject_ls = ([],[])
     for msg in rev_messages:
-        print(msg.content)
+        print(msg.content.split('\n'))
         #print(msg.attachments)
         is_approve = [i.count for i in msg.reactions if i.emoji==cg_quotegen.react_ls[0]][0] > 1
         is_reject = [i.count for i in msg.reactions if i.emoji==cg_quotegen.react_ls[1]][0] > 1
