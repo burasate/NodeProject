@@ -197,8 +197,8 @@ async def on_ready():
         auto_clear_all_dm_message.start()
         members_stat_record.start()
         members_stat_report.start()
-        cg_quotegen_review.start()
         cg_quotegen_sync.start()
+        cg_quotegen_review.start()
 
 """---------------------------------"""
 # Discord Sync
@@ -1033,7 +1033,6 @@ async def cg_quotegen_review():
 
 @tasks.loop(minutes=20)
 async def cg_quotegen_sync():
-    print('cg_quotegen_sync - update')
     utcnow = dt.datetime.utcnow()
     rev_guild = bot_func.get_guild()
     rev_channel = [i for i in rev_guild.channels if cg_quotegen.network_name in i.name and
@@ -1042,8 +1041,8 @@ async def cg_quotegen_sync():
     #print(rev_channel.name, rev_messages)
     approve_ls, reject_ls = ([],[])
     for msg in rev_messages:
-        print(msg.content.split('\n'))
-        #print(msg.attachments)
+        if [i.count for i in msg.reactions if i.emoji==cg_quotegen.react_ls[0]] == []: continue
+        if [i.count for i in msg.reactions if i.emoji==cg_quotegen.react_ls[1]] == []: continue
         is_approve = [i.count for i in msg.reactions if i.emoji==cg_quotegen.react_ls[0]][0] > 1
         is_reject = [i.count for i in msg.reactions if i.emoji==cg_quotegen.react_ls[1]][0] > 1
         #print([is_approve, is_reject])
@@ -1060,6 +1059,7 @@ async def cg_quotegen_sync():
     guild_ls = [bot.guilds[i] for i in range(len(bot.guilds))]
     #print(guild_ls)
     for guild in guild_ls:
+        print(f'cg_quotegen_sync - update to [ {guild.name} ]')
         text_channels = [i for i in guild.channels if str(i.type) == 'text' and
                          cg_quotegen.network_name in i.name and i.name.endswith('sync')]
         for channel in text_channels:
@@ -1067,6 +1067,7 @@ async def cg_quotegen_sync():
             #print(channel.name, messages)
             date_ls = [i.created_at for i in messages]
             last_hour = (utcnow - max(date_ls)).total_seconds() / 3600 if date_ls != [] else 100
+
 
             exists_ls = []
             for msg in messages:
