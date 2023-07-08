@@ -993,7 +993,6 @@ class cg_quotegen:
     emoji_ls = [':bulb:', ':wink:', ':smiley:', ':partying_face:']
     network_name = 'cg-quotegen'
 
-
 @tasks.loop(minutes=86)
 async def cg_quotegen_review():
     from quoteGenerator import quotegen
@@ -1034,6 +1033,7 @@ async def cg_quotegen_review():
 
 @tasks.loop(minutes=20)
 async def cg_quotegen_sync():
+    print('cg_quotegen_sync')
     utcnow = dt.datetime.utcnow()
     rev_guild = bot_func.get_guild()
     rev_channel = [i for i in rev_guild.channels if cg_quotegen.network_name in i.name and
