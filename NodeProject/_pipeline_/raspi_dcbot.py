@@ -1080,6 +1080,7 @@ async def cg_quotegen_sync():
                 if msg.id in exists_ls: continue
                 embed = discord.Embed().set_image(url=msg.attachments[0].url)
                 await channel.send(content=msg.content, embed=embed)
+                break
 
             # Del cast
             unsync_ls = [i for i in rev_messages if not i in approve_ls]
