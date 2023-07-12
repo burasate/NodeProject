@@ -911,7 +911,7 @@ Massage : \"{1}\" '''.format(transcript['title2'], transcript['content'])
         db_filter = {
               "property": "is_requested",
               "checkbox": {
-                "equals": 'false'
+                "equals": False
               }
         }
         j_rec = notionDatabase.get_json_rec(self.ntdb_id, page_size=100, filter=db_filter)
