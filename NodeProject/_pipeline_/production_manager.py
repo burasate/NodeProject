@@ -895,6 +895,18 @@ Massage : \"{1}\" '''.format(transcript['title2'], transcript['content'])
             page = db_data['results'][0]
         print('\n===========================\n')
 
+    def words_replace(self, text):
+        rp_dict = {
+            '': ''
+        }
+        for w in rp_dict:
+            if not w.lower() in text.lower(): continue
+            idx_start = text.lower().index(w.lower())
+            idx_end = idx_start + len(w)
+            text = list(text)
+            text[idx_start:idx_end] = rp_dict[w]
+            text = ''.join(text)
+
     def get_random_quote_data(self):
         db_filter = {
               "property": "is_requested",
@@ -902,7 +914,7 @@ Massage : \"{1}\" '''.format(transcript['title2'], transcript['content'])
                 "equals": 'false'
               }
         }
-        j_rec = notionDatabase.get_json_rec(self.ntdb_id, page_size=100, filter={})
+        j_rec = notionDatabase.get_json_rec(self.ntdb_id, page_size=100, filter=db_filter)
         rand_idx = random.randint(0, len(j_rec)-1)
         data = j_rec[rand_idx]
         #pprint.pprint(data)
@@ -918,7 +930,7 @@ Massage : \"{1}\" '''.format(transcript['title2'], transcript['content'])
                 lines[idx] = lines[idx] + ' ' + words[i]
             return lines
 
-        for i in ['content']+['content_th']:
+        for i in ['content', 'content_th']:
             data[i] = '\n'.join(separate_string(data[i]))
         return data
 

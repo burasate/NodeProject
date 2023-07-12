@@ -250,7 +250,7 @@ class fika: #teletubbies files
                     print(file_path)
 
     @staticmethod
-    def ttf_ma_stat(limit_count = 20, scan_limit=50):
+    def ttf_ma_stat(limit_count = 5, scan_limit=50):
         import random
 
         #vpn_log = open(r"C:\Users\DEX3D_I7\OpenVPN\log\GPLpfSenseA-UDP4-1196-fika_guest_3-config.log").readlines()
@@ -267,7 +267,7 @@ class fika: #teletubbies files
         ep_list = [i for i in os.listdir('E:/Audio') if i.isdigit()]
         ep_list = random.sample(ep_list, len(ep_list))
 
-        ep_filer = list(range(1041, 1050+1)) #+ list(range(1008,1008+1))
+        ep_filer = list(range(1049, 1050+1)) #+ list(range(1008,1008+1))
 
         ep_list = [int(i) for i in ep_list if int(i) in ep_filer]
         ep_list = [str(i) for i in ep_list]
