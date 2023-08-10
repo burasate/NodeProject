@@ -267,7 +267,7 @@ class fika: #teletubbies files
         ep_list = [i for i in os.listdir('E:/Audio') if i.isdigit()]
         ep_list = random.sample(ep_list, len(ep_list))
 
-        ep_filer = list(range(1049, 1050+1)) #+ list(range(1008,1008+1))
+        ep_filer = list(range(1051, 1060+1)) #+ list(range(1008,1008+1))
 
         ep_list = [int(i) for i in ep_list if int(i) in ep_filer]
         ep_list = [str(i) for i in ep_list]

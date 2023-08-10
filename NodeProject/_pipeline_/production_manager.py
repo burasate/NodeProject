@@ -31,6 +31,7 @@ gSheet.sheetName = 'Node Project Integration'
 from notionDatabase import notionDatabase
 from gSheet import gSheet
 
+
 # Path
 prev_dir = os.sep.join(rootPath.split(os.sep)[:-1])
 rec_dir = prev_dir + '/production_rec'
@@ -895,18 +896,6 @@ Massage : \"{1}\" '''.format(transcript['title2'], transcript['content'])
             page = db_data['results'][0]
         print('\n===========================\n')
 
-    def words_replace(self, text):
-        rp_dict = {
-            '': ''
-        }
-        for w in rp_dict:
-            if not w.lower() in text.lower(): continue
-            idx_start = text.lower().index(w.lower())
-            idx_end = idx_start + len(w)
-            text = list(text)
-            text[idx_start:idx_end] = rp_dict[w]
-            text = ''.join(text)
-
     def get_random_quote_data(self):
         db_filter = {
               "property": "is_requested",
@@ -936,9 +925,9 @@ Massage : \"{1}\" '''.format(transcript['title2'], transcript['content'])
 
 if __name__ == '__main__':
 
-    qd = quote_daily()
+    #qd = quote_daily()
     #qd.load_podcast_transcript()
-    qd.get_random_quote_data()
+    #qd.get_random_quote_data()
     '''
     for i in range(1000):
         qd.get_rand_transcript_line()
