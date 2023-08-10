@@ -993,7 +993,7 @@ class cg_quotegen:
     emoji_ls = [':bulb:', ':wink:', ':smiley:', ':partying_face:']
     network_name = 'cg-quotegen'
 
-@tasks.loop(minutes=86)
+@tasks.loop(hours=6)
 async def cg_quotegen_review():
     from quoteGenerator import quotegen
 
@@ -1032,12 +1032,12 @@ async def cg_quotegen_review():
         await massage.edit(content=massage.content + f'\n\nid_{massage.id}')
 
 @tasks.loop(minutes=20)
-async def cg_quotegen_sync():
+async def cg_quotegen_sync(load_limit=200):
     utcnow = dt.datetime.utcnow()
     rev_guild = bot_func.get_guild()
     rev_channel = [i for i in rev_guild.channels if cg_quotegen.network_name in i.name and
                    i.name.endswith('rev')][0]
-    rev_messages = [i async for i in rev_channel.history(limit=100) if i.author.bot]
+    rev_messages = [i async for i in rev_channel.history(limit=load_limit) if i.author.bot]
     #print(rev_channel.name, rev_messages)
     approve_ls, reject_ls = ([],[])
     for msg in rev_messages:
@@ -1063,7 +1063,7 @@ async def cg_quotegen_sync():
         text_channels = [i for i in guild.channels if str(i.type) == 'text' and
                          cg_quotegen.network_name in i.name and i.name.endswith('sync')]
         for channel in text_channels:
-            messages = [i async for i in channel.history(limit=100)]
+            messages = [i async for i in channel.history(limit=load_limit)]
             #print(channel.name, messages)
             date_ls = [i.created_at for i in messages]
             last_hour = (utcnow - max(date_ls)).total_seconds() / 3600 if date_ls != [] else 100
@@ -1077,7 +1077,7 @@ async def cg_quotegen_sync():
 
             # New cast
             for msg in approve_ls:
-                if last_hour < 7: break
+                if last_hour < 32: break
                 if msg.id in exists_ls: continue
                 embed = discord.Embed().set_image(url=msg.attachments[0].url)
                 await channel.send(content=msg.content, embed=embed)

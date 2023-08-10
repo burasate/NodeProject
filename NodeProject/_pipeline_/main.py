@@ -123,7 +123,7 @@ while True:
         if os.name == 'nt':
             qd = production_manager.quote_daily()
             qd.load_podcast_transcript()
-            for i in range(100):
+            for i in range(50):
                 qd.add_new_quote()
 
         """
