@@ -921,9 +921,10 @@ Massage : \"{1}\" '''.format(transcript['title2'], transcript['content'])
 
         for i in ['content', 'content_th']:
             if '[' in data[i] and ']' in data[i]:
-                data[i] = list(json.dumps(data[i]))
+                data[i] = ' \n'.join(list(json.dumps(data[i])))
             else:
-                data[i] = '\n'.join(separate_string(data[i]))
+                data[i] = ' \n'.join(separate_string(data[i]))
+
         return data
 
 if __name__ == '__main__':
