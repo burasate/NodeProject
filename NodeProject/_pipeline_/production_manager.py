@@ -898,10 +898,20 @@ Massage : \"{1}\" '''.format(transcript['title2'], transcript['content'])
 
     def get_random_quote_data(self):
         db_filter = {
-              "property": "is_requested",
-              "checkbox": {
-                "equals": False
-              }
+            'and': [
+                {
+                    'property': 'is_requested',
+                    'checkbox': {'equals': False}
+                },
+                {
+                    'property': 'gpt_content',
+                    'rich_text': {'equals': ''}
+                },
+                {
+                    'property': 'content_len',
+                    'number': {'less_than_or_equal_to': 300}
+                }
+            ]
         }
         j_rec = notionDatabase.get_json_rec(self.ntdb_id, page_size=100, filter=db_filter)
         rand_idx = random.randint(0, len(j_rec)-1)
@@ -919,19 +929,34 @@ Massage : \"{1}\" '''.format(transcript['title2'], transcript['content'])
                 lines[idx] = lines[idx] + ' ' + words[i]
             return lines
 
+        def th_replace(content_str):
+            content_str = str(content_str)
+            content_str = content_str.replace(' ๆ', 'ๆ')
+            content_str = content_str.strip()
+            return content_str
+
+        import ast
         for i in ['content', 'content_th']:
+            if data[i] == '' : return None
             if '[' in data[i] and ']' in data[i]:
-                data[i] = ' \n'.join(list(json.dumps(data[i])))
+                #print(type(data[i]), data[i])
+                data[i] = ast.literal_eval(data[i])
+                data[i] = ' '.join([str(n).strip() for n in list(data[i])])
+                data[i] = ' \n'.join(separate_string(data[i])).replace('\n ','\n')
+                #data[i] =
             else:
                 data[i] = ' \n'.join(separate_string(data[i]))
+            #print(type(data[i]), data[i])
+            if 'th' in i:
+                data[i] = th_replace(data[i])
 
         return data
 
 if __name__ == '__main__':
 
-    #qd = quote_daily()
+    qd = quote_daily()
     #qd.load_podcast_transcript()
-    #qd.get_random_quote_data()
+    pprint.pprint(qd.get_random_quote_data())
     '''
     for i in range(1000):
         qd.get_rand_transcript_line()
