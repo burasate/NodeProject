@@ -879,7 +879,7 @@ Massage : \"{1}\" '''.format(transcript['title2'], transcript['content'])
 
         # new page
         if db_data['results'] == []:
-            page = notionDatabase.createPage(ntdb_id, 'title', title_key)
+            page = notionDatabase.createPage(self.ntdb_id, 'title', title_key)
             properties = [i for i in list(page['properties'])]
             #print(properties)
             for col in transcript:
