@@ -19,11 +19,21 @@ transcription_dir = base_dir + '/cache/transcriptions'
 csv_path = cache_dir + '/podcast_episode.csv'
 
 class util:
+    @staticmethod
     def is_internet_connect(url='https://google.com'):
         try:
-            requests.session().get(url, timeout=10)
-            return True
-        except:
+            response = requests.get(url, timeout=60)
+            if response.status_code == 200:
+                print("Request successful!")
+                return True
+            else:
+                print(f"Request failed with status code: {response.status_code}")
+                return False
+        except requests.exceptions.Timeout:
+            print("Request timed out. Please check your network connection.")
+            return False
+        except requests.exceptions.RequestException as e:
+            print(f"An error occurred: {e}")
             return False
 
 class plistener ():
@@ -38,14 +48,16 @@ class plistener ():
         global podcast_rss
         con_rss = []
         for u in list(podcast_rss):
+            if filter_url != None:
+                if not u == filter_url: continue
             if util.is_internet_connect(url=u):
                 con_rss.append(u)
 
         df = pd.DataFrame([])
-
         for url in con_rss:
             if filter_url != None:
                 if not url == filter_url: continue
+            print(url)
             dp = feedparser.parse(url)
             rec = dp.entries
             rec = rec[:10]
@@ -73,8 +85,6 @@ class plistener ():
 
                 df = df.append(pd.DataFrame([data]))
 
-        df.reset_index(inplace=True, drop=True)
-
         '''
             for i, e in enumerate(dp.entries):
                 one_feed = {}
@@ -88,6 +98,8 @@ class plistener ():
     
         #print('empty ', df.empty)
         '''
+
+        df.reset_index(inplace=True, drop=True)
         return df
 
     def get_all_feed_df(self):
@@ -219,7 +231,7 @@ class plistener ():
         df.to_csv(csv_path, index=False, encoding='utf-8')
 
 podcast_rss = {
-    'https://media.rss.com/agoracommunity/feed.xml' : {
+    'https://media.rss.com/agoracommunity/feed.xml' : { # agoracommunity
         'title' : ['title'],
         'published' : ['published'],
         'summary' : ['summary_detail', 'value'],
@@ -227,7 +239,7 @@ podcast_rss = {
         'mp3_link' : ['links', -1, 'href'],
         'img_link' : ['image', 'href'],
     },
-    'https://allanmckay.libsyn.com/rss' : {
+    'https://allanmckay.libsyn.com/rss' : { # allanmckay
         'title' : ['title'],
         'published' : ['published'],
         'summary' : ['summary'],
@@ -235,7 +247,7 @@ podcast_rss = {
         'mp3_link' : ['links', -1, 'href'],
         'img_link' : ['image', 'href'],
     },
-    'https://media.rss.com/thecgbros/feed.xml' : {
+    'https://media.rss.com/thecgbros/feed.xml' : { # thecgbros
         'title' : ['title'],
         'published' : ['published'],
         'summary' : ['summary'],
@@ -243,7 +255,7 @@ podcast_rss = {
         'mp3_link' : ['links', -1, 'href'],
         'img_link' : ['image', 'href'],
     },
-    'https://anchor.fm/s/12548c30/podcast/rss' : {
+    'https://anchor.fm/s/12548c30/podcast/rss' : { # Directing Animation
         'title' : ['title_detail', 'value'],
         'published' : ['published'],
         'summary' : ['summary_detail', 'value'],
@@ -251,7 +263,7 @@ podcast_rss = {
         'mp3_link' : ['links', -1, 'href'],
         'img_link' : ['image', 'href'],
     },
-    'https://feeds.libsyn.com/428781/rss' : {
+    'https://feeds.libsyn.com/428781/rss' : { # befores & afters
         'title' : ['title_detail', 'value'],
         'published' : ['published'],
         'summary' : ['summary_detail', 'value'],
@@ -259,28 +271,28 @@ podcast_rss = {
         'mp3_link' : ['links', -1, 'href'],
         'img_link' : ['image', 'href'],
     },
-    'https://ianimate.net/podcast-rss' : {
+    'https://ianimate.net/podcast-rss' : { # ianimate
         'title' : ['title_detail', 'value'],
         'published' : ['published'],
         'summary' : ['summary_detail', 'value'],
         'link' : ['links', 0, 'href'],
         'mp3_link' : ['links', -1, 'href'],
     },
-    'http://www.theanimatedjourney.com/feed/podcast' : {
+    'http://www.theanimatedjourney.com/feed/podcast' : { # theanimatedjourney
         'title' : ['title_detail', 'value'],
         'published' : ['published'],
         'summary' : ['summary_detail', 'value'],
         'link' : ['links', 0, 'href'],
         'mp3_link' : ['links', -1, 'href'],
     },
-    'https://bancroftbros.libsyn.com/rss' : {
+    'https://bancroftbros.libsyn.com/rss' : { #bancroftbros
         'title' : ['title_detail', 'value'],
         'published' : ['published'],
         'summary' : ['summary_detail', 'value'],
         'link' : ['links', 0, 'href'],
         'mp3_link' : ['links', -1, 'href'],
     },
-    'https://schoolofmotion.libsyn.com/rss' : {
+    'https://schoolofmotion.libsyn.com/rss' : { # schoolofmotion
         'title' : ['title_detail', 'value'],
         'published' : ['published'],
         'summary' : ['summary_detail', 'value'],
@@ -288,7 +300,7 @@ podcast_rss = {
         'mp3_link' : ['links', -1, 'href'],
         'img_link' : ['image', 'href'],
     },
-    'https://film-book.com/feed/the-animation-podcast' : {
+    'https://film-book.com/feed/the-animation-podcast' : { # the-animation-podcast
         'title' : ['title_detail', 'value'],
         'published' : ['published'],
         'summary' : ['summary_detail', 'value'],
@@ -319,7 +331,7 @@ podcast_rss = {
         'mp3_link' : ['links', -1, 'href'],
         'img_link' : ['image', 'href'],
     },
-    'https://cglabs.libsyn.com/rss' : {
+    'https://cglabs.libsyn.com/rss' : { # cglabs
         'title' : ['title_detail', 'value'],
         'published' : ['published'],
         'summary' : ['summary_detail', 'value'],
@@ -327,18 +339,17 @@ podcast_rss = {
         'mp3_link' : ['links', -1, 'href'],
         'img_link' : ['image', 'href'],
     },
-    'https://www.fxguide.com/category/fxpodcast/feed/' : {
+    'https://www.fxguide.com/category/fxpodcast/feed/' : { # fxpodcast
         'title' : ['title_detail', 'value'],
         'published' : ['published'],
         'summary' : ['summary_detail', 'value'],
         'link' : ['links', 0, 'href'],
         'mp3_link' : ['links', -1, 'href'],
-    },
+    }
 }
 
 if __name__ == '__main__':
     pass
     #pl = plistener(podcast_rss)
-    #print(get_feed_df(filter_url='https://feeds.libsyn.com/428781/rss'))
-    #print(pl.get_feed_df(filter_url='https://www.fxguide.com/category/fxpodcast/feed/'))
+    #print(pl.get_feed_df(filter_url='https://anchor.fm/s/c70674cc/podcast/rss'))
     #pl.cache_transcription_from_podcast_rss(count_limit=100)
