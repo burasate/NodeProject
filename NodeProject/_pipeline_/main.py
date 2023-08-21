@@ -86,18 +86,6 @@ while True:
         """
         print('========\nSystem Manager\n========')
         importlib.reload(system_manager)
-        # Fika Project
-        if os.name == 'nt':
-            print('\nFika\n')
-            system_manager.fika.cache_layout_file()
-            # system_manager.versionBackup('.ma', r'C:\Fika\Projects\Dug\Shots', dateFormat='%Y%m%d_%H%M')
-            # system_manager.versionBackup('.ma', r"D:\GDrive\Temp\Fika\Works", dateFormat='%Y%m%d_%H%M')
-            # system_manager.versionBackup('.mov', r"D:\GDrive\Temp\Fika\Works", dateFormat='%Y%m%d_%H%M')
-            system_manager.fika.ttf_ma_stat()
-            system_manager.fika.stat_upload()
-            # system_manager.fika.studio_library()
-
-        importlib.reload(system_manager)
         system_manager.workspaceSetup()
         system_manager.integration.init_notion_db()
         system_manager.integration.load_notion_db()
@@ -131,6 +119,16 @@ while True:
         """
         print('========\nData Analytic\n========')
         importlib.reload(system_manager)
+
+        """
+        Fika Ent
+        """
+        if os.name == 'nt':
+            print('\nFika\n')
+            system_manager.fika.cache_layout_file()
+            system_manager.fika.ttf_ma_stat()
+            system_manager.fika.stat_upload()
+            # system_manager.fika.studio_library()
 
     except Exception as e:
         import traceback
