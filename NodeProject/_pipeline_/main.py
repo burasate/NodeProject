@@ -123,11 +123,11 @@ while True:
         """
         Fika Ent
         """
-        if os.name == 'nt':
-            print('\nFika\n')
-            system_manager.fika.cache_layout_file()
-            system_manager.fika.ttf_ma_stat()
-            system_manager.fika.stat_upload()
+        #if os.name == 'nt':
+            #print('\nFika\n')
+            #system_manager.fika.cache_layout_file()
+            #system_manager.fika.ttf_ma_stat()
+            #system_manager.fika.stat_upload()
             # system_manager.fika.studio_library()
 
     except Exception as e:

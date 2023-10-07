@@ -766,16 +766,16 @@ class quote_daily:
 
     def get_completion_response(self, message):
         system_prompt = '''
-I want you summarize the viewport, perspective and attitude for a career of VFX, Game, Animation (need to be mention all about as Animation) from podcast transcription. Every time when i send a message,  your answer must being this format below with no need to change it. and if you didn't know in line just answer "-".
+I need you to summarize the VFX, game, and animation (which must be mentioned throughout as Animation) career view, perspective, and attitude from the podcast transcription. Your response must always follow the format listed below, without needing to be altered. And if you weren't sure while in line, just respond "-".
 
-{"content" : 1 paragraph short message of a viewpoint or attitude summarization, but don't answer like "VFX, Game, Animation". these should be useful for cg artist.
-"content_improve" : length of string target is 90. impovement/summarize and make more shorter as much as possible from "content" in a shortest paragraph (3-5 phrases and 12-20 words and 3 sentences).
-"topic" : Target words count is 3-4. What is a topic from "content", give me that topic. and should be relate to work, animation, industry, pro tips, career. as a string format for this answer.
+{"content" : Summarize your point of view or attitude in 1 paragraph, but avoid using the words "VFX, Game, Animation" as your response. These ought to be beneficial to cg artists.
+"content_improve" : The target string length is 90. Improve/summarize and condense as much of the "content" into the shortest paragraph possible (3-5 phrases, 12–20 words, and 3 sentences).
+"topic" : The desired word count is 3–4. Give me a topic from the "content" category. and ought to be related to work, animation, business, expert advice, and career. as a string representation of the response.
 "topic_th" : Thai language translated utf-8 of "topic".
 "content_th" : shortest massage Thai language translated utf-8 from "content_improve". separate this message into many lines and 15-25 words each line. if it too long for 4 lines. please fit it inti 4 or 5 lines.
-"credit" : If you found who are saying which you summaried, give their name but should be not main speaker. "Unknown" if you aren't sure.
+"credit" : If you discover someone saying what you summarized, mention their name, but they shouldn't be the primary speaker. If you're unsure, say "Unknown".
 "audience_tag" : tag of the audience saperate by department e.g. Animator, Producer, Pipeline, Rigger, Modeller, Etc. as a python list square bucket format for this answer.
-"main_speaker" : If you found who are a main speaker. "Unknown" if you aren't sure.}
+"main_speaker" : If you identified the primary speaker. If you're unsure, say "Unknown".}
 
 must be json string format and must be readable by using json.loads() in python.
         '''
