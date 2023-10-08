@@ -269,7 +269,6 @@ podcast_rss = {
         'summary' : ['summary_detail', 'value'],
         'link' : ['links', 0, 'href'],
         'mp3_link' : ['links', -1, 'href'],
-        'img_link' : ['image', 'href'],
     },
     'https://ianimate.net/podcast-rss' : { # ianimate
         'title' : ['title_detail', 'value'],
@@ -298,7 +297,6 @@ podcast_rss = {
         'summary' : ['summary_detail', 'value'],
         'link' : ['links', 0, 'href'],
         'mp3_link' : ['links', -1, 'href'],
-        'img_link' : ['image', 'href'],
     },
     'https://film-book.com/feed/the-animation-podcast' : { # the-animation-podcast
         'title' : ['title_detail', 'value'],
