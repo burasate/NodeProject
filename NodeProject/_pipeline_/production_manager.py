@@ -595,6 +595,55 @@ class gumroad_script_tools:
         #else:
             #pass
 
+class m2_database:
+    @staticmethod
+    def submit_record():
+        ntdb = notionDatabase
+        ntdb_id = '360a80c1dff047e68c48ffd2ce8db298' #m2_submit_record
+        data = task_queue.data
+        pprint.pprint(data)
+        db_filter = {
+            'and': [
+                {
+                    'property': 'scene_name',
+                    'rich_text': {'equals': data['scene_name']}
+                },
+                {
+                    'property': 'user_name',
+                    'rich_text': {'equals': data['user_name']}
+                }
+            ]
+        }
+        db_data = ntdb.getDatabase(ntdb_id, filter=db_filter)
+        is_page_empty = db_data['results'] == []
+        print(db_data['results'])
+
+        # Notion delete duplicated pages
+        if len(db_data['results']) > 1:
+            print('ununique   : {}'.format(len(db_data['results'])))
+            for p in db_data['results'][1:]:
+                ntdb.del_page_id(p['id'])
+
+        # Notion page define
+        if is_page_empty:  # New page
+            page = ntdb.createPage(ntdb_id, 'scene_name', data['scene_name'])
+        else:  # Update page
+            page = db_data['results'][0]
+
+        # properties used
+        prop_ls = list(page['properties'])
+        for p in list(data):
+            if not p in prop_ls:
+                del data[p]
+        print('prepared data  ', data)
+
+        # Notion page organise
+        ntdb.update_page_properties(page['id'], data)
+        # if is_page_empty:
+        # pass
+        # else:
+        # pass
+
 # Task System (Lastest decoration)
 class task_queue:
     data = {}
@@ -618,6 +667,11 @@ class task_queue:
             'task_name': 'script_tool_check_in',
             'task_func': gumroad_script_tools.test,
             'wait': 0.0
+        },
+        {
+            'task_name': 'm2_rec_submit',
+            'task_func': m2_database.submit_record,
+            'wait': 1.0
         },
     ]
 
@@ -656,28 +710,6 @@ class task_queue:
                 #Excute
                 task_queue.func_rec[func_idx]['task_func']()
                 clear = True if not dev_mode else False
-
-                '''
-                if row['name'] == '':
-                    pass
-
-                elif row['name'] == 'sent_invite_to_project':
-                    project.update_invite()
-
-                elif row['name'] == 'set_project_channel_id':
-                    task_queue.set_project_channel_id()
-
-                elif row['name'] == 'join_project':
-                    project.add_project_member()
-
-                elif row['name'] == 'generate_financial_document':
-                    print('financial document - clear request quota...')
-                    time.sleep(30)
-                    finance.generate_document()
-                '''
-
-                #else:
-                    #clear = False
 
                 # Clear Task
                 if clear:
@@ -954,9 +986,9 @@ Massage : \"{1}\" '''.format(transcript['title2'], transcript['content'])
 
 if __name__ == '__main__':
 
-    qd = quote_daily()
+    #qd = quote_daily()
     #qd.load_podcast_transcript()
-    pprint.pprint(qd.get_random_quote_data())
+    #pprint.pprint(qd.get_random_quote_data())
     '''
     for i in range(1000):
         qd.get_rand_transcript_line()
@@ -989,7 +1021,7 @@ if __name__ == '__main__':
     #project.get_member_workload('Financial_test1', 'Kaofang.B71')
 
     #register.update_member()
-    #task_queue.run(dev_mode=True)
+    task_queue.run(dev_mode=True)
     #project.update_invite()
     #project.add_member(346164580487004171, 'Project_Test', 20)
     pass
