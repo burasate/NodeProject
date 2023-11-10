@@ -233,7 +233,7 @@ class finance:
 
             #Save file
             res = requests.get(pdf_url)
-            project_dir = file_storage_dir + os.sep + data_new['project_id']
+            project_dir = file_storage_dir + os.sep + data_new['project_id'].replace('-', '')
             if not os.path.exists(project_dir):
                 os.makedirs(project_dir)
             pdf_path = project_dir + '/{}_{}.pdf'.format(member_sl['page_id'], data_new['document_type'])
