@@ -159,6 +159,8 @@ class finance:
         url = link_data[doc_type + '_pdf_url']
         res = requests.get(url)
         project_dir = file_storage_dir + os.sep + project_sl['page_id']
+        print(project_sl['page_id'], project_dir)
+        1/0
         if not os.path.exists(project_dir):
             os.makedirs(project_dir)
         pdf_path = project_dir + '/{}_{}.pdf'.format(member_sl['page_id'],doc_type)
