@@ -586,9 +586,9 @@ async def dm_finance_document():
     project_id_list = os.listdir(file_storage_dir)
     #print(project_id_list)
     for project_id in project_id_list:
-        if not project_id in [i['page_id'] for i in project_rec]:
+        if not project_id in [str(i['page_id']).replace('-','') for i in project_rec]:
             continue
-        project_sl = [i for i in project_rec if i['page_id'] == project_id][0]
+        project_sl = [i for i in project_rec if str(i['page_id']).replace('-','') == project_id][0]
         pdf_dir = file_storage_dir + os.sep + project_id
         pdf_list = os.listdir(pdf_dir)
         pdf_list = [i for i in pdf_list if i.split('_')[-1].replace('.pdf','') in list(type_dict)]

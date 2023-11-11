@@ -158,15 +158,13 @@ class finance:
         #Save file
         url = link_data[doc_type + '_pdf_url']
         res = requests.get(url)
-        project_dir = file_storage_dir + os.sep + project_sl['page_id']
-        print(project_sl['page_id'], project_dir)
-        1/0
+        project_dir = file_storage_dir + os.sep + str(project_sl['page_id']).replace('-','')
         if not os.path.exists(project_dir):
             os.makedirs(project_dir)
-        pdf_path = project_dir + '/{}_{}.pdf'.format(member_sl['page_id'],doc_type)
+        pdf_path = project_dir + '/{}_{}.pdf'.format(str(member_sl['page_id']).replace('-',''),doc_type)
         with open(pdf_path, 'wb') as f:
             f.write(res.content)
-            print('pdf exprted {}'.format(pdf_path.replace(project_dir,'')))
+            print('pdf exported {}'.format(pdf_path.replace(project_dir,'')))
 
     @staticmethod
     def auto_generate_document():
