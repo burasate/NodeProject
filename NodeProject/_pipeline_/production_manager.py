@@ -798,9 +798,9 @@ class quote_daily:
 
     def get_completion_response(self, message):
         system_prompt = '''
-I need you to summarize the VFX, game, and animation (which must be mentioned throughout as Animation) career view, perspective, and attitude from the podcast transcription. Your response must always follow the format listed below, without needing to be altered. And if you weren't sure while in line, just respond "-".
+I need you to summarize (which should be mentioned throughout as game or animation perspective in friendly tone) from this podcast transcription. Your response must always follow the format listed below, without needing to be altered. And if you weren't sure while in line, just respond "-".
 
-{"content" : Summarize your point of view or attitude in 1 paragraph, but avoid using the words "VFX, Game, Animation" as your response. These ought to be beneficial to cg artists.
+{"content" : Summarize your point of view or attitude in 1 paragraph. These ought to be beneficial to cg artists.
 "content_improve" : The target string length is 90. Improve/summarize and condense as much of the "content" into the shortest paragraph possible (3-5 phrases, 12–20 words, and 3 sentences).
 "topic" : The desired word count is 3–4. Give me a topic from the "content" category. and ought to be related to work, animation, business, expert advice, and career. as a string representation of the response.
 "topic_th" : Thai language translated utf-8 of "topic".
@@ -820,7 +820,7 @@ must be json string format and must be readable by using json.loads() in python.
                 model=self.dc_cfg['open_ai_gpt']['model'],
                 messages=[
                     {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": message + '\nreply me as json string format only'}
+                    {"role": "user", "content": message + '\n\nreply me as json string format only'}
                 ],
                 temperature=0.25,
             )
@@ -860,8 +860,8 @@ must be json string format and must be readable by using json.loads() in python.
         transcript['title2'] = transcript['title']
         #print(transcript)
         message = '''
-Title : {0}
-Massage : \"{1}\" '''.format(transcript['title2'], transcript['content'])
+Podcast name : {0}
+Transcription : \"{1}\" '''.format(transcript['title2'], transcript['content'])
 
         # Notion init check
         title_key = transcript['file_name'].split('.')[0] + '_{:0>3d}'.format(transcript['line_number'])
