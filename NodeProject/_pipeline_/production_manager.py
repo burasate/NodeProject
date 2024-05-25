@@ -548,16 +548,12 @@ class gumroad_script_tools:
         ntdb = notionDatabase
         ntdb_id = 'fbca8d791aa54ac5b0d73a0766992295'
         data = task_queue.data
-        pprint.pprint(data)
+        #pprint.pprint(data)
         db_filter = {
             'and': [
                 {
                     'property': 'name',
                     'rich_text': {'equals': data['user_last']}
-                },
-                {
-                    'property': 'ip',
-                    'rich_text': {'equals': data['ip']}
                 },
                 {
                     'property': 'script_name',
@@ -567,7 +563,7 @@ class gumroad_script_tools:
         }
         db_data = ntdb.getDatabase(ntdb_id, filter=db_filter)
         is_page_empty = db_data['results'] == []
-        print(db_data['results'])
+        #print(db_data['results'])
 
         # Notion delete duplicated pages
         if len(db_data['results']) > 1:
