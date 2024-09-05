@@ -684,6 +684,9 @@ class task_queue:
         request_json = json.load(open(request_path))
         request_df = pd.DataFrame().from_records(request_json)
         request_df.sort_values(by=['date_time'], ascending=[True], inplace=True)
+        request_df['is_duplicated'] = (request_df.groupby('name')['name'].transform('count') > 1).astype(int)
+        request_df['is_latest'] = (request_df.groupby('name')['date_time'].transform('max') == request_df['date_time']).astype(int)
+
         for i in request_df.index.tolist():
             row = request_df.loc[i]
             s_data = str(row['data']).replace('\'','\\\"')
@@ -692,11 +695,15 @@ class task_queue:
 
             if 'error' in task_queue.data:
                 task_queue.data['error'] == ''
-            #print(task_queue.data)
 
             clear = False
-            if not row['name'] in [i['task_name'] for i in task_queue.func_rec]:
-                continue
+            if not row['name'] in [i['task_name'] for i in task_queue.func_rec]: # not action task
+                if bool(row['is_duplicated']) and not bool(row['is_latest']) and dev_mode: # delete duplicated unwant
+                    gSheet.deleteRow(request_sheet, 'date_time', row['date_time'])
+                    time.sleep(3.5)
+                    continue
+                else:
+                    continue
             func_idx = [i['task_name'] for i in task_queue.func_rec].index(row['name'])
 
             try:

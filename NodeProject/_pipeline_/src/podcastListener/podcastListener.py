@@ -237,7 +237,6 @@ podcast_rss = {
         'summary' : ['summary_detail', 'value'],
         'link' : ['links', 0, 'href'],
         'mp3_link' : ['links', -1, 'href'],
-        'img_link' : ['image', 'href'],
     },
     'https://allanmckay.libsyn.com/rss' : { # allanmckay
         'title' : ['title'],
@@ -245,7 +244,6 @@ podcast_rss = {
         'summary' : ['summary'],
         'link' : ['link'],
         'mp3_link' : ['links', -1, 'href'],
-        'img_link' : ['image', 'href'],
     },
     'https://media.rss.com/thecgbros/feed.xml' : { # thecgbros
         'title' : ['title'],
@@ -253,7 +251,6 @@ podcast_rss = {
         'summary' : ['summary'],
         'link' : ['links', 0, 'href'],
         'mp3_link' : ['links', -1, 'href'],
-        'img_link' : ['image', 'href'],
     },
     'https://anchor.fm/s/12548c30/podcast/rss' : { # Directing Animation
         'title' : ['title_detail', 'value'],
@@ -261,7 +258,6 @@ podcast_rss = {
         'summary' : ['summary_detail', 'value'],
         'link' : ['links', 0, 'href'],
         'mp3_link' : ['links', -1, 'href'],
-        'img_link' : ['image', 'href'],
     },
     'https://feeds.libsyn.com/428781/rss' : { # befores & afters
         'title' : ['title_detail', 'value'],
@@ -304,7 +300,6 @@ podcast_rss = {
         'summary' : ['summary_detail', 'value'],
         'link' : ['links', 0, 'href'],
         'mp3_link' : ['links', -1, 'href'],
-        'img_link' : ['image', 'href'],
     },
     'https://feeds.buzzsprout.com/1513429.rss' : { # Creators Society Animation Podcast
         'title' : ['title_detail', 'value'],
@@ -312,7 +307,6 @@ podcast_rss = {
         'summary' : ['summary_detail', 'value'],
         'link' : ['links', 0, 'href'],
         'mp3_link' : ['links', -1, 'href'],
-        'img_link' : ['image', 'href'],
     },
     'https://feeds.buzzsprout.com/2050428.rss' : { # Animated Animators
         'title' : ['title_detail', 'value'],
@@ -327,7 +321,6 @@ podcast_rss = {
         'summary' : ['summary_detail', 'value'],
         'link' : ['links', 0, 'href'],
         'mp3_link' : ['links', -1, 'href'],
-        'img_link' : ['image', 'href'],
     },
     'https://cglabs.libsyn.com/rss' : { # cglabs
         'title' : ['title_detail', 'value'],
@@ -335,7 +328,6 @@ podcast_rss = {
         'summary' : ['summary_detail', 'value'],
         'link' : ['links', 0, 'href'],
         'mp3_link' : ['links', -1, 'href'],
-        'img_link' : ['image', 'href'],
     },
     'https://www.fxguide.com/category/fxpodcast/feed/' : { # fxpodcast
         'title' : ['title_detail', 'value'],
@@ -347,7 +339,8 @@ podcast_rss = {
 }
 
 if __name__ == '__main__':
-    pass
-    #pl = plistener(podcast_rss)
+    #pass
+    pl = plistener(podcast_rss)
     #print(pl.get_feed_df(filter_url='https://anchor.fm/s/c70674cc/podcast/rss'))
     #pl.cache_transcription_from_podcast_rss(count_limit=100)
+    pl.transcription(r"D:\GDrive\Temp\M2_Shared\2024-08-30 17-03-31_1_1.mp3", r"D:\GDrive\Temp\M2_Shared\2024-08-30 17-03-31_1.txt")
