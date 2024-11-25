@@ -181,12 +181,10 @@ async def on_ready():
     print('Bot : Online')
     print('========================')
 
-    if not os.name == 'nt':
-        channel = bot.get_channel(channel_dict['log'])
-        await channel.send(f'`{dt.datetime.now()}`\nHello, I just woke up\n(Runnig on os \"{os.name}\")')
-
+    if not os.name == 'nt': # Rassberry pi
         #project_invite.start()
         print_time.start()
+        on_running_status.start()
         vote_report.start()
         role_update.start()
         project_channel_update.start()
@@ -199,6 +197,8 @@ async def on_ready():
         members_stat_report.start()
         cg_quotegen_sync.start()
         cg_quotegen_review.start()
+    else:
+        on_running_status.start()
 
 """---------------------------------"""
 # Discord Sync
@@ -206,6 +206,32 @@ async def on_ready():
 @tasks.loop(minutes=30)
 async def print_time():
     print(f'\n==========[     {dt.datetime.now()}     ]==========\n')
+
+@tasks.loop(minutes=15)
+async def on_running_status():
+    channel = bot.get_channel(channel_dict['log'])
+    topic = 'Node running status'
+
+    messages = [i async for i in channel.history(limit=100) if i.author.bot]
+    user_messages = [i async for i in channel.history(limit=100) if not i.author.bot]
+    for message in messages: # clear history
+        if topic in message.content:
+            await message.delete()
+        #if 'I just woke up' in message.content:
+            #await message.delete()
+    for message in user_messages: # clear user message
+        await message.delete()
+
+    msg = '''
+**{0}**
+`Node was running at {1}
+
+OS : {2}
+Python Ver : {3}
+Discord Ver : {4}`
+'''.format(topic, dt.datetime.now().__str__(), os.name, sys.version, discord.__version__)
+    await channel.send(msg)
+    del channel
 
 @tasks.loop(minutes=10)
 async def role_update():
