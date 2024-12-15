@@ -212,8 +212,8 @@ async def on_running_status():
     channel = bot.get_channel(channel_dict['log'])
     topic = 'Node running status'
 
-    messages = [i async for i in channel.history(limit=100) if i.author.bot]
-    user_messages = [i async for i in channel.history(limit=100) if not i.author.bot]
+    messages = [i async for i in channel.history(limit=300) if i.author.bot]
+    user_messages = [i async for i in channel.history(limit=300) if not i.author.bot]
     for message in messages: # clear history
         if topic in message.content:
             await message.delete()
