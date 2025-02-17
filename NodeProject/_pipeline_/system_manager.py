@@ -101,8 +101,8 @@ class integration:
         ntdb.loadNotionDatabase(notiondb_dir)
 
     def notion_sheet(*_):
-        base_path = os.sep.join(base_path.split(os.sep)[:-1]).replace('\\','/')
-        nt_csv_dir = base_path + '/production_rec/notionDatabase/csv'
+        prev_path = os.sep.join(base_path.split(os.sep)[:-1]).replace('\\','/')
+        nt_csv_dir = prev_path + '/production_rec/notionDatabase/csv'
         csv_path_list = [nt_csv_dir + '/' + i for i in os.listdir(nt_csv_dir) if '.csv' in i]
         #print(csv_path_list)
         for csv_path in csv_path_list:
