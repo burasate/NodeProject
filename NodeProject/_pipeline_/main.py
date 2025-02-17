@@ -15,7 +15,7 @@ project_path = os.sep.join(base_path.split(os.sep)[:-1])
 
 #Environment
 if not os.name == 'nt': #Linux
-	pass
+	import raspi_update
 else:
 	if not base_path in sys.path:
 		sys.path.insert(0, base_path)
@@ -67,7 +67,6 @@ Cycle System
 """
 import production_manager
 import system_manager
-import raspi_update
 
 #Internet Checking
 while not has_internet():
