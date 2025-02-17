@@ -5,27 +5,6 @@ import random
 """
 Init
 """
-os.system('cls||clear')
-print('========\nInitialize\n========')
-
-base_path = os.path.dirname(os.path.abspath(__file__))
-src_path = base_path+'/src'
-site_package_path = base_path+'/src'+'/site-packages'
-project_path = os.sep.join(base_path.split(os.sep)[:-1])
-
-#Environment
-if not os.name == 'nt': #Linux
-	import raspi_update
-else:
-	if not base_path in sys.path:
-		sys.path.insert(0, base_path)
-	if not src_path in sys.path:
-		sys.path.insert(0, src_path)
-	if not site_package_path in sys.path:
-		sys.path.insert(0, site_package_path)
-
-for p in sys.path:
-    print(p)
 
 #Internet Connection
 import requests
@@ -36,6 +15,29 @@ def has_internet():
         return False
     else:
         return True
+
+os.system('cls||clear')
+print('========\nInitialize\n========')
+
+base_path = os.path.dirname(os.path.abspath(__file__))
+src_path = base_path+'/src'
+site_package_path = base_path+'/src'+'/site-packages'
+project_path = os.sep.join(base_path.split(os.sep)[:-1])
+
+#Environment
+if not os.name == 'nt': #Linux
+	if has_internet():
+		import raspi_update
+else:
+	if not base_path in sys.path:
+		sys.path.insert(0, base_path)
+	if not src_path in sys.path:
+		sys.path.insert(0, src_path)
+	if not site_package_path in sys.path:
+		sys.path.insert(0, site_package_path)
+
+for p in sys.path:
+    print(p)
 
 def get_ssid_name():
 	os_name = os.name
