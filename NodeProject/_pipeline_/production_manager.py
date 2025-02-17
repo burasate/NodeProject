@@ -6,8 +6,8 @@ import datetime as dt
 Init
 """
 base_path = os.path.dirname(os.path.abspath(__file__))
-src_path = root_path+'/src'
-site_package_path = root_path+'/src'+'/site-packages'
+src_path = base_path+'/src'
+site_package_path = base_path+'/src'+'/site-packages'
 
 #Environment
 if not os.name == 'nt': #Linux

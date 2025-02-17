@@ -6,8 +6,8 @@ import datetime as dt
 Init
 """
 base_path = os.path.dirname(os.path.abspath(__file__))
-src_path = root_path+'/src'
-site_package_path = root_path+'/src'+'/site-packages'
+src_path = base_path+'/src'
+site_package_path = base_path+'/src'+'/site-packages'
 
 #Environment
 if not os.name == 'nt': #Linux
@@ -31,7 +31,7 @@ from notionDatabase import notionDatabase as ntdb
 from maReader import maReader
 
 # Path
-prev_dir = os.sep.join(root_path.split(os.sep)[:-1])
+prev_dir = os.sep.join(base_path.split(os.sep)[:-1])
 rec_dir = prev_dir + '/production_rec'
 notiondb_dir = rec_dir + '/notionDatabase'
 
@@ -40,8 +40,8 @@ Func
 """
 
 def workspaceSetup(*_):
-    path = os.sep.join(root_path.split(os.sep)[:-1]) #\project name
-    workspaceJ = json.load(open(root_path + '/workspace.json', 'r'))
+    path = os.sep.join(base_path.split(os.sep)[:-1]) #\project name
+    workspaceJ = json.load(open(base_path + '/workspace.json', 'r'))
     for data in workspaceJ:
         name = data['name']
         makePath = path+'/{}'.format(name)
@@ -101,7 +101,7 @@ class integration:
         ntdb.loadNotionDatabase(notiondb_dir)
 
     def notion_sheet(*_):
-        base_path = os.sep.join(root_path.split(os.sep)[:-1]).replace('\\','/')
+        base_path = os.sep.join(base_path.split(os.sep)[:-1]).replace('\\','/')
         nt_csv_dir = base_path + '/production_rec/notionDatabase/csv'
         csv_path_list = [nt_csv_dir + '/' + i for i in os.listdir(nt_csv_dir) if '.csv' in i]
         #print(csv_path_list)
@@ -243,7 +243,7 @@ class dinoponique: # home & farm iot system
             subprocess.Popen(['x-terminal-emulator', '-T', 'EZVIZ INTERVAL CAP', '-e', python_path, run_path])
 
 if __name__ == '__main__':
-    #base_path = os.sep.join(root_path.split(os.sep)[:-1])
+    #base_path = os.sep.join(base_path.split(os.sep)[:-1])
     #workspaceSetup()
     #versionBackup('.ma', base_path)
     #integration.init_notion_db()
