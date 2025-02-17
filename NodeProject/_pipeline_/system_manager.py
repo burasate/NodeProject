@@ -5,7 +5,7 @@ import datetime as dt
 """
 Init
 """
-root_path = os.path.dirname(os.path.abspath(__file__))
+base_path = os.path.dirname(os.path.abspath(__file__))
 src_path = root_path+'/src'
 site_package_path = root_path+'/src'+'/site-packages'
 
