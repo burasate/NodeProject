@@ -33,7 +33,7 @@ from gSheet import gSheet
 
 
 # Path
-prev_dir = os.sep.join(rootPath.split(os.sep)[:-1])
+prev_dir = os.sep.join(base_path.split(os.sep)[:-1])
 rec_dir = prev_dir + '/production_rec'
 notiondb_dir = rec_dir + '/notionDatabase'
 file_storage_dir = prev_dir + '/file_storage'
@@ -740,7 +740,7 @@ class quote_daily:
         from podcastListener import podcastListener
         self.pl = podcastListener.plistener(podcastListener.podcast_rss)
         self.transcription_dir = podcastListener.transcription_dir
-        self.dc_cfg_path = rootPath + '/raspi_dcbot.json'
+        self.dc_cfg_path = base_path + '/raspi_dcbot.json'
         self.dc_cfg = json.load(open(self.dc_cfg_path))
         self.dc_cfg['open_ai_gpt']['model'] = 'gpt-3.5-turbo'
         import openai
@@ -1009,7 +1009,7 @@ if __name__ == '__main__':
         time.sleep(18)
     '''
 
-    #base_path = os.sep.join(rootPath.split(os.sep)[:-1])
+    #base_path = os.sep.join(base_path.split(os.sep)[:-1])
 
     #import system_manager
     #system_manager.integration.init_notion_db()
