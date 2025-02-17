@@ -1,31 +1,28 @@
-import json,os,pprint,sys,time,shutil,importlib
+import json, os, pprint, sys, time, shutil, importlib, subprocess, getpass
 import datetime as dt
-import subprocess
+import random
 
 """
 Init
 """
-if not os.name == 'nt':
-    time.sleep(5)
-
 os.system('cls||clear')
 print('========\nInitialize\n========')
 
-rootPath = os.path.dirname(os.path.abspath(__file__))
-srcPath = rootPath+'/src'
-sitePackagePath = rootPath+'/src'+'/site-packages'
-projectPath = os.sep.join(rootPath.split(os.sep)[:-1])
+base_path = os.path.dirname(os.path.abspath(__file__))
+src_path = base_path+'/src'
+site_package_path = base_path+'/src'+'/site-packages'
+project_path = os.sep.join(base_path.split(os.sep)[:-1])
 
 #Environment
-if not rootPath in sys.path:
-    sys.path.insert(0,rootPath)
-if not srcPath in sys.path:
-    sys.path.insert(0,srcPath)
-if not sitePackagePath in sys.path:
-    sys.path.insert(0,sitePackagePath)
-#Environment Linux
-if not os.name == 'nt':
-    sys.path.remove(sitePackagePath)
+if not os.name == 'nt': #Linux
+	pass
+else:
+	if not base_path in sys.path:
+		sys.path.insert(0, base_path)
+	if not src_path in sys.path:
+		sys.path.insert(0, src_path)
+	if not site_package_path in sys.path:
+		sys.path.insert(0, site_package_path)
 
 for p in sys.path:
     print(p)
@@ -39,6 +36,31 @@ def has_internet():
         return False
     else:
         return True
+
+def get_ssid_name():
+	os_name = os.name
+	if os_name == 'nt': # windows
+		ssid_encode = subprocess.check_output("netsh wlan show interfaces")
+		ssid_decode = ssid_encode.decode().strip()
+		print(ssid_decode)
+		ssid_find = [i.strip() for i in ssid_decode.split('\n')]
+		ssid_find = [i for i in ssid_find if i.startswith('SSID')]
+		if ssid_find:
+			ssid = ssid_find[0].split(':')[-1].strip()
+			return ssid
+		else:
+			raise Warning('can\'t found ssid or wlan is disconnected')
+	elif os_name == 'posix': # raspberry pi
+		ssid_encode = subprocess.check_output("iwgetid")
+		ssid_decode = ssid_encode.decode().strip()
+		print(ssid_decode)
+		ssid_find = [i.strip() for i in ssid_decode.split('\n')]
+		ssid_find = [i for i in ssid_find if 'SSID' in i]
+		if ssid_find:
+			ssid = ssid_find[0].split(':')[-1].strip().replace('\"', '')
+			return ssid
+		else:
+			raise Warning('can\'t found ssid or wlan is disconnected')
 
 """
 Cycle System
@@ -55,12 +77,32 @@ while not has_internet():
     time.sleep(10)
 
 """-----------------------"""
+# Init Config
+"""-----------------------"""
+appdata_path = os.getenv('APPDATA') if os.name == 'nt' else os.path.expanduser('~/.config')
+node_project_dir = os.path.join(appdata_path, 'node_project')
+if not os.path.exists(node_project_dir):
+    os.makedirs(node_project_dir)
+config_path = os.path.join(node_project_dir, 'config.json')
+if os.path.exists(config_path):
+	config = json.load(open(config_path))
+	config['info']['ssid'] = get_ssid_name()
+else:
+	config = {
+		'info' : {
+			'user': getpass.getuser(),
+			'ssid': get_ssid_name(),
+		}
+	}
+json.dump(config, open(config_path, 'w'), indent=4)
+
+"""-----------------------"""
 # Discord Bot
 """-----------------------"""
-if not os.name == 'nt':
+if not os.name == 'nt': # posix
     os.system('cls||clear')
     raspi_update.update()
-    dcbot_path = rootPath + '/raspi_dcbot.py'
+    dcbot_path = base_path + '/raspi_dcbot.py'
     try:
         print('Open {}'.format(os.path.basename(dcbot_path)))
         time.sleep(1.5)
@@ -70,6 +112,12 @@ if not os.name == 'nt':
         import traceback
         print(str(traceback.format_exc()))
         time.sleep(10)
+
+"""-----------------------"""
+# IOT Systems Opening
+"""-----------------------"""
+#if not os.name == 'nt': # posix
+system_manager.dinoponique.run_ezviz_rtsp_image_capture( config['info']['ssid'] )
 
 while True:
     try:
@@ -93,22 +141,22 @@ while True:
         system_manager.data.clear_past_history()
         #data cleanup
         system_manager.integration.notion_sheet()
-        #system_manager.versionBackup('.ma', projectPath + '/animation_wrk', dateFormat='%Y%m%d_%H%M')
-        #system_manager.versionBackup('.mov', projectPath + '/animation_xpt', dateFormat='%Y%m%d_%H%M')
+        #system_manager.versionBackup('.ma', project_path + '/animation_wrk', dateFormat='%Y%m%d_%H%M')
+        #system_manager.versionBackup('.mov', project_path + '/animation_xpt', dateFormat='%Y%m%d_%H%M')
 
         """
         Production Manager (update, record and cleanup data of production)
         """
         print('========\nProduction Manager\n========')
         importlib.reload(production_manager)
-        #production_manager.loadNotionDatabase(projectPath + '/production_rec/notionDatabase')
+        #production_manager.loadNotionDatabase(project_path + '/production_rec/notionDatabase')
         production_manager.register.update_member()
         production_manager.finance.auto_generate_document()
         tq = production_manager.task_queue()
         tq.run()
 
         # Quote Daily Task
-        if os.name == 'nt':
+        if os.name == 'nt' and random.randint(0, 5) == 5:
             qd = production_manager.quote_daily()
             qd.load_podcast_transcript()
             for i in range(50):
@@ -119,16 +167,6 @@ while True:
         """
         print('========\nData Analytic\n========')
         importlib.reload(system_manager)
-
-        """
-        Fika Ent
-        """
-        #if os.name == 'nt':
-            #print('\nFika\n')
-            #system_manager.fika.cache_layout_file()
-            #system_manager.fika.ttf_ma_stat()
-            #system_manager.fika.stat_upload()
-            # system_manager.fika.studio_library()
 
     except Exception as e:
         import traceback

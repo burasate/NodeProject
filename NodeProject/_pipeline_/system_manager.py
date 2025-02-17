@@ -216,283 +216,30 @@ class error:
         else:
             return []
 
-class fika: #teletubbies files
+#--------------------------------------------------------
+
+class dinoponique: # home & farm iot system
     @staticmethod
-    def get_playblast_duration(video_path):
+    def run_ezviz_rtsp_image_capture(ssid):
+        if ssid != 'nang':
+            print('Mismatching SSID to run rtsp capture : {}'.format([ssid]))
+            time.sleep(2)
+            return
         import subprocess
-        ffmpeg_path = r"D:\GDrive\Documents\2022\BRSAnimPipeline\work\NodeProject\NodeProject\_pipeline_\src\ffmpeg\bin\ffprobe.exe"
-        result = subprocess.run(
-            [ffmpeg_path, '-i', video_path, '-show_entries', 'format=duration', '-v', 'quiet', '-of', 'csv=%s' % ("p=0")],
-            stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        try:
-            duration = float(result.stdout)
-        except:
-            duration = 0.0
-        return duration
-
-    @staticmethod
-    def cache_layout_file():
-        dir_path = r'C:\Fika\Projects\Dug\Shots\Publish'
-        dest_dir_path = r'D:\GDrive\Temp\Fika\Works\Layout'
-
-        for root, dirs, files in os.walk(dir_path, topdown=False):
-            for name in files:
-                file_path = os.path.join(root, name)
-                dest_file_path = os.path.join(dest_dir_path, name)
-
-                if not '_Layout.ma' in name:
-                    continue
-
-                is_exists = os.path.exists(dest_file_path)
-
-                if not is_exists:
-                    shutil.copyfile(file_path, dest_file_path)
-                    print(file_path)
-
-    @staticmethod
-    def ttf_ma_stat(limit_count = 5, scan_limit=50):
-        import random
-
-        #vpn_log = open(r"C:\Users\DEX3D_I7\OpenVPN\log\GPLpfSenseA-UDP4-1196-fika_guest_3-config.log").readlines()
-        #if not 'Initialization Sequence Completed' in vpn_log[-1]:
-            #return None
-        #print('Fika Connection : {}'.format(vpn_log[-1]))
-
-        stat_json_dir = r'D:\GDrive\Temp\Fika\Stat\json'
-
-        all_ma_path_list = []
-        if not os.path.exists('E:/Shots/Publish'):
-            return None
-
-        ep_list = [i for i in os.listdir('E:/Audio') if i.isdigit()]
-        ep_list = random.sample(ep_list, len(ep_list))
-
-        ep_filer = list(range(1051, 1060+1)) #+ list(range(1008,1008+1))
-
-        ep_list = [int(i) for i in ep_list if int(i) in ep_filer]
-        ep_list = [str(i) for i in ep_list]
-        for ep in ep_list:
-            #if not int(ep) in ep_filer:
-                #continue
-            ep_path = r'E:\Shots\Publish\{}'.format(ep)
-            try:
-                seq_list = os.listdir(ep_path)
-                seq_list = [i for i in seq_list if not '.' in i]
-            except:
-                continue
-
-            seq_list = random.sample(seq_list, len(seq_list))
-            for seq in seq_list:
-                seq_path = ep_path + os.sep + seq
-                shot_list = os.listdir(seq_path)
-                #print(seq_path)
-                #shot_dir = seq_path + os.sep + seq
-                shot_path_list = [seq_path + os.sep + i for i in os.listdir(seq_path)]
-                #print(shot_path_list)
-                for s_path in shot_path_list:
-                    shot = os.path.basename(s_path)
-                    if '.' in shot: continue;
-                    ma_path_list = [f'{s_path}/{st}/' + f'{ep}_{seq}_{shot}_{st}.ma' for st in os.listdir(s_path)
-                                    if st in ['Layout', 'FacialMotionEdit'] ]
-                    ma_path_list = [i for i in ma_path_list if os.path.exists(i)]
-                    print(json.dumps(ma_path_list, indent=4))
-                    time.sleep(0.5)
-                    all_ma_path_list += ma_path_list
-                    os.system('cls||clear')
-                    ep_ls_str = ', '.join(ep_list)
-                    print(f'Episode {ep_ls_str}\nma files ', len(all_ma_path_list), ' - ', end='')
-                    for i in range(len(all_ma_path_list)):
-                        if i % 10 == 0:
-                            print('|', end='')
-                        if i > scan_limit:
-                            break
-                    print('')
-                #break
-            #break
-
-        load_count = 0
-        all_ma_path_list = random.sample(all_ma_path_list, len(all_ma_path_list))
-        #print(json.dumps(all_ma_path_list, indent=4))
-        for ma_path in all_ma_path_list:
-            dir_path = os.path.dirname(ma_path).replace('.ma','')
-            name = os.path.basename(ma_path)
-            version = sorted([i for i in os.listdir(dir_path) if not '.' in i])
-            print(': {}'.format(name))
-            if version != []:
-                version = version[-1]
-            else:
-                version = 'v000'
-            ep = name.split('_')[0]
-            seq = name.split('_')[1]
-            shot = name.split('_')[2]
-            stage = name.split('_')[3]
-
-            j_path = stat_json_dir + f'/{name}_{version}.json'.replace('.ma', '')
-            if os.path.exists(j_path):
-                continue
-            if load_count > limit_count:
-                return None
-
-            print('record stat {}'.format(name), end='')
-            data = maReader.getStat(ma_path)
-            if data == None:
-                continue
-            data['name'] = name
-            data['version'] = version
-            data['episode'] = ep
-            data['sequence'] = seq
-            data['shot'] = shot
-            data['stage'] = stage
-            data['publish_dir'] = f'E:/Shots/Publish/{ep}/{seq}/{shot}/{stage}/'
-            data['pb_path'] = f'E:/Shots/Publish/{ep}/{seq}/{shot}/Playblasts/{ep}_{seq}_{shot}.mov'
-            data['pb_exists'] = os.path.exists(data['pb_path'])
-            if data['pb_exists']:
-                data['pb_mtime'] = os.stat(data['pb_path']).st_mtime
-                data['pb_mtime'] = dt.datetime.fromtimestamp(data['pb_mtime']).strftime('%Y-%m-%d %H:00:00')
-                data['pb_time_duration'] = fika.get_playblast_duration(data['pb_path'])
-            else:
-                data['pb_mtime'] = None
-            #"E:\Shots\Publish\1008\HOL\0000\Playblasts\1008_HOL_0000.mov"
-
-            data2 = maReader.getKeyTimeValue(ma_path)
-            '''
-            'shoulder_R0_orbit_ctl_visibility_ARM_po_inputB': {'time': [1036.0,
-                                                             1047.0,
-                                                             1058.0,
-                                                             1092.0,
-                                                             1098.0,
-                                                             1105.0,
-                                                             1113.0,
-                                                             1126.0,
-                                                             1146.0,
-                                                             1166.0],
-                                                    'value': [1.0,
-                                                              1.0,
-                                                              1.0,
-                                                              1.0,
-                                                              1.0,
-                                                              1.0,
-                                                              1.0,
-                                                              1.0,
-                                                              1.0,
-                                                              1.0]},
- 'spine_C0_fk0_ctl_rotateX_Merged_Layer_inputB': {'time': [], 'value': []},
-            '''
-            if data2 != None:
-                min_tc, max_tc = [[],[]]
-                for ac in data2:
-                    if not 'time' in data2[ac]: continue
-                    tc = data2[ac]['time']
-                    if tc == []: continue
-                    min_tc += [min(tc)]
-                    max_tc += [max(tc)]
-                if len(min_tc) != 0 or len(max_tc) != 0:
-                    min_tc = sum(min_tc)/len(min_tc)
-                    max_tc = sum(max_tc)/len(max_tc)
-                    if not min_tc == [] or not max_tc == []:
-                        t_ext = 0.00
-                        if min_tc < 951.00:
-                            t_ext = 951.00 - min_tc
-                        data['time_min_avg'] = round(min_tc)
-                        data['time_max_avg'] = round(max_tc)
-                        data['time_duration_avg'] = round(max_tc-min_tc-t_ext)
-
-            with open(j_path, 'w') as j_file:
-                json.dump(data, j_file, indent=4)
-            load_count += 1
-            print('    finished!')
-
-    @staticmethod
-    def stat_upload():
-        df = pd.DataFrame()
-        stat_json_dir = r'D:\GDrive\Temp\Fika\Stat\json'
-        stat_path_list = [stat_json_dir + os.sep + i for i in os.listdir(stat_json_dir)]
-
-        for j_path in stat_path_list:
-            #print(j_path)
-            data = json.load(open(j_path))
-            df = df.append(pd.DataFrame([data]))
-
-        #Calculate
-        df['version_n'] = df['version'].str.replace('v','').astype('int')
-        df['last_version_n'] = df.groupby(['name'])['version_n'].transform('max')
-        df.loc[df['version_n'] == df['last_version_n'], 'is_last_version'] = True
-        df.loc[df['version_n'] != df['last_version_n'], 'is_last_version'] = False
-
-        df.reset_index(inplace=True, drop=True)
-        #print(df[['name','version_n','last_version_n','is_last_version']])
-
-        csv_path = r'D:\GDrive\Temp\Fika\Stat'+os.sep+'ttf_version_stat.csv'
-        df.to_csv(csv_path, index=False)
-
-        time.sleep(5)
-        gSheet.updateFromCSV(csv_path, 'ma_stat', newline='', sheet_name='Fika_TTF_Stat')
-        print('update fika sheet')
-
-    @staticmethod
-    def studio_library():
-        src_path = r'E:\Maya\AnimationTools\StudioLibrary'
-        dst_path = r'X:\Server\StudioLibrary\Teletubies'
-        for root, dirs, files in os.walk(src_path, topdown=False):
-            for name in files:
-                file_path = os.path.join(root, name)
-                dst_copy_path = os.path.dirname(file_path).replace(src_path,dst_path) + os.sep + os.path.basename(file_path)
-                dst_folder_path = os.path.dirname(dst_copy_path)
-                print(dst_copy_path)
-
-                if not os.path.exists(dst_folder_path):
-                    os.makedirs(dst_folder_path)
-                if not os.path.exists(dst_copy_path):
-                    shutil.copy(file_path, dst_copy_path)
-
-    @staticmethod
-    def print_productivity():
-        d = {}
-        bp = r'C:\Fika\Projects\Dug\Playblasts'
-        # bp = r'D:\GDrive\Temp\Fika\Works\Playblast_lagacy'
-        for i in os.listdir(bp):
-            path = bp + os.sep + i
-            ctime = os.stat(path).st_ctime
-            dateStr = dt.datetime.fromtimestamp(ctime).strftime('%Y%m%d')
-            if not dateStr in d:
-                d[dateStr] = []
-            d[dateStr].append(fika.get_playblast_duration(path))
-        print(d)
-        d_list = []
-        for i in sorted(list(d)):
-            x = d[i]
-            d_list += [sum(x)]
-        sec_per_day = round(sum(d_list) / len(d_list), 1)
-        sec_per_week = sec_per_day * 5
-        sec_last_5days = round(sum(d_list[-5:]) / len(d_list[-5:]), 1)
-        print('All time average')
-        print('{} sec / day'.format(sec_per_day))
-        print('{} sec / week   ({} x 5)'.format(sec_per_week, sec_per_day))
-        print('Last 5 days')
-        print('{} sec / 5 days'.format(sec_last_5days))
-
-    """
-    def cache_audio_file():
-        dir_path = r'E:\Mocap'
-        dest_dir_path = r'D:\GDrive\Temp\Fika\Works\Layout'
-
-        for root, dirs, files in os.walk(dir_path, topdown=False):
-            for name in files:
-                file_path = os.path.join(root, name)
-                dest_file_path = os.path.join(dest_dir_path, name)
-
-                if not 'Combined.wav' in name:
-                    continue
-
-                print(dirs,file_path)
-
-                is_exists = os.path.exists(dest_file_path)
-
-                if not is_exists:pass
-                    #shutil.copyfile(file_path, dest_file_path)
-
-    """
-
+        print('Run rtsp_ezviz_image_capture..')
+        app_dir = src_path + os.sep + 'ezviz_recorder'
+        python_path = src_path + os.sep + r"python-3.7.0-embed-amd64\python.exe" if os.name == 'nt' else 'python3'
+        python_path = os.path.abspath(python_path) if os.name == 'nt' else python_path
+        run_path = app_dir + os.sep + 'ezviz_rtsp_image_capture.py'
+        run_path = os.path.abspath(run_path)
+        if python_path != python_path.replace(' ', '') or run_path != run_path.replace(' ', ''):
+            print('path warning!... \nthe path has space and there will be unsuccessful run')
+            time.sleep(5)
+        if os.name == 'nt':  # For Windows
+            subprocess.Popen(['start', 'cmd', '/K', python_path, run_path], shell=True)  # Open a Command Prompt window and keep it open
+        elif os.name == 'posix':  # For Unix-based systems (Linux, macOS)
+            #subprocess.call(['lxterminal', '-t', 'EZVIZ INTERVAL CAP', '-e', '{} {}'.format(python_path, run_path)])
+            subprocess.Popen(['x-terminal-emulator', '-T', 'EZVIZ INTERVAL CAP', '-e', python_path, run_path])
 
 if __name__ == '__main__':
     #base_path = os.sep.join(root_path.split(os.sep)[:-1])
@@ -504,12 +251,4 @@ if __name__ == '__main__':
     #data.create_history()
     #data.clear_past_history()
     #print(data.get_history_path_list(r"D:\GDrive\Documents\2022\BRSAnimPipeline\work\NodeProject\NodeProject\production_rec\notionDatabase\csv\project.csv"))
-
-    #fika.cache_layout_file()
-    #fika.cache_audio_file()
-    #fika.ttf_ma_stat()
-    #fika.stat_upload()
-    fika.studio_library()
-    fika.print_productivity()
-
     pass
