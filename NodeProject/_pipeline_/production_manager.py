@@ -5,10 +5,9 @@ import datetime as dt
 """
 Init
 """
-rootPath = os.path.dirname(os.path.abspath(__file__))
-srcPath = rootPath+'/src'
-sitePackagePath = rootPath+'/src'+'/site-packages'
-
+root_path = os.path.dirname(os.path.abspath(__file__))
+src_path = root_path+'/src'
+site_package_path = root_path+'/src'+'/site-packages'
 
 #Environment
 if not os.name == 'nt': #Linux
