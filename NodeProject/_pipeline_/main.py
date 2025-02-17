@@ -6,16 +6,6 @@ import random
 Init
 """
 
-#Internet Connection
-import requests
-def has_internet():
-    try:
-        r = requests.get('https://google.com')
-    except:
-        return False
-    else:
-        return True
-
 os.system('cls||clear')
 print('========\nInitialize\n========')
 
@@ -26,8 +16,7 @@ project_path = os.sep.join(base_path.split(os.sep)[:-1])
 
 #Environment
 if not os.name == 'nt': #Linux
-	if has_internet():
-		import raspi_update
+	pass
 else:
 	if not base_path in sys.path:
 		sys.path.insert(0, base_path)
@@ -69,6 +58,19 @@ Cycle System
 """
 import production_manager
 import system_manager
+
+if not os.name == 'nt': #Linux
+	import raspi_update
+
+#Internet Connection
+import requests
+def has_internet():
+    try:
+        r = requests.get('https://google.com')
+    except:
+        return False
+    else:
+        return True
 
 #Internet Checking
 while not has_internet():
