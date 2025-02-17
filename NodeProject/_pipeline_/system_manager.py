@@ -9,15 +9,16 @@ root_path = os.path.dirname(os.path.abspath(__file__))
 src_path = root_path+'/src'
 site_package_path = root_path+'/src'+'/site-packages'
 
-if not root_path in sys.path:
-    sys.path.insert(0,root_path)
-if not src_path in sys.path:
-    sys.path.insert(0,src_path)
-if not site_package_path in sys.path:
-    sys.path.insert(0,site_package_path)
-#Environment Linux
-if not os.name == 'nt':
-    sys.path.remove(site_package_path)
+#Environment
+if not os.name == 'nt': #Linux
+    pass
+else:
+	if not base_path in sys.path:
+		sys.path.insert(0, base_path)
+	if not src_path in sys.path:
+		sys.path.insert(0, src_path)
+	if not site_package_path in sys.path:
+		sys.path.insert(0, site_package_path)
 
 # Module
 import pandas as pd
