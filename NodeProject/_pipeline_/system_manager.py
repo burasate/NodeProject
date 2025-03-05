@@ -25,10 +25,10 @@ import pandas as pd
 pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None)
 pd.set_option('display.width', None)
-from gSheet import gSheet
+from src.gSheet import gSheet
 gSheet.sheetName = 'Node Project Integration'
-from notionDatabase import notionDatabase as ntdb
-from maReader import maReader
+from src.notionDatabase import notionDatabase as ntdb
+from src.maReader import maReader
 
 # Path
 prev_dir = os.sep.join(base_path.split(os.sep)[:-1])

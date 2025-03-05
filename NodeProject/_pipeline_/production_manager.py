@@ -26,10 +26,10 @@ import numpy as np
 pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None)
 pd.set_option('display.width', None)
-from gSheet import gSheet
+from src.gSheet import gSheet
 gSheet.sheetName = 'Node Project Integration'
-from notionDatabase import notionDatabase
-from gSheet import gSheet
+from src.notionDatabase import notionDatabase
+
 
 
 # Path
