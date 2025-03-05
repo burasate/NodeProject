@@ -54,13 +54,16 @@ def get_ssid_name():
 			raise Warning('can\'t found ssid or wlan is disconnected')
 
 """
+Update System
+"""
+if not os.name == 'nt': #Linux
+	import raspi_update
+
+"""
 Cycle System
 """
 import production_manager
 import system_manager
-
-if not os.name == 'nt': #Linux
-	import raspi_update
 
 #Internet Connection
 import requests
