@@ -49,9 +49,10 @@ print('----------')
 
 st_time = time.time()
 duration = config.interval + 1.0
-while 1:
+while True:
     if duration >= config.interval:
-        for ch, pw, ip in config.reg_local_ip_ls:
+        os.system('cls||clear')
+        for idx, (ch, pw, ip) in enumerate(config.reg_local_ip_ls):
             name = 'CAM{0:02d}'.format(int(ch))
             rtsp_url = "rtsp://admin:{}@{}:554".format(pw, ip)
             cam_dir = captures_dir + os.sep + name + os.sep + 'img_sequences'
@@ -68,29 +69,34 @@ while 1:
             img_path = cam_dir + os.sep + '{}_'.format(name) + now_format + '.jpg'
 
             ffmpeg_command = [
-                config.ffmpeg_path,
-                "-rtsp_transport", "udp",  # Use TCP for more stability
-                "-i", rtsp_url,  # Input stream
-                "-buffer_size", "8192000",  # 8MB buffer to prevent loss
-                "-an",  # Disable audio (can reduce issues)
-                #"-frames:v", "1",  # Capture one frame
-                "-t", "2",
-                "-r", "15",  # Set FPS to match the stream
-                "-update", "1",
-                "-q:v", "2",  # Set quality (lower is better, 2 is nearly lossless)
-                "-y",
-                img_path  # Output file
+                config.ffmpeg_path,  # Path to the FFmpeg executable
+                "-rtsp_transport", "udp",  # Use UDP (can be more stable in some networks)
+                "-i", rtsp_url,  # Input RTSP stream URL
+                "-buffer_size", "8192000",  # Set buffer size to 8MB to prevent packet loss
+                "-an",  # Disable audio (reduces processing and potential errors)
+                # "-frames:v", "1",  # (Optional) Capture a single frame instead of a short clip
+                "-t", "5",  # Capture 2 seconds of video
+                "-r", "14",  # Set FPS to 14 (match the stream's FPS if needed)
+                "-update", "1",  # Overwrite the same image file instead of creating new ones (for image output)
+                "-q:v", "2",  # Set image quality (lower values are better, 2 is nearly lossless)
+                "-y",  # Overwrite output file if it exists
+                img_path  # Path where the output image/video will be saved
             ]
             try:
                 result = subprocess.run(ffmpeg_command, check=False, timeout=config.ffmpeg_timeout,
                                         capture_output=True, text=True)
-                print(result.stderr)
-                print("{} {}  Picture saved successfully.".format(name, now_format))
-                time.sleep(1.5)
+
+                stderr = str(result.stderr).strip()
+                print(stderr[-100:])
+
+                if 'failed:' in stderr:
+                    raise Warning('Cannot connect to camera... {}  {}'.format(name, rtsp_url))
+                else:
+                    print("{} {}  Picture saved successfully.\n\n".format(name, now_format))
             except Exception as e:
-                print('!!!! ==========================')
+                print('\n==========================\n')
                 print(str(traceback.format_exc()))
-                print('!!!! ==========================')
+                print('\n==========================\n')
                 continue
 
     # update interval

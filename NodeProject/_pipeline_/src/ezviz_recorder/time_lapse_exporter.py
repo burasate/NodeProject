@@ -12,7 +12,7 @@ captures_dir =os.path.dirname(__file__) + '/captures'
 print(captures_dir)
 print(config.ffmpeg_path)
 
-def images_to_mp4(image_folder, output_file, ffmpeg_path="ffmpeg", fps=60, bitrate="900k"):
+def images_to_mp4(image_folder, output_file, ffmpeg_path="ffmpeg", fps=30, bitrate="900k"):
     """
     Convert a sequence of images in a folder to an MP4 video with a custom bitrate.
 
@@ -98,6 +98,7 @@ def images_to_mp4(image_folder, output_file, ffmpeg_path="ffmpeg", fps=60, bitra
 today_str = datetime.datetime.today().strftime('%Y%m%d')
 cam_dir_ls = [captures_dir + os.sep + i for i in os.listdir(captures_dir)]
 for cam_dir in cam_dir_ls:
+    os.system('cls||clear')
     seq_dir = cam_dir + os.sep + 'img_sequences'
     #print(seq_dir)
     date_str_ls = list(set([i.split('_')[1] for i in os.listdir(seq_dir)]))
@@ -119,6 +120,7 @@ for cam_dir in cam_dir_ls:
             [os.remove(seq_dir + os.sep + i) for i in img_file_ls]
             continue
         else:
+            print('copying.. {}'.format(temp_date_seq_dir))
             [shutil.copy(seq_dir + os.sep + i, temp_date_seq_dir + os.sep + i) for i in img_file_ls]
             ffmpeg_path = config.ffmpeg_path
             images_to_mp4(temp_date_seq_dir, mp4_path, ffmpeg_path)

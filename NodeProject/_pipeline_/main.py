@@ -158,12 +158,14 @@ while True:
         tq = production_manager.task_queue()
         tq.run()
 
+        '''
         # Quote Daily Task
         if os.name == 'nt' and random.randint(0, 5) == 5:
             qd = production_manager.quote_daily()
             qd.load_podcast_transcript()
             for i in range(50):
                 qd.add_new_quote()
+        '''
 
         """
         Data Analytic (data analysis and report)
