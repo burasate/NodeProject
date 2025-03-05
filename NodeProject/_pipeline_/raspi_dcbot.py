@@ -195,8 +195,8 @@ async def on_ready():
         auto_clear_all_dm_message.start()
         members_stat_record.start()
         members_stat_report.start()
-        cg_quotegen_sync.start()
-        cg_quotegen_review.start()
+        #cg_quotegen_sync.start()
+        #cg_quotegen_review.start()
     else:
         on_running_status.start()
 
