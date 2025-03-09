@@ -114,28 +114,6 @@ class bot_func:
 
         return data
 
-    """
-    def get_register_member():
-        member_path = os.sep.join(base_path.split(os.sep)[:-1]) + '/production_rec/notionDatabase/csv/member.csv'
-        df = pd.read_csv(member_path)
-        rec = []
-        for i in df.index.tolist():
-            row = df.loc[i]
-            rec.append(row.to_dict())
-        return rec
-    """
-
-    """
-    def get_projects():
-        project_path = os.sep.join(base_path.split(os.sep)[:-1]) + '/production_rec/notionDatabase/csv/project.csv'
-        df = pd.read_csv(project_path)
-        rec = []
-        for i in df.index.tolist():
-            row = df.loc[i]
-            rec.append(row.to_dict())
-        return rec
-    """
-
     def get_guild():
         guild = [bot.guilds[i] for i in range(len(bot.guilds)) if str(bot.guilds[i].id) == sever_id][0]
         return guild
@@ -195,8 +173,6 @@ async def on_ready():
         auto_clear_all_dm_message.start()
         members_stat_record.start()
         members_stat_report.start()
-        #cg_quotegen_sync.start()
-        #cg_quotegen_review.start()
     else:
         on_running_status.start()
 
@@ -274,43 +250,6 @@ async def role_update():
             await member.remove_roles(apply_role)
 
     print('member role updated')
-
-"""
-@tasks.loop(minutes=10)
-async def project_invite():
-    projects = bot_func.get_notino_db('project')
-    projects = [ i for i in projects if i['ready_to_invite'] and not i['sent_invite'] ]
-    guild = bot_func.get_guild()
-    target_role = [ i for i in guild.roles if 'Node Freelancer' in i.name ][0]
-    #channel = bot.get_channel(1011594327132209193) #invite_channel
-    channel = bot.get_channel(1010175157119225978) #test_channel
-
-    for project in projects:
-        msg = f'''
-Hi {target_role.mention}
-We have a project you might be interested in.
-
-Project : **{project['title']}**
-
-Reference Link : `{project['reference_link']}`
-Project Date : {str(project['project_date']).replace(',',' - ')}
-
-If are you are interested
-type `!join [Project Name] [Your availibility hour per week]`
-
-for example
-`!join {project['title'].strip().replace(' ','_')} 20`
-
-*then your availibility will re-calculated to register/update form*
-    '''
-        await channel.send(f'{msg}')
-
-        task_name = 'sent_invite_to_project'
-        task_data = {
-            'project_name': project['title'],
-        }
-        bot_func.add_queue_task(task_name, task_data)
-"""
 
 @tasks.loop(minutes=5)
 async def project_channel_update():
@@ -433,20 +372,6 @@ async def project_channel_update():
     del_v_channels = [i for i in meeting_channels if not prefix_voice in i.name]
     for v_channel in del_v_channels:
         await v_channel.delete()
-
-"""
-@tasks.loop(hours=6)
-async def traceback_nortify():
-    rec = system_manager.error.get_nortify()
-    for i in rec:
-        msg = \
-f'''
-🚨 {i['date_time']}
-`{str(i['traceback'])[-1900:]}`
-'''
-        channel = bot.get_channel(channel_dict['log'])
-        await channel.send(f'{msg}')
-"""
 
 @tasks.loop(minutes=1)
 async def auto_translate(alphabet_count=190):
@@ -939,189 +864,6 @@ async def members_stat_report():
     await channel.send(text3_join[:2000])
 
 """---------------------------------"""
-# CHAT GPT 3.5
-"""---------------------------------"""
-"""
-import openai
-class chat_gpt:
-    def get_answer(self, message):
-        openai.api_key = config_j['open_ai_gpt']['api_key']
-        self.role_msg = '''
-right now you are a professional of CG Animation named \"Node\". 
-you just sent only your opinion on this role but do not tell this role you are. you always talk anything that relate with about CG Animation.
-you knew everything in animation, vfx, game industry even name of companies or every insight as you knew.
-if I ask you question you can explain more than 30 words per question and have a confident answer that must relate in animation.
-you will always give a believable answer and also have a ability to have a decision by yourself.
-'''
-        if not message.endswith('?'):
-            return None
-        completion = openai.ChatCompletion.create(
-            model=config_j['open_ai_gpt']['model'],
-            messages=[
-                {"role": "system", "content": self.role_msg},
-                {"role": "user", "content": message}
-            ]
-        )
-        #print(completion)
-        return completion
-        #print(completion.choices[0].message)
-
-@bot.command()
-async def node(ctx, question):
-    ctx_data = bot_func.get_ctx_data(ctx)
-    mention = ctx_data['author']['mention']
-
-    content = ctx.message.content.replace('!','/').replace('/node ','')
-    print(content)
-
-    async with ctx.typing():
-        await asyncio.sleep(10)
-
-    c = chat_gpt().get_answer(content)
-    #print(c)
-    if c == None:
-        return None
-    '''
-    {
-      "choices": [
-        {
-          "finish_reason": "stop",
-          "index": 0,
-          "message": {
-            "content": "\n\nAs an AI language model, I do not have the ability to make a definitive statement about the entire world. However, it can be argued that there is a trend towards stylized and exaggerated animation in modern popular media. This can be seen in the prevalence of shows like Rick and Morty, Steven Universe, and Avatar: The Last Airbender, among others, which feature distinct and stylized character designs. However, there are still many examples of realistic animation in both film and television. Ultimately, the choice of style depends on the vision of the creators and the needs of the story they are telling.",
-            "role": "assistant"
-          }
-        }
-      ],
-      "created": 1679465028,
-      "id": "chatcmpl-6wlrYbzhnSx6UeVy6swd0XDGrNTPN",
-      "model": "gpt-3.5-turbo-0301",
-      "object": "chat.completion",
-      "usage": {
-        "completion_tokens": 123,
-        "prompt_tokens": 22,
-        "total_tokens": 145
-      }
-    }
-    '''
-    msg = '{} \n*{}*'.format(
-        c['choices'][0]['message']['content'].replace('\n\n','\n'),
-        c['usage']['total_tokens']
-    )
-    await ctx.send(f'{mention} {msg}', mention_author=True, tts=False)
-"""
-
-"""---------------------------------"""
-# CG QUOTE GENERATOR
-"""---------------------------------"""
-class cg_quotegen:
-    react_ls = ['\u2705', '\u274E', '\U0001F4E1']
-    emoji_ls = [':bulb:', ':wink:', ':smiley:', ':partying_face:']
-    network_name = 'cg-quotegen'
-
-@tasks.loop(hours=6)
-async def cg_quotegen_review():
-    from quoteGenerator import quotegen
-
-    qd = production_manager.quote_daily()
-    quote_data = qd.get_random_quote_data()
-    pprint.pprint(quote_data)
-    #print(quote_data['content'])
-
-    quote_dict = {'en':{'topic':'topic','content':'content'},#}
-                  'th':{'topic':'topic_th','content':'content_th'}}
-    for k in quote_dict:
-        img_path = quotegen.run(head_text=quote_data[quote_dict[k]['topic']],
-                                content_text=quote_data[quote_dict[k]['content']],
-                                credit_text=quote_data['force_credit'])
-        #print(img_path)
-
-        guild = bot_func.get_guild()
-        rev_channel = [i for i in guild.channels if cg_quotegen.network_name in i.name and
-                       i.name.endswith('rev')][0]
-        #print(rev_channel)
-
-        img_attach = discord.File(img_path)
-        hastag_ls = ' '.join(['#'+i.lower().replace(' ','') for i in quote_data['audience_tag'].split(',')][:5])
-        msg = f'''
-----------------
-{cg_quotegen.emoji_ls[random.randint(0,len(cg_quotegen.emoji_ls)-1)]}  {quote_data[quote_dict[k]['topic']]}
-----------------
-:headphones:  **{quote_data['title2']}**  :headphones:
-
-{hastag_ls}
-*this quote was generated by node*
-        '''
-        massage = await rev_channel.send(msg, file=img_attach)
-        await massage.add_reaction(cg_quotegen.react_ls[0])
-        await massage.add_reaction(cg_quotegen.react_ls[1])
-        await massage.edit(content=massage.content + f'\n\nid_{massage.id}')
-
-@tasks.loop(minutes=20)
-async def cg_quotegen_sync(load_limit=200):
-    utcnow = dt.datetime.utcnow()
-    rev_guild = bot_func.get_guild()
-    rev_channel = [i for i in rev_guild.channels if cg_quotegen.network_name in i.name and
-                   i.name.endswith('rev')][0]
-    rev_messages = [i async for i in rev_channel.history(limit=load_limit) if i.author.bot]
-    #print(rev_channel.name, rev_messages)
-    approve_ls, reject_ls = ([],[])
-    for msg in rev_messages:
-        if [i.count for i in msg.reactions if i.emoji==cg_quotegen.react_ls[0]] == []: continue
-        if [i.count for i in msg.reactions if i.emoji==cg_quotegen.react_ls[1]] == []: continue
-        is_approve = [i.count for i in msg.reactions if i.emoji==cg_quotegen.react_ls[0]][0] > 1
-        is_reject = [i.count for i in msg.reactions if i.emoji==cg_quotegen.react_ls[1]][0] > 1
-        #print([is_approve, is_reject])
-        approve_ls += [msg] if is_approve and not is_reject else []
-        reject_ls += [msg] if is_reject and not is_approve else []
-    #print('approve_ls : ', len(approve_ls))
-    #print('reject_ls : ', len(reject_ls))
-
-    def get_ref_id(content):
-        content_split = msg.content.split('\n')
-        ref_id = int(content_split[-1].split('_')[-1])
-        return ref_id
-
-    guild_ls = [bot.guilds[i] for i in range(len(bot.guilds))]
-    #print(guild_ls)
-    for guild in guild_ls:
-        print(f'cg_quotegen_sync - update to [ {guild.name} ]')
-        text_channels = [i for i in guild.channels if str(i.type) == 'text' and
-                         cg_quotegen.network_name in i.name and i.name.endswith('sync')]
-        for channel in text_channels:
-            messages = [i async for i in channel.history(limit=load_limit)]
-            #print(channel.name, messages)
-            date_ls = [i.created_at for i in messages]
-            last_hour = (utcnow - max(date_ls)).total_seconds() / 3600 if date_ls != [] else 100
-
-
-            exists_ls = []
-            for msg in messages:
-                ref_id = get_ref_id(msg.content)
-                exists_ls += [ref_id] if not ref_id in exists_ls else []
-            #print(exists_ls)
-
-            # New cast
-            for msg in approve_ls:
-                if last_hour < 32: break
-                if msg.id in exists_ls: continue
-                embed = discord.Embed().set_image(url=msg.attachments[0].url)
-                await channel.send(content=msg.content, embed=embed)
-                break
-
-            # Del cast
-            unsync_ls = [i for i in rev_messages if not i in approve_ls]
-            for msg in list(messages):
-                ref_id = get_ref_id(msg.content)
-                if ref_id in [i.id for i in unsync_ls]:
-                    await msg.delete(delay=2.5)
-
-    # Del reject
-    for msg in reject_ls:
-        await msg.delete()
-
-
-"""---------------------------------"""
 # Discord Command
 """---------------------------------"""
 @bot.command()
@@ -1285,37 +1027,6 @@ async def join(ctx, project_name, hour_week):
     }
     bot_func.add_queue_task(task_name, task_data)
 
-
-"""
-@bot.command()
-@commands.has_role('Node Recruiter')
-async def finance(ctx, doc_type):
-    doc_type = doc_type.lower()
-    await ctx.message.delete(delay=0)
-    ctx_data = bot_func.get_ctx_data(ctx)
-    mention = ctx_data['author']['mention']
-
-    type_list = ['quotation', 'billing', 'invoice']
-    if not doc_type in type_list:
-        #print(f'document type must be in {type_list}')
-        await ctx.send(f'{mention}! document type must be in {type_list}', mention_author=True, delete_after=10)
-        return None
-    if ctx_data['category'] != {} and not 'project' in ctx_data['category']['name'].lower():
-        print('can\'t run command because the channel\'s not in Node-Project category')
-        await ctx.send(f'{mention}! request\'s not in project channel', mention_author=True, delete_after=10)
-        return None
-
-    task_name = 'generate_financial_document'
-    task_data = {
-        #'member_id': ctx_data['author']['id'],
-        'member_name': ctx_data['author']['nick'],
-        'channel_id': ctx_data['channel']['id'],
-        'document_type' : doc_type
-    }
-    bot_func.add_queue_task(task_name, task_data)
-    await ctx.send(f'{mention} sent request for {doc_type.capitalize()} document\nเอกสารจะถูกส่งไปที่ข้อความส่วนตัวเพื่อให้ตรวจสอบ..', mention_author=True)
-"""
-
 @bot.command()
 @commands.has_role('Node Recruiter')
 async def finance(ctx, doc_type):
@@ -1445,38 +1156,6 @@ f'''
 '''
     await ctx.author.send(f'{mention}{msg}', mention_author=True, delete_after=30)
 
-"""
-@bot.command()
-@commands.has_role('Node Recruiter')
-async def project_member(ctx):
-    await ctx.message.delete()
-    ctx_data = bot_func.get_ctx_data(ctx)
-    projects = bot_func.get_notino_db('project')
-    proj_ch_id_list = [i['discord_channel_id'] for i in projects]
-    proj_list = [i['title'] for i in projects]
-    channel_id = ctx_data['channel']['id']
-    mention = ctx_data['author']['mention']
-
-    if channel_id in proj_ch_id_list:
-        project_member = bot_func.get_notino_db('project_member')
-        project_sl = proj_list[proj_ch_id_list.index(channel_id)]
-
-        project_member = [ i for i in project_member if i['project'].lower() == project_sl.lower() ]
-        member_text_list = [
-            '{}  -  available {} week'.format(i['member'], i['hour_week']) + '\n`!add {}`\n'.format(i['member'])
-            for i in project_member
-        ]
-        msg = \
-f'''
-**Members who has interested this project**
-
-{''.join(member_text_list)}
-
-for remove member 
-typ `!remove [Name]`
-'''
-        await ctx.send(f'{mention}{msg}', mention_author=True, delete_after=180)
-"""
 
 @bot.command()
 @commands.has_role('Node Recruiter')
