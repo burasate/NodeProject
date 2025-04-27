@@ -89,10 +89,14 @@ appdata_path = os.getenv('APPDATA') if os.name == 'nt' else os.path.expanduser('
 node_project_dir = os.path.join(appdata_path, 'node_project')
 if not os.path.exists(node_project_dir):
     os.makedirs(node_project_dir)
+'''
 config_path = os.path.join(node_project_dir, 'config.json')
 if os.path.exists(config_path):
-	config = json.load(open(config_path))
-	config['info']['ssid'] = get_ssid_name()
+    with open(config_path) as f:
+        content = f.read().strip()
+        if content:
+            config = json.loads(content)
+            config['info']['ssid'] = get_ssid_name()
 else:
 	config = {
 		'info' : {
@@ -101,6 +105,7 @@ else:
 		}
 	}
 json.dump(config, open(config_path, 'w'), indent=4)
+'''
 
 """-----------------------"""
 # Discord Bot
@@ -120,11 +125,8 @@ if not os.name == 'nt': # posix
         time.sleep(10)
 
 """-----------------------"""
-# IOT Systems Opening
+# Edge Systems Opening
 """-----------------------"""
-#if not os.name == 'nt': # posix
-system_manager.dinoponique.run_ezviz_rtsp_image_capture( config['info']['ssid'] )
-
 while True:
     try:
         print(os.system('cls||clear'))
