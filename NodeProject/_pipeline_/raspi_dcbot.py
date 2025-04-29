@@ -186,12 +186,12 @@ async def print_time():
 @tasks.loop(minutes=15)
 async def on_running_status():
     channel = bot.get_channel(channel_dict['log'])
-    topic = 'Node running status'
+    find = 'woke up'
 
     messages = [i async for i in channel.history(limit=300) if i.author.bot]
     user_messages = [i async for i in channel.history(limit=300) if not i.author.bot]
     for message in messages: # clear history
-        if topic in message.content:
+        if find in message.content:
             await message.delete()
         #if 'I just woke up' in message.content:
             #await message.delete()
