@@ -694,7 +694,12 @@ class task_queue:
 			row = request_df.loc[i]
 			s_data = str(row['data']).replace('\'','\\\"')
 			print('\nGet Task  {}'.format(i+1), s_data)
-			task_queue.data = json.loads(s_data)
+			try:
+				task_queue.data = json.loads(s_data)
+			except:
+				print('cannot read JSON STRING... skip!')
+				time.sleep(5)
+				continue
 
 			if 'error' in task_queue.data:
 				task_queue.data['error'] == ''
@@ -1043,8 +1048,8 @@ if __name__ == '__main__':
 	#project.get_member_workload('Financial_test1', 'Kaofang.B71')
 
 	#register.update_member()
-	#task_queue.run(dev_mode=True)
-	print(json.dumps( task_queue.get_find('aat_main'), indent=4 ))
+	task_queue.run(dev_mode=True)
+	#print(json.dumps( task_queue.get_find('aat_main'), indent=4 ))
 	#project.update_invite()
 	#project.add_member(346164580487004171, 'Project_Test', 20)
 	pass
