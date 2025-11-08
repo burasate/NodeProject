@@ -1,94 +1,109 @@
-import json, os, pprint, sys, time, shutil, importlib, subprocess, getpass
 import datetime as dt
+import importlib
+import os
+import subprocess
+import sys
+import time
+import requests
 import random
 
-"""
-Init
-"""
+# =========================
+# Init Utils
+# =========================
+class util:
+    @staticmethod
+    def get_ssid_name():
+        os_name = os.name
+        if os_name == 'nt':  # windows
+            ssid_encode = subprocess.check_output("netsh wlan show interfaces")
+            ssid_decode = ssid_encode.decode().strip()
+            print(ssid_decode)
+            ssid_find = [i.strip() for i in ssid_decode.split('\n')]
+            ssid_find = [i for i in ssid_find if i.startswith('SSID')]
+            if ssid_find:
+                ssid = ssid_find[0].split(':')[-1].strip()
+                return ssid
+            else:
+                raise Warning('can\'t found ssid or wlan is disconnected')
+        elif os_name == 'posix':  # raspberry pi
+            ssid_encode = subprocess.check_output("iwgetid")
+            ssid_decode = ssid_encode.decode().strip()
+            print(ssid_decode)
+            ssid_find = [i.strip() for i in ssid_decode.split('\n')]
+            ssid_find = [i for i in ssid_find if 'SSID' in i]
+            if ssid_find:
+                ssid = ssid_find[0].split(':')[-1].strip().replace('\"', '')
+                return ssid
+            else:
+                raise Warning('can\'t found ssid or wlan is disconnected')
 
+    @staticmethod
+    def has_internet():
+        r = requests.get('https://google.com')
+        return r.ok
+
+#=========================
+# Init
+#=========================
 os.system('cls||clear')
 print('========\nInitialize\n========')
 
+#=========================
+# Environment
+#=========================
 base_path = os.path.dirname(os.path.abspath(__file__))
 src_path = base_path+'/src'
 site_package_path = base_path+'/src'+'/site-packages'
 project_path = os.sep.join(base_path.split(os.sep)[:-1])
 
-#Environment
+print(base_path)
+print(src_path)
+print(site_package_path)
+print(project_path)
+
 if not os.name == 'nt': #Linux
-	pass
+    pass
 else:
-	if not base_path in sys.path:
-		sys.path.insert(0, base_path)
-	if not src_path in sys.path:
-		sys.path.insert(0, src_path)
-	if not site_package_path in sys.path:
-		sys.path.insert(0, site_package_path)
+    if not base_path in sys.path:
+        sys.path.insert(0, base_path)
+    if not src_path in sys.path:
+        sys.path.insert(0, src_path)
+    if not site_package_path in sys.path:
+        sys.path.insert(0, site_package_path)
 
 for p in sys.path:
     print(p)
 
-def get_ssid_name():
-	os_name = os.name
-	if os_name == 'nt': # windows
-		ssid_encode = subprocess.check_output("netsh wlan show interfaces")
-		ssid_decode = ssid_encode.decode().strip()
-		print(ssid_decode)
-		ssid_find = [i.strip() for i in ssid_decode.split('\n')]
-		ssid_find = [i for i in ssid_find if i.startswith('SSID')]
-		if ssid_find:
-			ssid = ssid_find[0].split(':')[-1].strip()
-			return ssid
-		else:
-			raise Warning('can\'t found ssid or wlan is disconnected')
-	elif os_name == 'posix': # raspberry pi
-		ssid_encode = subprocess.check_output("iwgetid")
-		ssid_decode = ssid_encode.decode().strip()
-		print(ssid_decode)
-		ssid_find = [i.strip() for i in ssid_decode.split('\n')]
-		ssid_find = [i for i in ssid_find if 'SSID' in i]
-		if ssid_find:
-			ssid = ssid_find[0].split(':')[-1].strip().replace('\"', '')
-			return ssid
-		else:
-			raise Warning('can\'t found ssid or wlan is disconnected')
-
-"""-----------------------"""
-#Update System
-"""-----------------------"""
-if not os.name == 'nt': #Linux
-	import raspi_update
-
-"""-----------------------"""
-#Cycle System
-"""-----------------------"""
+#=========================
+# Loop system
+#=========================
 import production_manager
 import system_manager
 
-#Internet Connection
-import requests
-def has_internet():
-    try:
-        r = requests.get('https://google.com')
-    except:
-        return False
-    else:
-        return True
-
-#Internet Checking
-while not has_internet():
-    print(has_internet())
+#=========================
+# Connection
+#=========================
+has_internet = util.has_internet()
+while not has_internet:
+    has_internet = util.has_internet()
     now = str(dt.datetime.now().strftime('%Y/%m/%d %H:%M:%S'))
-    print('{}   no internet connection!'.format(now))
-    time.sleep(10)
+    print('{}   waiting for the INTERNET CONNECTION'.format(now))
+    time.sleep(random.randint(10,30))
 
-"""-----------------------"""
-# Init Config
-"""-----------------------"""
+#=========================
+# NT System Updating
+#=========================
+if not os.name == 'nt': #Linux
+    import raspi_update
+
+#=========================
+# Config
+#=========================
 appdata_path = os.getenv('APPDATA') if os.name == 'nt' else os.path.expanduser('~/.config')
 node_project_dir = os.path.join(appdata_path, 'node_project')
 if not os.path.exists(node_project_dir):
     os.makedirs(node_project_dir)
+
 '''
 config_path = os.path.join(node_project_dir, 'config.json')
 if os.path.exists(config_path):
@@ -96,20 +111,20 @@ if os.path.exists(config_path):
         content = f.read().strip()
         if content:
             config = json.loads(content)
-            config['info']['ssid'] = get_ssid_name()
+            config['info']['ssid'] = util.get_ssid_name()
 else:
-	config = {
-		'info' : {
-			'user': getpass.getuser(),
-			'ssid': get_ssid_name(),
-		}
-	}
+    config = {
+        'info' : {
+            'user': getpass.getuser(),
+            'ssid': util.get_ssid_name(),
+        }
+    }
 json.dump(config, open(config_path, 'w'), indent=4)
 '''
 
-"""-----------------------"""
-# Discord Bot
-"""-----------------------"""
+#=========================
+# Discord launcher
+#=========================
 if not os.name == 'nt': # posix
     os.system('cls||clear')
     raspi_update.update()
@@ -124,9 +139,9 @@ if not os.name == 'nt': # posix
         print(str(traceback.format_exc()))
         time.sleep(10)
 
-"""-----------------------"""
-# Edge Systems Opening
-"""-----------------------"""
+#=========================
+# Edge System Begin
+#=========================
 while True:
     try:
         print(os.system('cls||clear'))
@@ -183,7 +198,7 @@ while True:
         print('!!!! ==========================')
         print(str(traceback.format_exc()))
         print('!!!! ==========================')
-        system_manager.error.record( str(traceback.format_exc()) )
+        system_manager.error.record_log( str(traceback.format_exc()) )
     finally:
         print('Ending of Process')
         time.sleep(120)
