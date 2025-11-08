@@ -183,7 +183,26 @@ class data:
 
 class error:
     file_path = rec_dir + '/main_traceback.csv'
+    log_path = os.path.sep.join(rec_dir, 'error_log.txt')
 
+    def record_log(text):
+        timestamp = dt.datetime.now().strftime('%m-%d-%Y %H:%M:%S')
+        log_line = f"[{timestamp}]   {text}\n"
+
+        # Read existing lines if file exists
+        lines = []
+        if os.path.exists(log_path):
+            with open(log_path, 'r', encoding='utf-8') as f:
+                lines = f.readlines()
+
+        # Keep only last 99 lines + new one
+        lines = lines[-99:] + [log_line]
+
+        # Write back
+        with open(log_path, 'w', encoding='utf-8') as f:
+            f.writelines(lines)
+
+    '''
     @staticmethod
     def record(text):
         try:
@@ -201,6 +220,7 @@ class error:
             df.to_csv(error.file_path, index=False)
         except:
             pass
+    '''
 
     @staticmethod
     def get_nortify(clear_after = True):
