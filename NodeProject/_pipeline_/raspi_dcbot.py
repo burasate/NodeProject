@@ -1098,6 +1098,7 @@ Please fill out the information for issuing financial documents.
     embed = discord.Embed(title=f'''{project_sl['title']} - {doc_type.capitalize()}''', url=form_url,
                           description='with Node Flow Account', color=0xfcba03)
     await ctx.author.send(msg, embed=embed)
+    await ctx.message.delete(delay=10)
 
     """
     freelance_role = [i for i in ctx_data['guild']['roles'] if i['name'] == 'Node Freelancer'][0]
