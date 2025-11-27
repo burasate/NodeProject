@@ -205,7 +205,7 @@ async def on_running_status():
 OS : {2}
 Python Ver : {3}
 Discord Ver : {4}`
-'''.format(topic, dt.datetime.now().__str__(), os.name, sys.version, discord.__version__)
+'''.format('Node running status', dt.datetime.now().__str__(), os.name, sys.version, discord.__version__)
     await channel.send(msg)
     del channel
 
