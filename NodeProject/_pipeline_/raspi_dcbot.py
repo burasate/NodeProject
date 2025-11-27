@@ -183,15 +183,14 @@ async def on_ready():
 async def print_time():
     print(f'\n==========[     {dt.datetime.now()}     ]==========\n')
 
-@tasks.loop(minutes=15)
+@tasks.loop(minutes=60)
 async def on_running_status():
     channel = bot.get_channel(channel_dict['log'])
-    find = 'woke up'
 
     messages = [i async for i in channel.history(limit=300) if i.author.bot]
     user_messages = [i async for i in channel.history(limit=300) if not i.author.bot]
     for message in messages: # clear history
-        if find in message.content:
+        if 'Node running status' in message.content:
             await message.delete()
         #if 'I just woke up' in message.content:
             #await message.delete()
@@ -207,7 +206,6 @@ Python Ver : {3}
 Discord Ver : {4}`
 '''.format('Node running status', dt.datetime.now().__str__(), os.name, sys.version, discord.__version__)
     await channel.send(msg)
-    del channel
 
 @tasks.loop(minutes=10)
 async def role_update():
