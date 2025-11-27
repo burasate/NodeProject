@@ -192,8 +192,6 @@ async def on_running_status():
     for message in messages: # clear history
         if 'Node running status' in message.content:
             await message.delete()
-        #if 'I just woke up' in message.content:
-            #await message.delete()
     for message in user_messages: # clear user message
         await message.delete()
 
