@@ -224,7 +224,7 @@ class finance:
 						)
 						time.sleep(2)
 
-
+			pprint.pprint(finance_config)
 			pdf_url = [i for i in finance_config
 					   if i['property_name'] == f'''{data_new['document_type']}_pdf_url'''
 					   ][0]['property_value']
