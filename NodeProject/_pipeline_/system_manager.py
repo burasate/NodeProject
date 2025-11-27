@@ -180,7 +180,7 @@ class data:
         hist_file_list = sorted([ i for i in os.listdir(hist_dir_path) if name_no_ext in i ])
         hist_path_list = [os.path.join(hist_dir_path, i) for i in hist_file_list]
         return hist_path_list
-
+'''
 class error:
     file_path = rec_dir + '/main_traceback.csv'
     log_path = os.path.sep.join(rec_dir, 'error_log.txt')
@@ -200,6 +200,25 @@ class error:
 
         # Write back
         with open(log_path, 'w', encoding='utf-8') as f:
+            f.writelines(lines)
+'''
+
+class error:
+    log_path = os.path.join(rec_dir, "error_log.txt")
+
+    @staticmethod
+    def record_log(text):
+        timestamp = dt.datetime.now().strftime('%m-%d-%Y %H:%M:%S')
+        log_line = f"[{timestamp}]   {text}\n"
+
+        lines = []
+        if os.path.exists(error.log_path):
+            with open(error.log_path, 'r', encoding='utf-8') as f:
+                lines = f.readlines()
+
+        lines = lines[-99:] + [log_line]
+
+        with open(error.log_path, 'w', encoding='utf-8') as f:
             f.writelines(lines)
 
     '''
