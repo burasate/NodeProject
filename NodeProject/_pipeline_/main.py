@@ -147,7 +147,7 @@ while True:
         print(os.system('cls||clear'))
         dateTime = dt.datetime.now().strftime('%Y/%m/%d %H:%M:%S')
         print(dateTime)
-        while not has_internet():
+        while not has_internet:
             os.system('cls||clear')
             print(' - no internet connection!')
             time.sleep(30)
