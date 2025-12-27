@@ -276,6 +276,7 @@ class finance:
 			notionDatabase.updatePageProperty(new_page['id'], 'project_name',
 											  [data_new['project_id']])
 
+
 	def get_document_review(): # For project owner recieving the doc
 		doc_data = gSheet.getAllDataS('Document')
 		#pprint.pprint(doc_data)
