@@ -276,12 +276,11 @@ class finance:
 			notionDatabase.updatePageProperty(new_page['id'], 'project_name',
 											  [data_new['project_id']])
 
-	def get_document_review():
+	def get_document_review(): # For project owner recieving the doc
 		doc_data = gSheet.getAllDataS('Document')
 		#pprint.pprint(doc_data)
 		r_data = []
 		for data in doc_data:
-			print(data['request_count'])
 			data['request_count'] = int(bool(data['request_count']))
 			if not data['document_type'] == 'financial':
 				continue
@@ -290,7 +289,6 @@ class finance:
 				gSheet.setValue('Document', findKey='Timestamp', findValue=data['Timestamp'],
 								key='request_count', value=data['request_count'])
 				r_data.append(data)
-
 		return r_data
 
 # Member System
