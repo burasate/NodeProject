@@ -585,19 +585,18 @@ Please sign {doc_type} and send back to the link below message.
 async def dm_finance_review():
     members = bot_func.get_guild().members
     r_data = production_manager.finance.get_document_review()
-    pprint.pprint(r_data)
     if not r_data:
         return
 
     project_rec = bot_func.get_notino_db('project')
-    pprint.pprint(project_rec)
+    #pprint.pprint(project_rec)
 
     for data in r_data:
         project_sl = [ i for i in project_rec if i['page_id'] == data['project_nt_ref'] ][0]
-        pprint.pprint(project_sl)
+        #pprint.pprint(project_sl)
         recruiter_name = project_sl['recruiter_name']
         recruiter_discord_id = int(project_sl['recruiter_discord_id'])
-        print(recruiter_discord_id, type(recruiter_discord_id))
+        #print(recruiter_discord_id, type(recruiter_discord_id))
         member = [i for i in members if (i.nick == recruiter_name) or (str(i.id) == str(recruiter_discord_id))][0]
         print('sending review message to {}'.format(member))
 

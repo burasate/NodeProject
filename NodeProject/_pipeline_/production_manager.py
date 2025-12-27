@@ -224,7 +224,7 @@ class finance:
 						)
 						time.sleep(2)
 
-			pprint.pprint(finance_config)
+			#pprint.pprint(finance_config)
 			doc_type = data_new['document_type']
 			pdf_url = [i for i in finance_config if i['property_name'] == f"{doc_type}_pdf_url_th"]
 			assert len(pdf_url) == 1
@@ -239,15 +239,14 @@ class finance:
 			pdf_path = project_dir + '/{}_{}.pdf'.format(member_sl['page_id'], data_new['document_type'])
 			with open(pdf_path, 'wb') as f:
 				f.write(res.content)
-				print('pdf exprted {}'.format(os.path.basename(pdf_path)))
+				print('\npdf exported {}\n'.format(os.path.basename(pdf_path)))
 
 			#'''
-			if data['request_count'] != 1:
+			if os.path.exists(pdf_path):
+				time.sleep(2)
 				gSheet.setValue('FlowAccount', findKey='Timestamp', findValue=data['Timestamp'],
 								key='request_count', value=1)
-			elif data['request_count'] <= 1:
-				continue
-			#'''
+				time.sleep(2)
 
 			#Update Financial Data
 			dst_db_id = [i['id'] for i in notionDatabase.database if i['name'] == 'project_finance'][0]
@@ -255,7 +254,7 @@ class finance:
 			#pprint.pprint(db_data['results'])
 			id_list = [i['id'] for i in db_data['results']]
 			title_list = []
-			print('reading title name')
+			print('reading title name..')
 			for page_id in [i['id'] for i in db_data['results']]:
 				title = notionDatabase.getPageProperty(page_id, 'title')['results'][0]['title']['text']['content']
 				title_list.append(title)
