@@ -19,7 +19,6 @@ if '3.7' in str(sys.version):
 			sys.path.insert(0, p)
 			print(sys.path[0])
 
-print(base_dir)
 import config
 
 #---------------------------------------------------------------------------------

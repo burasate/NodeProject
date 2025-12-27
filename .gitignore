@@ -189,5 +189,6 @@ gDrive/
 *.mp3
 *.otf
 cache/
+src/
 myLinkedin/
 *config.py

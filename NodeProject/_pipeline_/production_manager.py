@@ -282,18 +282,14 @@ class finance:
 		#pprint.pprint(doc_data)
 		r_data = []
 		for data in doc_data:
-			if data['request_count'] == '':
-				data['request_count'] = 0
+			data['request_count'] = int(bool(data['request_count']))
 			if not data['document_type'] == 'financial':
 				continue
-			if data['request_count'] > 0:
-				continue
-
-			#print(data)
-			data['request_count'] += 1
-			gSheet.setValue('Document', findKey='Timestamp', findValue=data['Timestamp'],
-							key='request_count', value=data['request_count'])
-			r_data.append(data)
+			if data['request_count'] < 1:
+				data['request_count'] += 1
+				gSheet.setValue('Document', findKey='Timestamp', findValue=data['Timestamp'],
+								key='request_count', value=data['request_count'])
+				r_data.append(data)
 
 		return r_data
 
