@@ -282,6 +282,7 @@ class finance:
 		#pprint.pprint(doc_data)
 		r_data = []
 		for data in doc_data:
+			print(data['request_count'])
 			data['request_count'] = int(bool(data['request_count']))
 			if not data['document_type'] == 'financial':
 				continue
