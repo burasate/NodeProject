@@ -183,15 +183,18 @@ async def on_ready():
 async def print_time():
     print(f'\n==========[     {dt.datetime.now()}     ]==========\n')
 
-@tasks.loop(minutes=60)
+@tasks.loop(minutes=15)
 async def on_running_status():
     channel = bot.get_channel(channel_dict['log'])
+    find = 'woke up'
 
     messages = [i async for i in channel.history(limit=300) if i.author.bot]
     user_messages = [i async for i in channel.history(limit=300) if not i.author.bot]
     for message in messages: # clear history
-        if 'Node running status' in message.content:
+        if find in message.content:
             await message.delete()
+        #if 'I just woke up' in message.content:
+            #await message.delete()
     for message in user_messages: # clear user message
         await message.delete()
 
@@ -202,8 +205,9 @@ async def on_running_status():
 OS : {2}
 Python Ver : {3}
 Discord Ver : {4}`
-'''.format('Node running status', dt.datetime.now().__str__(), os.name, sys.version, discord.__version__)
+'''.format(topic, dt.datetime.now().__str__(), os.name, sys.version, discord.__version__)
     await channel.send(msg)
+    del channel
 
 @tasks.loop(minutes=10)
 async def role_update():
@@ -585,10 +589,8 @@ Please sign {doc_type} and send back to the link below message.
 async def dm_finance_review():
     members = bot_func.get_guild().members
     r_data = production_manager.finance.get_document_review()
-    if not r_data:
-        return
-
     project_rec = bot_func.get_notino_db('project')
+    #print(r_data)
     #pprint.pprint(project_rec)
 
     for data in r_data:
@@ -1096,7 +1098,6 @@ Please fill out the information for issuing financial documents.
     embed = discord.Embed(title=f'''{project_sl['title']} - {doc_type.capitalize()}''', url=form_url,
                           description='with Node Flow Account', color=0xfcba03)
     await ctx.author.send(msg, embed=embed)
-    await ctx.message.delete(delay=10)
 
     """
     freelance_role = [i for i in ctx_data['guild']['roles'] if i['name'] == 'Node Freelancer'][0]
