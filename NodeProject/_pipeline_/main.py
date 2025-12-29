@@ -117,8 +117,16 @@ if not os.name == 'nt': # posix
     try:
         print('Open {}'.format(os.path.basename(dcbot_path)))
         time.sleep(1.5)
-        subprocess.call( ['lxterminal', '-t', 'Discord Node', '-e','python3 {}'.format(dcbot_path)] ) #python 3.7
-        #subprocess.call( ['lxterminal', '-t', 'Discord Node', '-e','python3.10 {}'.format(dcbot_path)] ) #python 3.10
+
+        venv_path = os.path.expanduser('~/.env/bin/activate')
+        if os.path.exists(venv_path):
+            cmd = f'source {venv_path} && python3 {dcbot_path}'
+        else:
+            cmd = f'python3 {dcbot_path}'
+
+        subprocess.call([
+            'lxterminal', '--title=Node Discord', '-e', 'bash', '-c',cmd
+        ])
     except Exception as e:
         import traceback
         print(str(traceback.format_exc()))
