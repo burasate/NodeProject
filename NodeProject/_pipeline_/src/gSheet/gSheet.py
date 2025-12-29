@@ -6,7 +6,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 
 rootPath = os.path.dirname(os.path.abspath(__file__))
 dataPath = os.path.join(rootPath, 'data')
-jsonKeyPath = os.path.join(dataPath, '899435123a5b_production.json')
+jsonKeyPath = os.path.join(dataPath, 'gSheet.json')
 sheetName = 'Node Project Integration'
 
 
