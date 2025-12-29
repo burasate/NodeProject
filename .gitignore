@@ -194,4 +194,5 @@ myLinkedin/
 *config.py
 
 # Keep
-!src/gSheet/gSheet.py
+!src/*/gSheet.py
+!src/*/notionDatabase.py

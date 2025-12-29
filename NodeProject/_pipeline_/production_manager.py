@@ -224,12 +224,11 @@ class finance:
 						)
 						time.sleep(2)
 
-			#pprint.pprint(finance_config)
-			doc_type = data_new['document_type']
-			pdf_url = [i for i in finance_config if i['property_name'] == f"{doc_type}_pdf_url_th"]
-			assert len(pdf_url) == 1
-			pdf_url = pdf_url[0]['property_value']
-			print(pdf_url)
+
+			pdf_url = [i for i in finance_config
+					   if i['property_name'] == f'''{data_new['document_type']}_pdf_url'''
+					   ][0]['property_value']
+			#print(pdf_url)
 
 			#Save file
 			res = requests.get(pdf_url)
@@ -239,14 +238,15 @@ class finance:
 			pdf_path = project_dir + '/{}_{}.pdf'.format(member_sl['page_id'], data_new['document_type'])
 			with open(pdf_path, 'wb') as f:
 				f.write(res.content)
-				print('\npdf exported {}\n'.format(os.path.basename(pdf_path)))
+				print('pdf exprted {}'.format(os.path.basename(pdf_path)))
 
 			#'''
-			if os.path.exists(pdf_path):
-				time.sleep(2)
+			if data['request_count'] != 1:
 				gSheet.setValue('FlowAccount', findKey='Timestamp', findValue=data['Timestamp'],
 								key='request_count', value=1)
-				time.sleep(2)
+			elif data['request_count'] <= 1:
+				continue
+			#'''
 
 			#Update Financial Data
 			dst_db_id = [i['id'] for i in notionDatabase.database if i['name'] == 'project_finance'][0]
@@ -254,7 +254,7 @@ class finance:
 			#pprint.pprint(db_data['results'])
 			id_list = [i['id'] for i in db_data['results']]
 			title_list = []
-			print('reading title name..')
+			print('reading title name')
 			for page_id in [i['id'] for i in db_data['results']]:
 				title = notionDatabase.getPageProperty(page_id, 'title')['results'][0]['title']['text']['content']
 				title_list.append(title)
@@ -276,20 +276,24 @@ class finance:
 			notionDatabase.updatePageProperty(new_page['id'], 'project_name',
 											  [data_new['project_id']])
 
-
-	def get_document_review(): # For project owner recieving the doc
+	def get_document_review():
 		doc_data = gSheet.getAllDataS('Document')
 		#pprint.pprint(doc_data)
 		r_data = []
 		for data in doc_data:
-			data['request_count'] = int(bool(data['request_count']))
+			if data['request_count'] == '':
+				data['request_count'] = 0
 			if not data['document_type'] == 'financial':
 				continue
-			if data['request_count'] < 1:
-				data['request_count'] += 1
-				gSheet.setValue('Document', findKey='Timestamp', findValue=data['Timestamp'],
-								key='request_count', value=data['request_count'])
-				r_data.append(data)
+			if data['request_count'] > 0:
+				continue
+
+			#print(data)
+			data['request_count'] += 1
+			gSheet.setValue('Document', findKey='Timestamp', findValue=data['Timestamp'],
+							key='request_count', value=data['request_count'])
+			r_data.append(data)
+
 		return r_data
 
 # Member System
@@ -683,43 +687,31 @@ class task_queue:
 		request_json = json.load(open(request_path))
 		request_df = pd.DataFrame().from_records(request_json)
 		request_df.sort_values(by=['date_time'], ascending=[True], inplace=True)
-		request_df['is_duplicated'] = (request_df.groupby(['name', 'data'])['name'].transform('count') > 1).astype(int)
+		request_df['is_duplicated'] = (request_df.groupby('name')['name'].transform('count') > 1).astype(int)
 		request_df['is_latest'] = (request_df.groupby('name')['date_time'].transform('max') == request_df['date_time']).astype(int)
 
 		for i in request_df.index.tolist():
 			row = request_df.loc[i]
 			s_data = str(row['data']).replace('\'','\\\"')
-			print('\nGet Task  {}'.format(i+1), s_data[:50] + '....')
-			try:
-				task_queue.data = json.loads(s_data)
-			except:
-				print('cannot read JSON STRING... skip!')
-				time.sleep(5)
-				continue
+			print('\nGet Task  {}'.format(i+1), s_data)
+			task_queue.data = json.loads(s_data)
 
 			if 'error' in task_queue.data:
 				task_queue.data['error'] == ''
 
 			clear = False
-
 			if not row['name'] in [i['task_name'] for i in task_queue.func_rec]: # not action task
-				if str(row['data']) == '{}': # delete none data
-					gSheet.deleteRow(request_sheet, 'date_time', row['date_time'])
-					time.sleep(5.0)
-
 				if bool(row['is_duplicated']) and not bool(row['is_latest']) and dev_mode: # delete duplicated unwant
 					gSheet.deleteRow(request_sheet, 'date_time', row['date_time'])
-					time.sleep(4.0)
+					time.sleep(3.5)
 					continue
-
-				continue  # pass no action
-
-			# If found action tasks
+				else:
+					continue
 			func_idx = [i['task_name'] for i in task_queue.func_rec].index(row['name'])
+
 			try:
 				#Data
-				print('Get Action Task Data  ', json.dumps(task_queue.data, indent=4))
-				print('------------\n')
+				print('Get Data  ', task_queue.data)
 
 				#Excute
 				task_queue.func_rec[func_idx]['task_func']()
@@ -1051,8 +1043,8 @@ if __name__ == '__main__':
 	#project.get_member_workload('Financial_test1', 'Kaofang.B71')
 
 	#register.update_member()
-	task_queue.run(dev_mode=True)
-	#print(json.dumps( task_queue.get_find('aat_main'), indent=4 ))
+	#task_queue.run(dev_mode=True)
+	print(json.dumps( task_queue.get_find('aat_main'), indent=4 ))
 	#project.update_invite()
 	#project.add_member(346164580487004171, 'Project_Test', 20)
 	pass
