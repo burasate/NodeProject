@@ -190,5 +190,7 @@ gDrive/
 *.otf
 cache/
 src/*/*.py
+src/*.py
+src/
 myLinkedin/
 *config.py
