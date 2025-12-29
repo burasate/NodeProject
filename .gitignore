@@ -189,8 +189,9 @@ gDrive/
 *.mp3
 *.otf
 cache/
-src/*/*.py
-src/*.py
 src/
 myLinkedin/
 *config.py
+
+# Keep
+!src/gSheet/gSheet.py
