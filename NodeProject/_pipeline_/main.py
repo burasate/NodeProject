@@ -123,10 +123,12 @@ if not os.name == 'nt': # posix
             cmd = f'source {venv_path} && python3 {dcbot_path}'
         else:
             cmd = f'python3 {dcbot_path}'
+        cmd = f'echo -ne "\\033]0;Node Discord\\007"; {cmd}'
 
         subprocess.call([
-            'lxterminal', '--title=Node Discord', '-e', 'bash', '-c',cmd
+            'lxterminal', '-e', 'bash', '-c',cmd
         ])
+
     except Exception as e:
         import traceback
         print(str(traceback.format_exc()))

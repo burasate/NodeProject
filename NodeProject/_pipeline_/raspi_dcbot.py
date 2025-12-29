@@ -199,13 +199,13 @@ async def on_running_status():
         await message.delete()
 
     msg = '''
-**{0}**
+**Node running status**
 `Node was running at {1}
 
 OS : {2}
 Python Ver : {3}
 Discord Ver : {4}`
-'''.format(topic, dt.datetime.now().__str__(), os.name, sys.version, discord.__version__)
+'''.format(dt.datetime.now().__str__(), os.name, sys.version, discord.__version__)
     await channel.send(msg)
     del channel
 
@@ -339,7 +339,7 @@ async def project_channel_update():
             is_active = False
             continue
         last_meesage = last_meesage_list[0]
-        inactive_days = (dt.datetime.now() - last_meesage.created_at).days
+        inactive_days = (dt.datetime.now(dt.timezone.utc) - last_meesage.created_at).days
         #print(inactive_days, v_channel_timeout_days)
         if inactive_days > v_channel_timeout_days:
             is_active = False
@@ -629,7 +629,8 @@ async def auto_clear_all_dm_message():
     for message in all_direct_messages:
         #print('delete',message.created_at,message)
         create_at = message.created_at
-        days = (dt.datetime.now() - create_at).days
+        now = dt.datetime.now(dt.timezone.utc)
+        days = (now - create_at).days
         #print(create_at, days)
         if days >= 45:
             await message.delete()
