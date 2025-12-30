@@ -114,6 +114,7 @@ class bot_func:
 
         return data
 
+    @staticmethod
     def get_guild():
         guild = [bot.guilds[i] for i in range(len(bot.guilds)) if str(bot.guilds[i].id) == sever_id][0]
         return guild
@@ -200,11 +201,11 @@ async def on_running_status():
 
     msg = '''
 **Node running status**
-`Node was running at {1}
+`Node was running at {0}
 
-OS : {2}
-Python Ver : {3}
-Discord Ver : {4}`
+OS : {1}
+Python Ver : {2}
+Discord Ver : {3}`
 '''.format(dt.datetime.now().__str__(), os.name, sys.version, discord.__version__)
     await channel.send(msg)
     del channel
@@ -659,7 +660,8 @@ async def members_stat_record():
 
     for message in message_list:
         create_at = message.created_at
-        days = (dt.datetime.now() - create_at).days
+        now = dt.datetime.now(dt.timezone.utc)
+        days = (now - create_at).days
         if days > 1 or message.author.bot:
             continue
         df_msg = df_msg.append([{
