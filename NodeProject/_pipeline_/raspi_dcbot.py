@@ -724,7 +724,7 @@ async def members_stat_report():
             pd.read_csv(f)
         except:
             continue
-        df = df.append(pd.read_csv(f))
+        df = df._append(pd.read_csv(f))
     #print(df.head(5))
     #print(df.tail(5))
 
