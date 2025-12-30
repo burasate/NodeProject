@@ -664,7 +664,7 @@ async def members_stat_record():
         days = (now - create_at).days
         if days > 1 or message.author.bot:
             continue
-        df_msg = df_msg.append([{
+        df_msg = df_msg._append([{
             'create_at' : create_at,
             'iso_weekday' : create_at.isoweekday(),
             'hour' : create_at.hour,
@@ -679,7 +679,7 @@ async def members_stat_record():
     df_mb = pd.DataFrame()
     for member in members:
         now = dt.datetime.now()
-        df_mb = df_mb.append([{
+        df_mb = df_mb._append([{
             'date_time' : now,
             'iso_weekday': now.isoweekday(),
             'hour': now.hour,
