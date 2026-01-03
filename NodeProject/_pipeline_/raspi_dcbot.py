@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import os, csv, os, json, time, pprint, sys, shutil, random
+import os, csv, os, json, time, pprint, sys, shutil, random, traceback
 """
 https://discordpy.readthedocs.io/en/stable/api.html
 https://autocode.com/tools/discord/embed-builder/
@@ -34,6 +34,7 @@ from gSheet import gSheet
 gSheet.sheetName = 'Node Project Integration'
 import system_manager
 import production_manager
+import dcbot_utils as utils
 
 config_file_name = os.path.basename(os.path.abspath(__file__)).replace('.py','.json')
 with open(base_path + '/' + config_file_name) as config_f:
@@ -149,6 +150,14 @@ class bot_func:
         result = data_new[row_name_list.index('input_output')]['target_language']
         #print(result)
         return result
+
+    @staticmethod
+    def get_thread_from_message(message: discord.Message) -> discord.Thread | None:
+        if message.thread:
+            return message.thread
+        if isinstance(message.channel, discord.Thread):
+            return message.channel
+        return None
 
 """---------------------------------"""
 # Discord Start
@@ -1208,68 +1217,107 @@ async def remove(ctx, member_name):
 """---------------------------------"""
 @bot.event
 async def on_message(message):
-    if not message.guild == bot_func.get_guild():
-        return None
-
-    member_name = message.author.display_name
-
-    #Image attachment outside from project channel -------------------------------------
     is_bot_self = message.author == bot.user
-    is_attachment = message.attachments != []
-    is_project_channel = 'proj-' in message.channel.name
-    media_ext_list = ['jpg', 'jpeg', 'png', 'gif', 'mov', 'mp4']
-    print(message)
-    #print(message.channel.name)
-    #print(is_attachment and is_project_channel)
-    if not is_project_channel and is_attachment and not is_bot_self:
-        attach_sl = (message.attachments)[0]
-        is_media = attach_sl.url.split('.')[-1] in media_ext_list
-        if is_media:
-            log_text = f'Found member \"{member_name}\" shared media outside project (\"{message.channel.name}\").'
-            log_channel = bot.get_channel(channel_dict['log'])
-            await log_channel.send(log_text)
+    if is_bot_self:
+        return
+    #print(json.dumps(dir(message), indent=4))
 
-            dm_text = f'**This message was sent to you**\nbecause you just shared some media outside ' \
-                      f'(\"{message.channel.name}\") that isn\'t a project channel \nand might be ' \
-                      f'risked to confidentiality of project\nplease re-check it again.'
-            await message.author.send(dm_text)
-            await log_channel.send('sent dm message to member already.')
+    if not message.guild and message.channel: # On DM
+        print(f"DM message from {message.author}\n{message.content}")
+        await message.add_reaction("📝")
 
-    # No Command -------------------------------------
-    if message.content.startswith('! ') or message.content.startswith('/ '):
-        msg = 'Please ensure use ! exclamation mark and command without whitespace.'
-        channel = bot.get_channel(message.channel.id)
-        await channel.send(msg)
+    if message.guild == bot_func.get_guild(): # On PROJECT NODE Server
+        member_name = message.author.display_name
 
-    #TEST EMBED
-    if message.content.startswith('!embed'):
-        embed = discord.Embed(title="Links", description="Here are 3 links:")
-        # Customization for Link 1
-        embed.add_field(name="🌐 Link 1", value="https://www.example.com", inline=False)
-        # Customization for Link 2
-        embed.add_field(name="Link 2", value="https://www.google.com", inline=True)
-        # Customization for Link 3
-        embed.add_field(name="🎉 Link 3", value="https://www.discord.com", inline=False)
-        embed.set_image(url="https://i.imgur.com/fYk81j1.png")
+        #Image attachment outside from project channel -------------------------------------
+        is_attachment = message.attachments != []
+        is_project_channel = 'proj-' in message.channel.name
+        media_ext_list = ['jpg', 'jpeg', 'png', 'gif', 'mov', 'mp4']
+        #print(message)
+        #print(message.channel.name)
+        #print(is_attachment and is_project_channel)
+        if not is_project_channel and is_attachment and not is_bot_self:
+            attach_sl = (message.attachments)[0]
+            is_media = attach_sl.url.split('.')[-1] in media_ext_list
+            if is_media:
+                log_text = f'Found member \"{member_name}\" shared media outside project (\"{message.channel.name}\").'
+                log_channel = bot.get_channel(channel_dict['log'])
+                await log_channel.send(log_text)
 
-        # Additional customization for the embed
-        embed.set_footer(text="Thanks for using our bot!", icon_url="https://i.imgur.com/1Fp6hK5.png")
-        embed.set_thumbnail(url="https://i.imgur.com/fYk81j1.png")
+                dm_text = f'**This message was sent to you**\nbecause you just shared some media outside ' \
+                          f'(\"{message.channel.name}\") that isn\'t a project channel \nand might be ' \
+                          f'risked to confidentiality of project\nplease re-check it again.'
+                await message.author.send(dm_text)
+                await log_channel.send('sent dm message to member already.')
 
-        await message.channel.send(embed=embed)
+        # No Command -------------------------------------
+        if message.content.startswith('! ') or message.content.startswith('/ '):
+            msg = 'Please ensure use ! exclamation mark and command without whitespace.'
+            channel = bot.get_channel(message.channel.id)
+            await channel.send(msg)
 
-    # Accept Command
-    await bot.process_commands(message)
+        #TEST EMBED
+        if message.content.startswith('!embed'):
+            embed = discord.Embed(title="Links", description="Here are 3 links:")
+            # Customization for Link 1
+            embed.add_field(name="🌐 Link 1", value="https://www.example.com", inline=False)
+            # Customization for Link 2
+            embed.add_field(name="Link 2", value="https://www.google.com", inline=True)
+            # Customization for Link 3
+            embed.add_field(name="🎉 Link 3", value="https://www.discord.com", inline=False)
+            embed.set_image(url="https://i.imgur.com/fYk81j1.png")
 
+            # Additional customization for the embed
+            embed.set_footer(text="Thanks for using our bot!", icon_url="https://i.imgur.com/1Fp6hK5.png")
+            embed.set_thumbnail(url="https://i.imgur.com/fYk81j1.png")
+
+            await message.channel.send(embed=embed)
+
+        # Accept Command
+        await bot.process_commands(message)
+
+    gpt_name = 'gpt' if os.name == 'nt' else 'gpt2'
+    if message.guild != bot_func.get_guild() and gpt_name in str(message.channel).lower():  # ChatGPT On Any Severs
+        chatgpt = utils.chatgpt()
+        thread = bot_func.get_thread_from_message(message)
+        if not thread:
+            import uuid
+            thread = await message.create_thread(name=f'{gpt_name}-{uuid.uuid4()}', auto_archive_duration=60)
+            await asyncio.sleep(5)
+
+        async with thread.typing():
+            input_messages = [chatgpt.system_dict.get('general'),]
+            async for m in thread.history(limit=10, oldest_first=True):
+                if not m.content:
+                    continue
+
+                if m.author.bot:
+                    input_messages += [{'role': 'assistant', 'content': m.content}]
+                else:
+                    input_messages += [{'role': 'user', 'content': m.content}]
+
+            latest_message = {"role": "user", "content": message.content}
+            if not latest_message in input_messages:
+                input_messages += [latest_message]
+
+            resp = chatgpt.chat(messages=input_messages, max_tokens=150)
+            reply_msg = resp.choices[0].message.content
+            await thread.send(f"```{reply_msg}```")
 
 """---------------------------------"""
 # Run
 """---------------------------------"""
 loaded = [i.split(':')[0] for i in sys.modules]
+'''
 for dp in [src_path + os.sep + i for i in os.listdir(src_path + os.sep + 'site-packages_3.10')]:
     #print(dp)
     bname = os.path.basename(dp)
     if '.' in bname: continue
     if not bname in loaded:
         print(bname, bname in loaded)
-bot.run(token)
+'''
+try:
+    bot.run(token)
+except:
+    traceback.print_exc()
+    time.sleep(30)

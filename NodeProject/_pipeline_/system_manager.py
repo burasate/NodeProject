@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import json,os,pprint,sys,time,shutil
 import datetime as dt
+from typing import Any, Callable, Dict, Generator, List, Optional, Union
 
 """
 Init
@@ -216,6 +217,197 @@ class error:
             return rec
         else:
             return []
+
+from openai import OpenAI, OpenAIError
+class chatgpt_client:
+    """
+    Lightweight wrapper around the modern OpenAI Python client for chat completions.
+    - Uses environment variable OPENAI_API_KEY by default.
+    - Uses client.chat.completions.create(...) (structured Chat Completions object).
+    """
+
+    def __init__(
+            self,
+            api_key: Optional[str] = None,
+            model: str = "gpt-4o-mini",
+            client_kwargs: Optional[Dict[str, Any]] = None,
+    ):
+        """
+        api_key: explicit API key or None to read from OPENAI_API_KEY
+        model: default model id to use
+        client_kwargs: any other kwargs to pass to OpenAI(...) constructor (e.g. base_url, timeout)
+        """
+        client_kwargs = client_kwargs.copy() if client_kwargs else {}
+        resolved_key = api_key or os.getenv("OPENAI_API_KEY")
+        if resolved_key:
+            # pass api_key into the client constructor if provided
+            client_kwargs.setdefault("api_key", resolved_key)
+        self.client = OpenAI(**client_kwargs)
+        self.model = model
+
+    def _build_payload(
+            self,
+            messages: List[Dict[str, str]],
+            *,
+            temperature: Optional[float] = None,
+            max_tokens: Optional[int] = None,
+            top_p: Optional[float] = None,
+            n: Optional[int] = None,
+            presence_penalty: Optional[float] = None,
+            frequency_penalty: Optional[float] = None,
+            functions: Optional[List[Dict[str, Any]]] = None,
+            function_call: Optional[Union[str, Dict[str, Any]]] = None,
+            stop: Optional[Union[str, List[str]]] = None,
+            **extra,
+    ) -> Dict[str, Any]:
+        payload: Dict[str, Any] = {"model": self.model, "messages": messages}
+        if temperature is not None:
+            payload["temperature"] = temperature
+        if max_tokens is not None:
+            payload["max_tokens"] = max_tokens
+        if top_p is not None:
+            payload["top_p"] = top_p
+        if n is not None:
+            payload["n"] = n
+        if presence_penalty is not None:
+            payload["presence_penalty"] = presence_penalty
+        if frequency_penalty is not None:
+            payload["frequency_penalty"] = frequency_penalty
+        if functions is not None:
+            payload["functions"] = functions
+        if function_call is not None:
+            payload["function_call"] = function_call
+        if stop is not None:
+            payload["stop"] = stop
+        payload.update(extra)
+        return payload
+
+    def chat(
+            self,
+            messages: List[Dict[str, str]],
+            *,
+            temperature: Optional[float] = None,
+            max_tokens: Optional[int] = None,
+            stream: bool = False,
+            chunk_callback: Optional[Callable[[str], None]] = None,
+            retry: int = 1,
+            retry_backoff: float = 1.0,
+            **kwargs,
+    ) -> Union[str, Dict[str, Any], Generator[str, None, None]]:
+        """
+        Send messages to the Chat Completions API.
+
+        messages: list of {"role": "system|user|assistant", "content": "..."}
+        stream: if True, returns a generator yielding text chunks as they're received.
+                If chunk_callback is provided, it's called for every chunk as well.
+        retry: number of attempts (>=1)
+        retry_backoff: seconds to wait between retries (multiplied each retry attempt)
+
+        Returns:
+          - If stream=False: returns the assistant text (str) by default. If you need full response object, pass raw=True as a kwarg.
+          - If stream=True: returns a generator that yields text chunks (strings).
+        """
+        attempts = 0
+        last_exc = None
+        raw = kwargs.pop("raw", False)
+
+        while attempts < retry:
+            try:
+                payload = self._build_payload(messages, temperature=temperature, max_tokens=max_tokens,
+                                              **kwargs)
+                if stream:
+                    # streaming generator
+                    response_iter = self.client.chat.completions.stream(**payload)
+
+                    def _generator() -> Generator[str, None, None]:
+                        collected = ""
+                        for chunk in response_iter:
+                            # The structured streaming chunk shape may vary by SDK version:
+                            # Some chunks include {'choices':[{'delta':{'content': '...'}}], ...}
+                            # Fall back defensively.
+                            try:
+                                choices = getattr(chunk, "choices", None) or chunk.get("choices",
+                                                                                       None)  # type: ignore
+                            except Exception:
+                                choices = None
+                            delta_text = ""
+                            if choices:
+                                # iterate all choices and collect content fragments
+                                for c in choices:
+                                    delta = c.get("delta") if isinstance(c, dict) else getattr(c, "delta", None)
+                                    if delta:
+                                        part = delta.get("content") if isinstance(delta, dict) else getattr(
+                                            delta, "content", None)
+                                        if part:
+                                            delta_text += part
+                            # fallback: some SDKs stream plain text chunks
+                            if not delta_text:
+                                # try direct text field
+                                dt = getattr(chunk, "text", None) or (
+                                    chunk.get("text") if isinstance(chunk, dict) else None)
+                                if dt:
+                                    delta_text = dt
+                            if delta_text:
+                                collected += delta_text
+                                if chunk_callback:
+                                    try:
+                                        chunk_callback(delta_text)
+                                    except Exception:
+                                        pass
+                                yield delta_text
+                        # generator completes
+
+                    return _generator()
+                else:
+                    resp = self.client.chat.completions.create(**payload)
+                    if raw:
+                        return resp
+                    # extract text from structured response
+                    try:
+                        # modern structured object: resp.choices[0].message["content"]
+                        first_choice = resp.choices[0]
+                        message = first_choice.message if hasattr(first_choice, "message") else (
+                            first_choice.get("message") if isinstance(first_choice, dict) else None)
+                        content = message.get("content") if isinstance(message, dict) else getattr(message,
+                                                                                                   "get",
+                                                                                                   lambda k,
+                                                                                                          d=None: None)(
+                            "content") if message is not None else None
+                        if content is None:
+                            # alternative: some SDKs put text in resp.choices[0].delta or resp.choices[0].text
+                            content = getattr(first_choice, "text", None) or (
+                                first_choice.get("text") if isinstance(first_choice, dict) else None)
+                        return content if content is not None else resp
+                    except Exception:
+                        return resp
+            except OpenAIError as e:
+                last_exc = e
+                attempts += 1
+                if attempts >= retry:
+                    raise
+                time.sleep(retry_backoff * attempts)
+            except Exception as e:
+                # non-OpenAI exceptions: break or retry depending on attempts
+                last_exc = e
+                attempts += 1
+                if attempts >= retry:
+                    raise
+                time.sleep(retry_backoff * attempts)
+
+        # if all retries failed, raise last exception
+        if last_exc:
+            raise last_exc
+
+    # convenience helpers
+    def ask(self, text: str, *, system: Optional[str] = None, **kwargs) -> Union[str, Dict[str, Any]]:
+        """
+        One-shot user prompt convenience wrapper.
+        """
+        messages = []
+        if system:
+            messages.append({"role": "system", "content": system})
+        messages.append({"role": "user", "content": text})
+        return self.chat(messages, **kwargs)
 
 #--------------------------------------------------------
 
