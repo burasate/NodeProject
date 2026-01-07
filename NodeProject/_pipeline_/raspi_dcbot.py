@@ -1302,7 +1302,7 @@ async def on_message(message):
 
             resp = chatgpt.chat(messages=input_messages, max_tokens=150)
             reply_msg = resp.choices[0].message.content
-            await thread.send(f"```{reply_msg}```")
+            await thread.send(f"{reply_msg}")
 
 """---------------------------------"""
 # Run
