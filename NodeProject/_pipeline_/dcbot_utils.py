@@ -6,7 +6,6 @@ from notionDatabase import notionDatabase as ntdb
 
 base_path = os.path.dirname(os.path.abspath(__file__))
 
-
 class chatgpt:
     def __init__(self):
         self.dc_cfg_path = os.path.join(base_path, "raspi_dcbot.json")
@@ -24,7 +23,7 @@ class chatgpt:
                     "You are a helpful assistant. you will say straightforward\n"
                     "avoiding indirect language. \n"
                     "listing out  can be easily to read and understand\n"
-                    "Your format to reply will be on 'Discord' and you must have Markdown code block eg ```your code/your paragraph```\n"
+                    "Your format to reply will be on 'Discord' and you must have Markdown code block each paragraphs\n"
                 ),
             },
             "": "",

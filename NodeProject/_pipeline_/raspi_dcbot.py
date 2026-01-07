@@ -1300,7 +1300,7 @@ async def on_message(message):
             if not latest_message in input_messages:
                 input_messages += [latest_message]
 
-            resp = chatgpt.chat(messages=input_messages, max_tokens=150)
+            resp = chatgpt.chat(messages=input_messages, max_tokens=300)
             reply_msg = resp.choices[0].message.content
             await thread.send(f"{reply_msg}")
 
