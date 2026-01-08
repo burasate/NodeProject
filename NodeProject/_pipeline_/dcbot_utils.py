@@ -6,6 +6,7 @@ from notionDatabase import notionDatabase as ntdb
 
 base_path = os.path.dirname(os.path.abspath(__file__))
 
+
 class chatgpt:
     def __init__(self):
         self.dc_cfg_path = os.path.join(base_path, "raspi_dcbot.json")
@@ -41,7 +42,7 @@ import urllib.request
 import urllib.parse
 import urllib.error
 
-"""
+
 class comfy_ui:
     def __init__(
         self,
@@ -110,10 +111,12 @@ class comfy_ui:
                         break  # Execution is done
             else:
                 continue
-        print(json.dumps(self.get_history(prompt_id), indent=4))
+
+        return self.get_history(prompt_id)
 
 
 if True:  # Example
+    """
     workflow = {
         "3": {
             "class_type": "KSampler",
@@ -162,13 +165,24 @@ if True:  # Example
     ] = "masterpiece best quality girl, fur coat, delicate necklace, thigh-high lace stockings, lace garter belt, garter straps, lace collar, lace bodysuit, open-cup lingerie, tiara, MSFit01 <lora:MSFit01-000001:1>, masterpiece, high_quality, highres, 1woman, adult, ass, black hair, breasts, lips, long hair, looking at viewer, looking back, medium breasts, mole, nipples, shadow,solo, standing, from below, pink labia, one leg up"
     workflow["7"]["inputs"]["text"] = "worst_quality, bad_quality, poorly_detailed,"
     workflow["3"]["inputs"]["seed"] = 21551
-
+    """
+    with open(
+        r"C:\Users\DEX3D_I7\Downloads\ComfyUI_00075_.json", "r", encoding="utf-8"
+    ) as j:
+        workflow = json.load(j)
+    # workflow["3"]["inputs"]["prompt"] = "can you help me to suggest NSFW Content for 3d"
+    workflow["6"]["inputs"][
+        "text"
+    ] = "masterpiece best quality girl, fur coat, delicate necklace, thigh-high lace stockings, lace garter belt, garter straps, lace collar, lace bodysuit, open-cup lingerie, tiara, MSFit01 <lora:MSFit01-000001:1>, masterpiece, high_quality, highres, 1woman, adult, ass, black hair, breasts, lips, long hair, looking at viewer, looking back, medium breasts, mole, nipples, shadow,solo, standing, from below, pink labia, one leg up"
+    workflow["5"]["inputs"]["height"] = 720
+    workflow["5"]["inputs"]["width"] = 720
+    # comfy = comfy_ui(server="192.168.1.13:8188", ws_timeout=60)
     comfy = comfy_ui(ws_timeout=60)
     import random
 
-    for i in range(10):
-        workflow["3"]["inputs"]["seed"] = random.randint(1, 10000)
+    for i in range(100):
+        workflow["3"]["inputs"]["seed"] = random.randint(1, 455454445)
         comfy.socket_connect()
-        comfy.send_queue(workflow)
+        result = comfy.send_queue(workflow)
+        print(json.dumps(result, indent=4))
         comfy.socket_close()
-"""
