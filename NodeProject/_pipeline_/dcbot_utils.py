@@ -115,7 +115,7 @@ class comfy_ui:
         return self.get_history(prompt_id)
 
 
-if True:  # Example
+if False:  # Example
     """
     workflow = {
         "3": {
