@@ -1,3 +1,4 @@
+# -- coding: utf-8 --
 import requests, json, pprint, os, random, csv
 from datetime import datetime
 import pandas as pd

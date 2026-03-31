@@ -1308,14 +1308,7 @@ async def on_message(message):
 # Run
 """---------------------------------"""
 loaded = [i.split(':')[0] for i in sys.modules]
-'''
-for dp in [src_path + os.sep + i for i in os.listdir(src_path + os.sep + 'site-packages_3.10')]:
-    #print(dp)
-    bname = os.path.basename(dp)
-    if '.' in bname: continue
-    if not bname in loaded:
-        print(bname, bname in loaded)
-'''
+
 try:
     bot.run(token)
 except:
