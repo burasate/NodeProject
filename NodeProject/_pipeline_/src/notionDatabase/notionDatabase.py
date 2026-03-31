@@ -580,7 +580,7 @@ def get_json_rec(database_id, page_size=100, filter={}):
                 type = item['properties'][prop]['type']
                 sub_ls = []
                 #print('\n{}'.format(result))
-				if type not in type_dict:
+                if type not in type_dict:
                     print(f"Warning: Unsupported property type '{type}' found in column '{prop}'. Skipping.")
                     rec_data[prop] = None
                     continue
